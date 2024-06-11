@@ -160,6 +160,89 @@ class CookieBenchmark(umbridge.Model):
         """
         return False
 
+class CookieTimeBenchmark(umbridge.Model):
+    """
+    A benchmark model for Cookie Time.
+
+    Inherits from umbridge.Model.
+
+    Attributes:
+        None
+    """
+
+    def __init__(self):
+        """
+        Initializes the CookieTimeBenchmark object.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        super().__init__("cookietimebenchmark")
+
+    def get_input_sizes(self, config):
+        """
+        Returns the input sizes for the model.
+
+        Args:
+            config (dict): A dictionary containing configuration parameters.
+
+        Returns:
+            list: A list containing the input sizes.
+        """
+        return [8]
+
+    def get_output_sizes(self, config):
+        """
+        Returns the output sizes for the model.
+
+        Args:
+            config (dict): A dictionary containing configuration parameters.
+
+        Returns:
+            list: A list containing the output sizes.
+        """
+        return [1]
+    
+    def __call__(self, parameters, config):
+        """
+        Invokes the model to perform computations.
+
+        Args:
+            parameters (list): A list of parameters.
+            config (dict): A dictionary containing configuration parameters.
+
+        Returns:
+            list: A list containing the computed integral.
+        """
+        model = EllipticPDE(config['N'])
+        model.setupProblem('cookie', parameters[0], advection=True)
+        # u = model.solveTime(config['tol'],config['T'])
+        u = model.solveTimeSimple(config['letol'],config['T'])
+        integral = model.computebenchmarkqoi()
+        # model.writeSln("outputFinal")
+        return [[integral]]
+
+    def supports_evaluate(self):
+        """
+        Checks if the model supports evaluation.
+
+        Returns:
+            bool: True if the model supports evaluation, False otherwise.
+        """
+        return True
+
+    def supports_gradient(self):
+        """
+        Checks if the model supports gradient computation.
+
+        Returns:
+            bool: True if the model supports gradient computation, False otherwise.
+        """
+        return False
+
 
 def verifyConfig(config):
     if config is None:
@@ -175,10 +258,15 @@ def verifyConfig(config):
         config['pc'] = "none"
     if ~('tol' in config):
         config['tol'] = "LU"
+    if ~('letol' in config):
+        config['letol'] = 1e-4
+    if ~('T' in config):
+        config['T'] = 10.0
     return config
 
 
 cookieforward = CookieForward()
 cookiebenchmark= CookieBenchmark()
+cookietimebenchmark = CookieTimeBenchmark()
 
-umbridge.serve_models([cookieforward,cookiebenchmark], 4242)
+umbridge.serve_models([cookieforward,cookiebenchmark,cookietimebenchmark], 4242)
