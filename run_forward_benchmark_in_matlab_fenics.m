@@ -29,8 +29,6 @@ plotting = true;
 
 % specify model port
 % uri = 'http://0.0.0.0:4242';
-uri = 'http://stokes.imati.cnr.it:4243';
-% uri = 'http://stokes.imati.cnr.it:31785';
 model = HTTPModel(uri,'benchmark');
 
 % config cookie solver with num threades
