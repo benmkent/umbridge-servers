@@ -217,6 +217,10 @@ class CookieTimeBenchmark(umbridge.Model):
         Returns:
             list: A list containing the computed integral.
         """
+        # Use default values by ensuring dictionary is empty
+        config={}
+        config = verifyConfig(config)
+
         model = EllipticPDE(config['N'])
         model.setupProblem('cookie', parameters[0], advection=True)
         # u = model.solveTime(config['tol'],config['T'])
