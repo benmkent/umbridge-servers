@@ -378,10 +378,9 @@ class EllipticPDE:
         vtkfile = File("output" + str(tol) + ".pvd")
 
         def monitor(ts, step, t, u, u2, enorm):
-            print(f"Time = {t:.4g},\t dt = {ts:.4g},\t E = {
-                enorm:.4g},\t acc = {acc:.4g}")
-            self.u.vector()[:] = u[:]
-            self.u.rename("u", "label")
+            print(f"Time = {t:.4g},\t dt = {ts:.4g},\t E = {enorm:.4g},\t acc = {acc:.4g}")
+            # self.u.vector()[:] = u[:]
+            # self.u.rename("u", "label")
             # vtkfile << (self.u, t)  # Write function u to VTK file
 
         ksp = PETSc.KSP().create()
