@@ -15,6 +15,7 @@ spec:
       containers:
       - name: model
         image: benmkent/cookiebenchmark:latest
+        imagePullPolicy: "Always"
         env:
         - name: OMP_NUM_THREADS
           value: "1"
