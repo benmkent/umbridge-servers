@@ -337,19 +337,19 @@ def verifyConfig(config):
     if config is None:
         config = {}
 
-    if ~('N' in config):
+    if 'N' not in config:
         config['N'] = 400
-    if ~('quad_degree' in config):
+    if 'quad_degree' not in config:
         config['quad_degree'] = 8
-    if ~('coeffs' in config):
+    if 'coeffs' not in config:
         config['coeffs'] = None
-    if ~('pc' in config):
+    if 'pc' not in config:
         config['pc'] = "none"
-    if ~('tol' in config):
+    if 'tol' not in config:
         config['tol'] = "LU"
-    if ~('letol' in config):
+    if 'letol' not in config:
         config['letol'] = 1e-4
-    if ~('T' in config):
+    if 'T' not in config:
         config['T'] = 10.0
     return config
 
