@@ -351,6 +351,8 @@ def verifyConfig(config):
         config['letol'] = 1e-4
     if 'T' not in config:
         config['T'] = 10.0
+
+    print(config)
     return config
 
 

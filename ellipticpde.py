@@ -430,7 +430,7 @@ class EllipticPDE:
 
             ksp.solve(rhs, u_petsc)
 
-            print(u_petsc[:])
+            # print(u_petsc[:])
 
             e_petsc.zeroEntries()
             e_petsc.axpby(1.0, 0.0, abf2)
