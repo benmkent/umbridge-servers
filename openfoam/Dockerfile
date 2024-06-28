@@ -6,7 +6,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget
 RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
 RUN apt-get install -y openfoam2312-default
 
-RUN pip3 install --break-system-packages umbridge
+RUN pip3 install --break-system-packages umbridge numpy
 
 EXPOSE 4242
 
