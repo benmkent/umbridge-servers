@@ -23,7 +23,7 @@ RUN wget -P ./2DWMH/pitzDailyModified https://turbmodels.larc.nasa.gov/Nasahump_
 RUN gzip -dfk ./2DWMH/pitzDailyModified/hump2newtop_noplenumZ409x109.p3dfmt.gz
 
 RUN python3 ./p3d2gmsh.py -o ./2DWMH/pitzDailyModified/hump2newtop_noplenumZ409x109.msh -m ./2DWMH/pitzDailyModified/hump2newtop_noplenumZ409x109.nmf ./2DWMH/pitzDailyModified/hump2newtop_noplenumZ409x109.p3dfmt
-RUN openfoam2312 gmshToFoam -case ./2DWMH/pitzDailyModified/ hump2newtop_noplenumZ409x109.msh
+RUN cd ./2DWMH/pitzDailyModified/ && openfoam2312 gmshToFoam ./2DWMH/pitzDailyModified/hump2newtop_noplenumZ409x109.msh
 
 # Docker file should pull meshes from e.g. https://turbmodels.larc.nasa.gov/Nasahump_grids/hump2newtop_noplenumZ1633x433.p3dfmt.gz and convert
 
