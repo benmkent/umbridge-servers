@@ -22,7 +22,14 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (cookie-benchmark)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./cookie-benchmark
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/cookiebenchmark:latest
+
+      - name: Build and push Docker image (openfoam)
         uses: docker/build-push-action@v5
         with:
           context: ./cookie-benchmark
