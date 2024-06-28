@@ -1,9 +1,9 @@
-FROM ubuntu:mantis
+FROM ubuntu:mantic
 
 RUN apt update
-RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl
+RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget
 # Add the repository
-RUN curl https://dl.openfoam.com/add-debian-repo.sh | sudo bash
+RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
 RUN apt-get install -y openfoam2312-default
 
 RUN pip3 install --break-system-packages umbridge
