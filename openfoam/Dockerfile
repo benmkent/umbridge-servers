@@ -14,6 +14,7 @@ RUN apt update
 
 WORKDIR /
 
+
 # Copy files and subdirectories (i.e. the openfoam setup)
 COPY . .
 RUN wget -P ./2DWMH/pitzDailyModified https://turbmodels.larc.nasa.gov/Nasahump_grids/hump2newtop_noplenumZ409x109.nmf   
