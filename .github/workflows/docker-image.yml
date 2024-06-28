@@ -32,6 +32,6 @@ jobs:
       - name: Build and push Docker image (openfoam)
         uses: docker/build-push-action@v5
         with:
-          context: ./cookie-benchmark
+          context: ./openfoam
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/cookiebenchmark:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/openfoam2dwmh:latest
