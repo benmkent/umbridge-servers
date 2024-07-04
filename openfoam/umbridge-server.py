@@ -33,7 +33,7 @@ class TestModel(umbridge.Model):
         # For realisation assign parameters
         input_file= casefile+"/system/controlDict"
         output_file=input_file
-        replacement_value=parameters[0][0]
+        replacement_value=str(parameters[0][0])
 
         # Use sed to replace $JET_MAG with the replacement value
         print("Writing jet mag "+replacement_value)
