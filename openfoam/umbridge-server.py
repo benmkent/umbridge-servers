@@ -1,6 +1,8 @@
 import umbridge
 import os
+import sys
 from postprocess_openfoam import extract_reattachment_point
+
 
 class TestModel(umbridge.Model):
 
@@ -18,7 +20,7 @@ class TestModel(umbridge.Model):
         if config['Fidelity'] == 1:
             casefile = "./NASA_hump_data_coarse3"
         elif config['Fidelity'] == 2:
-            casefile = "./NASA_hump_data_coarse2"        
+            casefile = "./NASA_hump_data_coarse2"
         elif config['Fidelity'] == 3:
             casefile = "./NASA_hump_data_coarse1"
         elif config['Fidelity'] == 4:
@@ -27,30 +29,22 @@ class TestModel(umbridge.Model):
             AssertionError("Unknown config")
 
         if 'res_tol' not in config:
-            config['res_tol'] = 1e-10;
+            config['res_tol'] = 1e-10
 
         # Copy folder to use as realisation
         tempcasefile = "./caserealisation"
         os.system('cp -r ' + casefile + ' ' + tempcasefile)
 
         # For realisation assign parameters
-        input_file= tempcasefile+"/system/controlDict"
-        output_file=input_file
-        replacement_value=str(parameters[0][0])
+        input_file = tempcasefile+"/system/controlDict"
+        output_file = input_file
+        replacement_value = str(parameters[0][0])
+        replace_jet_mag(input_file, output_file, replacement_value)
 
-        # Use sed to replace $JET_MAG with the replacement value
-        print("Writing jet mag "+replacement_value)
-        sed_command = f"sed 's/JET_MAG/{replacement_value}/g' {input_file} > {output_file}"
-        os.system(sed_command)
-
-        input_file= tempcasefile+"/system/fvSolution"
-        output_file=input_file
-        replacement_value=str(config['res_tol'])
-
-        # Use sed to replace $JET_MAG with the replacement value
-        print("Writing residual tol "+replacement_value)
-        sed_command = f"sed 's/RES_TOL/{replacement_value}/g' {input_file} > {output_file}"
-        os.system(sed_command)
+        input_file = tempcasefile+"/system/fvSolution"
+        output_file = input_file
+        replacement_value = str(config['res_tol'])
+        replace_jet_mag(input_file, output_file, replacement_value)
 
         # Set up boundary conditions
         print("Enforcing boundary conditions jetNasaHump")
@@ -66,15 +60,47 @@ class TestModel(umbridge.Model):
         display(x)
 
         # Clean up
-        os.system('rm -r '+ tempcasefile)
+        os.system('rm -r ' + tempcasefile)
 
         return [[x]]
-
 
     def supports_evaluate(self):
         return True
 
+
 testmodel = TestModel()
+
+
+def replace_jet_mag(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'JET_MAG' with 'replacement_value'
+    modified_data = file_data.replace('JET_MAG', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'JET_MAG' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.")
+
+
+def replace_res_tol(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'JET_MAG' with 'replacement_value'
+    modified_data = file_data.replace('RES_TOL', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'RES_TOL' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.")
 
 
 umbridge.serve_models([testmodel], 4242)
