@@ -28,7 +28,7 @@ class TestModel(umbridge.Model):
 
         # Copy folder to use as realisation
         tempcasefile = "./caserealisation"
-        os.system('cp -r '+ casefile + tempcasefile)
+        os.system('cp -r ' + casefile + ' ' + tempcasefile)
 
         # For realisation assign parameters
         input_file= casefile+"/system/controlDict"
@@ -37,15 +37,16 @@ class TestModel(umbridge.Model):
 
         # Use sed to replace $JET_MAG with the replacement value
         print("Writing jet mag "+replacement_value)
-        os.system("sed s/JET_MAG/" + replacement_value + "/g" + input_file + " > " + output_file)
+        sed_command = f"sed 's/JET_MAG/{replacement_value}/g' {input_file} > {output_file}"
+        os.system("sed \"s/JET_MAG/" + replacement_value + "/g\"" + input_file + " > " + output_file)
 
         # Set up boundary conditions
         print("Enforcing boundary conditions jetNasaHump")
-        os.system('openfoam jetNasaHump -case '+tempcasefile)
+        os.system('openfoam2406 jetNasaHump -case '+tempcasefile)
 
         # Run simple foam
         print("Run simplefoam")
-        os.system('openfoam simpleFoam -case '+tempcasefile)
+        os.system('openfoam2406 simpleFoam -case '+tempcasefile)
 
         # Extract quantity of interest (reattachment point)
         print("Extract reattachment point")
