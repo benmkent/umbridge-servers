@@ -60,11 +60,11 @@ SIMPLE
 
     residualControl
     {
-        p               1e-10;
-        U               1e-10;
-        nuTilda         1e-10;
-        epsilon         1e-10;
-        k               1e-10;
+        p               RES_TOL;
+        U               RES_TOL;
+        nuTilda         RES_TOL;
+        epsilon         RES_TOL;
+        k               RES_TOL;
     }
 }
 

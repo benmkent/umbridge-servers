@@ -26,6 +26,9 @@ class TestModel(umbridge.Model):
         else:
             AssertionError("Unknown config")
 
+        if 'res_tol' not in config:
+            config['res_tol'] = 1e-10;
+
         # Copy folder to use as realisation
         tempcasefile = "./caserealisation"
         os.system('cp -r ' + casefile + ' ' + tempcasefile)
@@ -38,7 +41,16 @@ class TestModel(umbridge.Model):
         # Use sed to replace $JET_MAG with the replacement value
         print("Writing jet mag "+replacement_value)
         sed_command = f"sed 's/JET_MAG/{replacement_value}/g' {input_file} > {output_file}"
-        os.system("sed \"s/JET_MAG/" + replacement_value + "/g\"" + input_file + " > " + output_file)
+        os.system(sed_command)
+
+        input_file= casefile+"/system/fvSolution"
+        output_file=input_file
+        replacement_value=str(config['res_tol'])
+
+        # Use sed to replace $JET_MAG with the replacement value
+        print("Writing residual tol "+replacement_value)
+        sed_command = f"sed 's/RES_TOL/{replacement_value}/g' {input_file} > {output_file}"
+        os.system(sed_command)
 
         # Set up boundary conditions
         print("Enforcing boundary conditions jetNasaHump")

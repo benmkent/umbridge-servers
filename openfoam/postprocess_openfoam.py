@@ -10,4 +10,5 @@ def extract_reattachment_point(filename):
 
     r = spline.roots()
 
-    return r[end]
+    # Return last root
+    return r[-1]
