@@ -33,11 +33,11 @@ param = [[24, 0]]
 #test output for another config
 txt = "model output (quantity of interest) = "
 # txt = ""
-output = model(param,{"Fidelity": 1})
+output = model(param,{"Fidelity": 1, "res_tol": 1e-6})
 print(txt+str(output[0][0]))
-output = model(param,{"Fidelity": 2})
+output = model(param,{"Fidelity": 2, "res_tol": 1e-6})
 print(txt+str(output[0][0]))
-output = model(param,{"Fidelity": 3})
+output = model(param,{"Fidelity": 3, "res_tol": 1e-6})
 print(txt+str(output[0][0]))
-output = model(param,{"Fidelity": 4})
+output = model(param,{"Fidelity": 4, "res_tol": 1e-6})
 print(txt+str(output[0][0]))

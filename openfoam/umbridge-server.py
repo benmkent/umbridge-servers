@@ -34,7 +34,7 @@ class TestModel(umbridge.Model):
         os.system('cp -r ' + casefile + ' ' + tempcasefile)
 
         # For realisation assign parameters
-        input_file= casefile+"/system/controlDict"
+        input_file= tempcasefile+"/system/controlDict"
         output_file=input_file
         replacement_value=str(parameters[0][0])
 
@@ -43,7 +43,7 @@ class TestModel(umbridge.Model):
         sed_command = f"sed 's/JET_MAG/{replacement_value}/g' {input_file} > {output_file}"
         os.system(sed_command)
 
-        input_file= casefile+"/system/fvSolution"
+        input_file= tempcasefile+"/system/fvSolution"
         output_file=input_file
         replacement_value=str(config['res_tol'])
 
