@@ -11,7 +11,7 @@ class EllipticPDE:
     Class representing an elliptic partial differential equation.
     """
 
-    def __init__(self, N):
+    def __init__(self, N, basis_degree, quad_degree):
         """
         Initialize the elliptic PDE problem.
 
@@ -24,8 +24,21 @@ class EllipticPDE:
         set_log_level(LogLevel.DEBUG)
 
         # Create FEniCS mesh and define function space
-        mesh = UnitSquareMesh(N, N)
-        V = FunctionSpace(mesh, "Lagrange", 1)
+        # mesh = UnitSquareMesh(N, N)
+        # Define the corners of the rectangular domain
+        x0, y0 = 0.0, 0.0  # Bottom-left corner
+        x1, y1 = 1.0, 1.0  # Top-right corner
+
+        # Define the number of elements in each direction
+        nx, ny = N, N
+
+        p0 = Point(x0,y0)
+        p1 = Point(x1,y1)
+        # Create a rectangular mesh with quadrilateral elements
+        # mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), nx, ny, quadrilateral=True)
+        mesh = RectangleMesh.create([p0,p1],[nx,ny],CellType.Type.quadrilateral)
+
+        V = FunctionSpace(mesh, "Lagrange", basis_degree)
         self.V = V
 
     def setupProblem(self, difftype, y, quad_degree=0, varcoeffs=None, advection=False):
@@ -56,7 +69,8 @@ class EllipticPDE:
 
         # Forcing on subdomain F defined by f_indicator
         f_indicator = Expression(
-            "abs(x[0] - 0.5) < 0.1 and abs(x[1] -0.5) < 0.1", degree=quad_degree)
+            "abs(x[0] - 0.5) < 0.1 and abs(x[1] -0.5) <= 0.1", degree=quad_degree)
+
         f = Constant(100.0) * f_indicator
 
         # Diffusion field defined via indicators on appropriate subdomains
@@ -99,8 +113,8 @@ class EllipticPDE:
         u = Function(V)
 
         # Write to python object
-        self.diffproject = project(diff, V)
-        self.fproject = project(f, V)
+        # self.diffproject = project(diff, V)
+        # self.fproject = project(f, V)
         self.f_indicator = f_indicator
         self.a = a
         self.L = L
@@ -234,8 +248,8 @@ class EllipticPDE:
         """
         fileout = File(filename + ".pvd")
         fileout << self.u
-        fileout << self.diffproject
-        fileout << self.fproject
+        # fileout << self.diffproject
+        # fileout << self.fproject
 
 
     def solveTime(self, tol, finalTime):

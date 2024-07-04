@@ -1,0 +1,103 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1606+                                |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     isoFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         5000;
+
+deltaT          1;
+
+writeControl    timeStep;
+
+writeInterval   1000;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+// INLET: NASA ratio
+inlet_mag       34.6;
+
+// INLET: TEST ratio
+//inlet_mag       0.0;
+
+// JET: NASA ratio
+jet_mag         23.4;
+
+// JET: 90% TEST ratio
+//jet_mag         21.06;
+// JET: 10% TEST ratio
+//jet_mag         2.34;
+
+functions
+{
+// wallPressure
+// {
+//     type surfaces;
+//     functionObjectLibs ("libsampling.so");
+//     surfaceFormat raw; // vtk;
+//     outputControl outputTime;
+//     interpolationScheme cellPoint;
+//     fields (p);
+//     surfaces    
+//     (
+//         bottomWall
+//         {
+//             type    wall;
+//             patches ("bottomWall");
+//             interpolate true;
+//             triangulate false;
+//         }
+//     );
+// }
+
+wallShearStress1
+{
+    type wallShearStress;
+    libs     ("libfieldFunctionObjects.so");
+    // Optional Entries
+    outputControl outputTime;
+
+    // Restrict to a set of patches
+    patches  ("bottomWall");
+}
+
+// turbulenceFields1
+// {
+//     type    turbulenceFields;
+//     libs    ("libfieldFunctionObjects.so");
+//     fields  (nut nuEff R);
+// }
+// }
+}
+// ************************************************************************* //

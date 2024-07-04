@@ -4,9 +4,9 @@ RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget gmsh
 # Add the repository
 RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
-RUN apt-get install -y openfoam2312-default
+RUN apt-get install -y openfoam2406-dev
 
-RUN pip3 install --break-system-packages umbridge numpy
+RUN pip3 install --break-system-packages umbridge numpy fluidfoam
 
 EXPOSE 4242
 
@@ -17,14 +17,20 @@ WORKDIR /
 
 # Copy files and subdirectories (i.e. the openfoam setup)
 COPY . .
-RUN wget -P ./2DWMH/pitzDailyModified https://turbmodels.larc.nasa.gov/Nasahump_grids/hump2newtop_noplenumZ409x109.nmf   
 
-RUN wget -P ./2DWMH/pitzDailyModified https://turbmodels.larc.nasa.gov/Nasahump_grids/hump2newtop_noplenumZ409x109.p3dfmt.gz 
-RUN gzip -dfk ./2DWMH/pitzDailyModified/hump2newtop_noplenumZ409x109.p3dfmt.gz
+# Make sure we build the jetNasaHump tool
+RUN openfoam2406 wclean ./jetNasaHump
+RUN openfoam2406 wmake ./jetNasaHump
 
-RUN python3 ./p3d2gmsh.py -o ./2DWMH/pitzDailyModified/hump2newtop_noplenumZ409x109.msh -m ./2DWMH/pitzDailyModified/hump2newtop_noplenumZ409x109.nmf ./2DWMH/pitzDailyModified/hump2newtop_noplenumZ409x109.p3dfmt
-RUN cd ./2DWMH/pitzDailyModified/ && openfoam2312 gmshToFoam ./2DWMH/pitzDailyModified/hump2newtop_noplenumZ409x109.msh
+# Map fields from common initial guess and ensure meshes are OK
+RUN openfoam2406 blockMesh -case ./NASA_hump_data_baseline
 
-# Docker file should pull meshes from e.g. https://turbmodels.larc.nasa.gov/Nasahump_grids/hump2newtop_noplenumZ1633x433.p3dfmt.gz and convert
+RUN openfoam2406 blockMesh -case ./NASA_hump_data_coarse1
+RUN openfoam2406 mapFieldsPar -consistent -case ./NASA_hump_data_coarse1 ./NASA_hump_data_baseline
+RUN openfoam2406 blockMesh -case ./NASA_hump_data_coarse2
+RUN openfoam2406 mapFieldsPar -consistent -case ./NASA_hump_data_coarse2 ./NASA_hump_data_baseline
+RUN openfoam2406 blockMesh -case ./NASA_hump_data_coarse3
+RUN openfoam2406 mapFieldsPar -consistent -case ./NASA_hump_data_coarse3 ./NASA_hump_data_baseline
 
+# Once openfoam folders are configured we can start the server
 CMD python3 umbridge-server.py

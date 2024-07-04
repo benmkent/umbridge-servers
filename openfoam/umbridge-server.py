@@ -1,5 +1,6 @@
 import umbridge
 import os
+from postprocess_openfoam import extract_reattachment_point
 
 class TestModel(umbridge.Model):
 
@@ -7,28 +8,49 @@ class TestModel(umbridge.Model):
         super().__init__("forward")
 
     def get_input_sizes(self, config):
-        return [1]
+        return [2]
 
     def get_output_sizes(self, config):
         return [1]
 
     def __call__(self, parameters, config):
-        # arguments = " ".join([str(x) for x in parameters[0]]);
+        # Decide on fidelity
+        if config['Fidelity'] == 1:
+            casefile = "./NASA_hump_data_coarse3"
+        elif config['Fidelity'] == 2:
+            casefile = "./NASA_hump_data_coarse2"        
+        elif config['Fidelity'] == 3:
+            casefile = "./NASA_hump_data_coarse1"
+        elif config['Fidelity'] == 4:
+            casefile = "./NASA_hump_data_coarse1"
+        else:
+            AssertionError("Unknown config")
 
-        # num_threads = str(config.get("NumThreads",1));
-        # basis_degree = str(config.get("BasisDegree",4));
-        # fidelity = str(config.get("Fidelity",2));
+        # Copy folder to use as realisation
+        tempcasefile = "./caserealisation"
+        os.system('cp -r '+ casefile + tempcasefile)
 
-        # arguments = arguments + " " + basis_degree + " " + fidelity
+        # For realisation assign parameters
+        input_file= casefile+"/system/controlDict"
+        output_file=input_file
+        replacement_value=parameters[0][0]
 
-        # System call
-        os.system('openfoam2312 simpleFoam -case ./2DWMH/pitzDailyModified/')
+        # Use sed to replace $JET_MAG with the replacement value
+        sed "s/\$JET_MAG/$replacement_value/g" "$input_file" > "$output_file"
 
-        # Read second line of output file
-        #with open('/poisson_lorenzo_results.dat', 'r') as f:
-        #    line = f.readline() # Read first line
+        # Set up boundary conditions
+        os.system('openfoam jetNasaHump -case '+tempcasefile)
 
-        return [[float(0)]]
+        # Run simple foam
+        os.system('openfoam simpleFoam -case '+tempcasefile)
+
+        # Extract quantity of interest (reattachment point)
+        x = extract_reattachment_point(tempcasefile)
+
+        # Clean up
+        os.system('rm -r '+ tempcasefile)
+
+        return [[x]]
 
 
     def supports_evaluate(self):

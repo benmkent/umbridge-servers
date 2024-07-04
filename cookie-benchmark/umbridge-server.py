@@ -51,7 +51,7 @@ class CookieForward(umbridge.Model):
         """
         config = verifyConfig(config)
         # Initialize PDE model
-        model = EllipticPDE(config['N'])
+        model = EllipticPDE(config['N'], config['BasisDegree'], config['quad_degree'])
         # Set up cookie problem
         model.setupProblem(
             'cookie', parameters[0], config['quad_degree'], config['coeffs'])
@@ -131,7 +131,7 @@ class CookieBenchmark(umbridge.Model):
         config={}
         config = verifyConfig(config)
         # Initialize PDE model
-        model = EllipticPDE(config['N'])
+        model = EllipticPDE(config['N'], config['BasisDegree'], config['quad_degree'])
         # Set up cookie problem
         model.setupProblem(
             'cookie', parameters[0], config['quad_degree'], config['coeffs'])
@@ -219,7 +219,7 @@ class CookieTime(umbridge.Model):
         """
         config = verifyConfig(config)
 
-        model = EllipticPDE(config['N'])
+        model = EllipticPDE(config['N'], config['BasisDegree'], config['quad_degree'])
         model.setupProblem('cookie', parameters[0], advection=True)
         # u = model.solveTime(config['tol'],config['T'])
         u = model.solveTimeSimple(config['letol'],config['T'])
@@ -306,7 +306,7 @@ class CookieTimeBenchmark(umbridge.Model):
         config={}
         config = verifyConfig(config)
 
-        model = EllipticPDE(config['N'])
+        model = EllipticPDE(config['N'], config['BasisDegree'], config['quad_degree'])
         model.setupProblem('cookie', parameters[0], advection=True)
         # u = model.solveTime(config['tol'],config['T'])
         u = model.solveTimeSimple(config['letol'],config['T'])
@@ -337,8 +337,14 @@ def verifyConfig(config):
     if config is None:
         config = {}
 
-    if 'N' not in config:
+    if 'Fidelity' not in config:
         config['N'] = 400
+    else:
+        config['N'] = 100 * config['Fidelity']
+
+    if 'BasisDegree' not in config:
+        config['BasisDegree'] = 1
+
     if 'quad_degree' not in config:
         config['quad_degree'] = 8
     if 'coeffs' not in config:
