@@ -37,7 +37,7 @@ class TestModel(umbridge.Model):
 
         # Use sed to replace $JET_MAG with the replacement value
         print("Writing jet mag "+replacement_value)
-        os.system("sed s/\"+JET_MAG/"+replacement_value+"/g" +input_file" > "+output_file)
+        os.system("sed s/\JET_MAG/" + replacement_value + "/g" + input_file + " > " + output_file)
 
         # Set up boundary conditions
         print("Enforcing boundary conditions jetNasaHump")
