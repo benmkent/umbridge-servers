@@ -52,7 +52,8 @@ inlet_mag       34.6;
 //inlet_mag       0.0;
 
 // JET: NASA ratio
-jet_mag         23.4;
+// jet_mag         23.4;
+jet_mag         JET_MAG
 
 // JET: 90% TEST ratio
 //jet_mag         21.06;

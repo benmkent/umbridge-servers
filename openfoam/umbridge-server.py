@@ -36,16 +36,21 @@ class TestModel(umbridge.Model):
         replacement_value=parameters[0][0]
 
         # Use sed to replace $JET_MAG with the replacement value
-        sed "s/\$JET_MAG/$replacement_value/g" "$input_file" > "$output_file"
+        print("Writing jet mag "+replacement_value)
+        os.system("sed s/\"+JET_MAG/"+replacement_value+"/g" +input_file" > "+output_file)
 
         # Set up boundary conditions
+        print("Enforcing boundary conditions jetNasaHump")
         os.system('openfoam jetNasaHump -case '+tempcasefile)
 
         # Run simple foam
+        print("Run simplefoam")
         os.system('openfoam simpleFoam -case '+tempcasefile)
 
         # Extract quantity of interest (reattachment point)
+        print("Extract reattachment point")
         x = extract_reattachment_point(tempcasefile)
+        display(x)
 
         # Clean up
         os.system('rm -r '+ tempcasefile)
