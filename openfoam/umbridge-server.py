@@ -44,7 +44,7 @@ class TestModel(umbridge.Model):
         input_file = tempcasefile+"/system/fvSolution"
         output_file = input_file
         replacement_value = str(config['res_tol'])
-        replace_jet_mag(input_file, output_file, replacement_value)
+        replace_res_tol(input_file, output_file, replacement_value)
 
         # Set up boundary conditions
         print("Enforcing boundary conditions jetNasaHump")
