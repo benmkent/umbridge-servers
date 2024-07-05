@@ -30,6 +30,8 @@ class TestModel(umbridge.Model):
 
         if 'res_tol' not in config:
             config['res_tol'] = 1e-10
+        if 'final_time' not in config:
+            config['final_time'] = 5000
 
         # Copy folder to use as realisation
         tempcasefile = "./caserealisation"
@@ -40,6 +42,8 @@ class TestModel(umbridge.Model):
         output_file = input_file
         replacement_value = str(parameters[0][0])
         replace_jet_mag(input_file, output_file, replacement_value)
+        replacement_value = str(config['final_time'])
+        replace_final_time(input_file, output_file, replacement_value)
 
         input_file = tempcasefile+"/system/fvSolution"
         output_file = input_file
@@ -56,7 +60,7 @@ class TestModel(umbridge.Model):
 
         # Extract quantity of interest (reattachment point)
         print("Extract reattachment point")
-        x = extract_reattachment_point(tempcasefile)
+        x = extract_reattachment_point(tempcasefile, config['final_time'])
         print("Reattachment point: " + str(x))
 
         # Clean up
@@ -93,7 +97,7 @@ def replace_res_tol(input_file, output_file, replacement_value):
     with open(input_file, 'r') as f:
         file_data = f.read()
 
-    # Replace all occurrences of 'JET_MAG' with 'replacement_value'
+    # Replace all occurrences of 'RES_TOL' with 'replacement_value'
     modified_data = file_data.replace('RES_TOL', replacement_value)
 
     # Write modified content to output file
@@ -101,6 +105,21 @@ def replace_res_tol(input_file, output_file, replacement_value):
         f.write(modified_data)
 
     print(f"Replaced 'RES_TOL' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.")
+
+def replace_final_time(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'FINAL_TIME' with 'replacement_value'
+    modified_data = file_data.replace('FINAL_TIME', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'FINAL_TIME' with '{replacement_value}' in '{
           input_file}'. Output saved to '{output_file}'.")
 
 

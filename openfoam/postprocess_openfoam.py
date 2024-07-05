@@ -1,9 +1,9 @@
 import fluidfoam as fluidfoam
 from scipy import interpolate
 
-def extract_reattachment_point(filename):
+def extract_reattachment_point(filename, final_time):
     X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
-    Tx,Ty,Tz = fluidfoam.readfield(filename,name="wallShearStress",time_name="5000",boundary="bottomWall")
+    Tx,Ty,Tz = fluidfoam.readfield(filename,name="wallShearStress",time_name=str(final_time),boundary="bottomWall")
     # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
 
     spline = interpolate.CubicSpline(X,Tx)
@@ -11,4 +11,4 @@ def extract_reattachment_point(filename):
     r = spline.roots()
 
     # Return last root
-    return r[-1]
+    return float(r[-1])
