@@ -30,8 +30,8 @@ class TestModel(umbridge.Model):
 
         if 'res_tol' not in config:
             config['res_tol'] = 1e-10
-        if 'final_time' not in config:
-            config['final_time'] = 5000
+        # if 'final_time' not in config:
+        #     config['final_time'] = 5000
 
         # Copy folder to use as realisation
         tempcasefile = "./caserealisation"
@@ -42,8 +42,8 @@ class TestModel(umbridge.Model):
         output_file = input_file
         replacement_value = str(parameters[0][0])
         replace_jet_mag(input_file, output_file, replacement_value)
-        replacement_value = str(config['final_time'])
-        replace_final_time(input_file, output_file, replacement_value)
+        # replacement_value = str(config['final_time'])
+        # replace_final_time(input_file, output_file, replacement_value)
 
         input_file = tempcasefile+"/system/fvSolution"
         output_file = input_file
@@ -60,7 +60,7 @@ class TestModel(umbridge.Model):
 
         # Extract quantity of interest (reattachment point)
         print("Extract reattachment point")
-        x = extract_reattachment_point(tempcasefile, config['final_time'])
+        x = extract_reattachment_point(tempcasefile, 5000)
         print("Reattachment point: " + str(x))
 
         # Clean up
