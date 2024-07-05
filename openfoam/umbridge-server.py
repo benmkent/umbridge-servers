@@ -57,7 +57,7 @@ class TestModel(umbridge.Model):
         # Extract quantity of interest (reattachment point)
         print("Extract reattachment point")
         x = extract_reattachment_point(tempcasefile)
-        print("Reattachment point: " + num2str(x))
+        print("Reattachment point: " + str(x))
 
         # Clean up
         print("Clean up temporary case file")
