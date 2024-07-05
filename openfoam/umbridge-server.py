@@ -1,7 +1,7 @@
 import umbridge
 import os
 import sys
-import np as np
+import numpy as np
 from postprocess_openfoam import extract_reattachment_point
 
 
