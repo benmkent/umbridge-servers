@@ -1,6 +1,7 @@
 import umbridge
 import os
 import sys
+import np as np
 from postprocess_openfoam import extract_reattachment_point
 
 
@@ -40,10 +41,10 @@ class TestModel(umbridge.Model):
         # For realisation assign parameters
         input_file = tempcasefile+"/system/controlDict"
         output_file = input_file
-        replacement_value = str(parameters[0][0])
-        replace_jet_mag(input_file, output_file, replacement_value)
-        replacement_value = str(parameters[0][1])
-        replace_inflow_mag(input_file, output_file, replacement_value)
+        replacement_value_jet = str(parameters[0][0])
+        replace_jet_mag(input_file, output_file, replacement_value_jet)
+        replacement_value_inflow = str(parameters[0][1])
+        replace_inflow_mag(input_file, output_file, replacement_value_inflow)
         # replacement_value = str(config['final_time'])
         # replace_final_time(input_file, output_file, replacement_value)
 
@@ -62,8 +63,12 @@ class TestModel(umbridge.Model):
 
         # Extract quantity of interest (reattachment point)
         print("Extract reattachment point")
-        x = extract_reattachment_point(tempcasefile, 5000)
+        (x , X, Tx) = extract_reattachment_point(tempcasefile, 5000)
         print("Reattachment point: " + str(x))
+
+        # Step 3: Stack the vectors as columns
+        wall_shear = np.column_stack((X, Tx))
+        np.savetxt('./output/wallshearJet'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) +'.csv', wall_shear, fmt='%d')
 
         # Clean up
         print("Clean up temporary case file")
