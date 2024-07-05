@@ -46,7 +46,7 @@ timePrecision   6;
 runTimeModifiable true;
 
 // INLET: NASA ratio
-inlet_mag       34.6;
+inlet_mag       INFLOW_MAG;
 
 // INLET: TEST ratio
 //inlet_mag       0.0;

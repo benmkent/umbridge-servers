@@ -42,6 +42,8 @@ class TestModel(umbridge.Model):
         output_file = input_file
         replacement_value = str(parameters[0][0])
         replace_jet_mag(input_file, output_file, replacement_value)
+        replacement_value = str(parameters[0][1])
+        replace_inflow_mag(input_file, output_file, replacement_value)
         # replacement_value = str(config['final_time'])
         # replace_final_time(input_file, output_file, replacement_value)
 
@@ -122,5 +124,19 @@ def replace_final_time(input_file, output_file, replacement_value):
     print(f"Replaced 'FINAL_TIME' with '{replacement_value}' in '{
           input_file}'. Output saved to '{output_file}'.")
 
+def replace_inflow_mag(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'INFLOW_MAG' with 'replacement_value'
+    modified_data = file_data.replace('INFLOW_MAG', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'INFLOW_MAG' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.")
 
 umbridge.serve_models([testmodel], 4242)
