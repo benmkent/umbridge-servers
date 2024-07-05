@@ -27,9 +27,9 @@ endTime         FINAL_TIME;
 
 deltaT          1;
 
-writeControl    endTime;
+writeControl    timeStep;
 
-writeInterval   1000;
+writeInterval   FINAL_TIME;
 
 purgeWrite      0;
 
