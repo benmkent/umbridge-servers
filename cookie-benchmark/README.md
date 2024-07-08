@@ -1,9 +1,15 @@
 # Cookie Benchmark
+## Overview
 This is an implementation of the [cookie bencmark](https://github.com/UM-Bridge/benchmarks/tree/main/benchmarks/cookies-problem-propagation) test problem.
 This sets up a Docker container ```benmkent/cookiebenchmark:latest``` for use with the [UM-BRIDGE](https://um-bridge-benchmarks.readthedocs.io/en/docs/) uncertainty quantification interface.
 This is easily downloaded and run using
-``` docker run -p 4243:4242 -itd benmkent/cookiebenchmark:latest```
+``` docker run -p 4242:4242 -itd benmkent/cookiebenchmark:latest```
 where the first port number is mapped through to ```4242``` which is exposed in the container.
+
+## Run 
+```
+docker run -p 4242:4242 -it benmkent/cookiebenchmark:latest
+```
 
 The Docker container serves four models
 - forward: the forward elliptic model with configurable model inputs
@@ -11,15 +17,24 @@ The Docker container serves four models
 - cookietime: the forward parabolic model with configurable inputs
 - cookietimebenchmark: the forward parabolic model with fixed model inputs
 
-# Implementation details
-## ellipticpde.py
-A Python implementation of the elliptic and parabolic ``cookie'' PDE problem.
-Finite element approximation on a quad grid is assembled using FEniCS.
-The linear systems are solved using PETSc via the petsc4py interface.
+## Properties
+All four models take the same parametric input and return the same QoI (the integral of the solution over the spatial subdomain [0.4,0.6]^2.
 
-## umbridge-server.py
-This defines the UM-BRIDGE interfaces for the test problem.
+Mapping | Dimensions	| Description
+--------|-------------|------------
+input |	[8] |	These values modify the conductivity coefficient in the 8 cookies, each of them must be greater than -1 (software does not check that input values are valid)
+output |	[1] |	The integral of the solution over the central subdomain
 
+All four models suppor the UM-BRDIGE evaluate feature.
+
+Feature	| Supported
+--------|---------
+Evaluate|	True
+Gradient|	False
+ApplyJacobian|	False
+ApplyHessian|	False
+
+### Config
 Model |Dictionary Key | Default value | User control | Description
 ------|---------------|---------------|--------------|-------------
 Both | N | 400 | 100 * config['Fidelity'] or config['N'] integer | The number of cells in each dimension (i.e. a mesh of N^2 elements)
@@ -31,9 +46,18 @@ Elliptic | tol | "LU" | Float | Relative tolerance for the GM-RES solver. "LU" u
 Parabolic | letol  | 1e-4 | Float | Local timestepping error tolerance for a simple implementation of TR-AB2 timestepping.
 Parabolic | T | 10.0 | Float | Final time for timestepping approximation. The QoI is evaluated and returned for time T.
 
-## run_forward_benchmark_in_matlab_fenics.m
+## Implementation details
+### ellipticpde.py
+A Python implementation of the elliptic and parabolic ``cookie'' PDE problem.
+Finite element approximation on a quad grid is assembled using FEniCS.
+The linear systems are solved using PETSc via the petsc4py interface.
+
+### umbridge-server.py
+This defines the UM-BRIDGE interfaces for the test problem.
+
+### run_forward_benchmark_in_matlab_fenics.m
 Runs the FEniCS implementation of the benchmark problem in MATLAB via the UM-BRIDGE interface and a Docker running ```benmkent/cookiebenchmark:latest```.
 Requires the [Sparse Grids MATLAB Kit](https://sites.google.com/view/sparse-grids-kit).
 
-## test_output.py
+### test_output.py
 Python script to generate QoI approximations for testing.
