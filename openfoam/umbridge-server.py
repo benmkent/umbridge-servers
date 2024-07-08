@@ -67,8 +67,11 @@ class TestModel(umbridge.Model):
         print("Reattachment point: " + str(x))
 
         # Step 3: Stack the vectors as columns
+        output_dir = './output'
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
         wall_shear = np.column_stack((X, Tx))
-        np.savetxt('./output/wallshearJet'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) +'.csv', wall_shear, fmt='%d')
+        np.savetxt(output_dir+'/wallshearJet'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) +'.csv', wall_shear, fmt='%d')
 
         # Clean up
         print("Clean up temporary case file")
