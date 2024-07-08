@@ -15,5 +15,5 @@ The linear systems are solved using PETSc via the petsc4py interface.
 This defines the UM-BRIDGE interfaces for the test problem.
 
 ## run_forward_benchmark_in_matlab_fenics.m
-Runs the FEniCS implementation of the benchmark problem in MATLAB via the UM-BRIDGE interface and a Docker running ```benmkent/cookiebenchmark:latest'''.
+Runs the FEniCS implementation of the benchmark problem in MATLAB via the UM-BRIDGE interface and a Docker running ```benmkent/cookiebenchmark:latest```.
 Requires the [Sparse Grids MATLAB Kit](https://sites.google.com/view/sparse-grids-kit).
