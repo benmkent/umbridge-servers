@@ -10,6 +10,7 @@ where the first port number is mapped through to ```4242``` which is exposed in 
 ```
 docker run -p 4242:4242 -it benmkent/cookiebenchmark:latest
 ```
+The compressed size of the container is 754.5 MB.
 
 The Docker container serves four models
 - forward: the forward elliptic model with configurable model inputs
