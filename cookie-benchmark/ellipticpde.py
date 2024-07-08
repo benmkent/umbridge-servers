@@ -24,7 +24,6 @@ class EllipticPDE:
         set_log_level(LogLevel.DEBUG)
 
         # Create FEniCS mesh and define function space
-        # mesh = UnitSquareMesh(N, N)
         # Define the corners of the rectangular domain
         x0, y0 = 0.0, 0.0  # Bottom-left corner
         x1, y1 = 1.0, 1.0  # Top-right corner
@@ -35,20 +34,24 @@ class EllipticPDE:
         p0 = Point(x0,y0)
         p1 = Point(x1,y1)
         # Create a rectangular mesh with quadrilateral elements
-        # mesh = RectangleMesh(Point(x0, y0), Point(x1, y1), nx, ny, quadrilateral=True)
         mesh = RectangleMesh.create([p0,p1],[nx,ny],CellType.Type.quadrilateral)
 
+        # Can alternatively use a triangular mesh
+        # mesh = UnitSquareMesh(N, N)
+
+        # Define approximation space
         V = FunctionSpace(mesh, "Lagrange", basis_degree)
+        self.mesh = mesh
         self.V = V
 
-    def setupProblem(self, difftype, y, quad_degree=0, varcoeffs=None, advection=False):
+    def setupProblem(self, difftype, y, quad_degree=8, varcoeffs=None, advection=False):
         """
         Set up the variational problem for the PDE.
 
         Parameters:
         difftype (str): Type of diffusion field (only 'cookie' implemented).
         y (array): Array of coefficients for the diffusion field.
-        quad_degree (int, optional): Quadrature degree for integration (default is 0).
+        quad_degree (int, optional): Quadrature degree for integration (default is 8).
         varcoeffs (array, optional): Array of variable coefficients (default is None).
         advection (bool, optional): Whether to include advection term (default is False).
         """
@@ -68,13 +71,20 @@ class EllipticPDE:
         v = TestFunction(V)
 
         # Forcing on subdomain F defined by f_indicator
-        f_indicator = Expression(
-            "abs(x[0] - 0.5) < 0.1 and abs(x[1] -0.5) <= 0.1", degree=quad_degree)
+        # F is an indicator function for the square subdomain [0.4,0.6]^2
+        # NOTE: I think using SpatialCoordinate avoids interpolating the discontinuity into the function space.
+        x = SpatialCoordinate(self.mesh)
+        f_indicator = conditional(lt(abs(x[0] - 0.5),0.1), 1.0, 0.0)*conditional(lt(abs(x[1] - 0.5),0.1), 1.0, 0.0)
+        # Define f using the indicator function
+        f = 100 * f_indicator
 
-        f = Constant(100.0) * f_indicator
+        #f_indicator = Expression(            "abs(x[0] - 0.5) <= 0.1 and abs(x[1] -0.5) <= 0.1", degree=quad_degree)
+        #f = Constant(100.0) * f_indicator
 
         # Diffusion field defined via indicators on appropriate subdomains
+        # See the definition of the benchmark problem (https://doi.org/10.48550/arXiv.2402.13768)
         if difftype == 'cookie':
+            # Input varcoeffs allows the background diffusion field to be changed
             if varcoeffs is None:
                 a0 = 1.0
             else:
@@ -88,31 +98,37 @@ class EllipticPDE:
             r = 0.13
             diff = a0
             for ii in range(8):
-                indicator_ii = Expression("(sqrt(pow(x[0]-cx,2) + pow(x[1]-cy,2)) < r)",
-                                          cx=cxlist[ii], cy=cylist[ii], r=r, degree=quad_degree)
+                # NOTE:I am not sure how this handles the discontinuous indicator function. There may be a better way to implement this.
+                #indicator_ii = Expression("(sqrt(pow(x[0]-cx,2) + pow(x[1]-cy,2)) <= r)",
+                                          #cx=cxlist[ii], cy=cylist[ii], r=r, degree=quad_degree)
+                cx_ii = cxlist[ii]
+                cy_ii = cylist[ii]
+                distance = sqrt(pow(x[0] - cx_ii, 2) + pow(x[1] - cy_ii, 2))
+                indicator_ii = conditional(lt(distance, r), 1.0, 0.0)
                 diff = diff + indicator_ii * Constant(1.0-a0 + y[ii])
         else:
             error("Unknown diffusion field")
 
         # Diffusion bilinear form
-        a = inner(diff*grad(u), grad(v))*dx
+        dx_q = Measure('dx', domain=self.mesh, metadata={'quadrature_degree': quad_degree})
+        a = inner(diff*grad(u), grad(v))*dx_q
 
-        # Optional: additional advection term
+        # Optional: additional advection term. This is not included in the benchmark
         if advection is True:
-            w = Expression(("4*(x[1]-0.5)*(1-4*pow(x[0]-0.5,2))",
-                           "-4*(x[0]-0.5)*(1-4*pow(x[1]-0.5,2))"), degree=4)
-            a = a + inner(w, grad(u)) * v * dx
+            #w = Expression(("4*(x[1]-0.5)*(1-4*pow(x[0]-0.5,2))", "-4*(x[0]-0.5)*(1-4*pow(x[1]-0.5,2))"), degree=4)
+            w = as_vector((4*(x[1]-0.5)*(1-4*pow(x[0]-0.5,2)), -4*(x[0]-0.5)*(1-4*pow(x[1]-0.5,2))))
+            a = a + inner(w, grad(u)) * v * dx_q
 
         # Define linear form on RHS
-        L = f*v*dx
+        L = f*v*dx_q
 
         # Bilinear form for mass matrix
-        m = inner(u, v)*dx
+        m = inner(u, v)*dx_q
 
         # Generic function in approx space V
         u = Function(V)
 
-        # Write to python object
+        # Write to object
         # self.diffproject = project(diff, V)
         # self.fproject = project(f, V)
         self.f_indicator = f_indicator
@@ -152,8 +168,8 @@ class EllipticPDE:
         pc = PETSc.PC().create()
 
         if tol == "LU":
-            # IF tol is string LU use direct solver
-            # Direct solver is full LU preconditioner
+            # If tol is string LU use direct solver
+            # Direct solver is full LU preconditioner (and hence no iterations required)
             pc.setType(PETSc.PC.Type.LU)  # Set the preconditioner type
             ksp.setType(PETSc.KSP.Type.PREONLY)  # Choose a solver type
             pc.setOperators(A_petsc)  # Attach the matrix to the preconditioner
@@ -477,3 +493,5 @@ class EllipticPDE:
         lhs.destroy()
         lhs_old.destroy()
         rhs.destroy()
+
+        return self.u.vector().get_local()

@@ -49,12 +49,12 @@ class CookieForward(umbridge.Model):
         Returns:
         list: List containing the quantity of interest.
         """
+        # Fill missing entries in config with default values
         config = verifyConfig(config)
         # Initialize PDE model
         model = EllipticPDE(config['N'], config['BasisDegree'], config['quad_degree'])
         # Set up cookie problem
-        model.setupProblem(
-            'cookie', parameters[0], config['quad_degree'], config['coeffs'])
+        model.setupProblem('cookie', parameters[0], config['quad_degree'], config['coeffs'])
         # Solve linear system with preconditioning pc and solver tolerance tol
         model.solve(config['pc'], config['tol'])
         # Compute quantity of interest (QoI) on solution
@@ -344,7 +344,6 @@ def verifyConfig(config):
 
     if 'BasisDegree' not in config:
         config['BasisDegree'] = 1
-
     if 'quad_degree' not in config:
         config['quad_degree'] = 8
     if 'coeffs' not in config:
@@ -361,10 +360,11 @@ def verifyConfig(config):
     print(config)
     return config
 
-
+# Initialise UM-BRIDGE models
 cookieforward = CookieForward()
 cookiebenchmark= CookieBenchmark()
 cookietimebenchmark = CookieTimeBenchmark()
 cookietime = CookieTime()
 
+# Start UM-BRIDGE server
 umbridge.serve_models([cookieforward,cookiebenchmark,cookietime,cookietimebenchmark], 4242)

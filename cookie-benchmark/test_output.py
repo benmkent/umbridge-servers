@@ -29,37 +29,41 @@ output = model.get_output_sizes()
 print("get_output_sizes() returns "+str(output[0]))
 assert pytest.approx(output[0]) == 1, "get input sizes returns wrong value"
 
-param = [[-2.3939786473373e-01, -8.6610045659126e-01, -2.1086275315687e-01, -9.2604304103162e-01, -6.0002531612112e-01, -5.5677423053456e-01, -7.7546408441658e-01, -7.6957620518706e-01]]
-
-#test output for another config
-txt = "model output (quantity of interest) = "
 txt = ""
-output = model(param,{"BasisDegree": 1, "Fidelity": 1})
-print(txt+str(output[0][0]))
-output = model(param,{"BasisDegree": 1, "Fidelity": 2})
-print(txt+str(output[0][0]))
-output = model(param,{"BasisDegree": 1, "Fidelity": 3})
-print(txt+str(output[0][0]))
-output = model(param,{"BasisDegree": 1, "Fidelity": 4})
-print(txt+str(output[0][0]))
+
+for ii in range(1,16,1):
+    quad_degree=ii
+    print(quad_degree,end=',')
+
+    # #test output for another config
+    # txt = "model output (quantity of interest) = "
+    param = [[-2.3939786473373e-01, -8.6610045659126e-01, -2.1086275315687e-01, -9.2604304103162e-01, -6.0002531612112e-01, -5.5677423053456e-01, -7.7546408441658e-01, -7.6957620518706e-01]]
+    output = model(param,{"BasisDegree": 1, "Fidelity": 1, "quad_degree":quad_degree})
+    print(txt+str(output[0][0]),end=',')
+    output = model(param,{"BasisDegree": 1, "Fidelity": 2, "quad_degree":quad_degree})
+    print(txt+str(output[0][0]),end=',')
+    output = model(param,{"BasisDegree": 1, "Fidelity": 3, "quad_degree":quad_degree})
+    print(txt+str(output[0][0]),end=',')
+    output = model(param,{"BasisDegree": 1, "Fidelity": 4, "quad_degree":quad_degree})
+    print(txt+str(output[0][0]),end=',')
 
 
-param = [[-0.2,-0.2,-0.3,-0.4,-0.5,-0.6,-0.7,-0.8]]
-output = model(param,{"BasisDegree": 1, "Fidelity": 1})
-print(txt+str(output[0][0]))
-output = model(param,{"BasisDegree": 1, "Fidelity": 2})
-print(txt+str(output[0][0]))
-output = model(param,{"BasisDegree": 1, "Fidelity": 3})
-print(txt+str(output[0][0]))
-output = model(param,{"BasisDegree": 1, "Fidelity": 4})
-print(txt+str(output[0][0]))
+    param = [[-0.2,-0.2,-0.3,-0.4,-0.5,-0.6,-0.7,-0.8]]
+    output = model(param,{"BasisDegree": 1, "Fidelity": 1, "quad_degree":quad_degree})
+    print(txt+str(output[0][0]),end=',')
+    output = model(param,{"BasisDegree": 1, "Fidelity": 2, "quad_degree":quad_degree})
+    print(txt+str(output[0][0]),end=',')
+    output = model(param,{"BasisDegree": 1, "Fidelity": 3, "quad_degree":quad_degree})
+    print(txt+str(output[0][0]),end=',')
+    output = model(param,{"BasisDegree": 1, "Fidelity": 4, "quad_degree":quad_degree})
+    print(txt+str(output[0][0]),end=',')
 
-param = [[0,0,0,0,0,0,0,0]]
-output = model(param,{"BasisDegree": 1, "Fidelity": 1})
-print(txt+str(output[0][0]))
-output = model(param,{"BasisDegree": 1, "Fidelity": 2})
-print(txt+str(output[0][0]))
-output = model(param,{"BasisDegree": 1, "Fidelity": 3})
-print(txt+str(output[0][0]))
-output = model(param,{"BasisDegree": 1, "Fidelity": 4})
-print(txt+str(output[0][0]))
+    param = [[0,0,0,0,0,0,0,0]]
+    output = model(param,{"BasisDegree": 1, "Fidelity": 1, "quad_degree":quad_degree})
+    print(txt+str(output[0][0]),end=',')
+    output = model(param,{"BasisDegree": 1, "Fidelity": 2, "quad_degree":quad_degree})
+    print(txt+str(output[0][0]),end=',')
+    output = model(param,{"BasisDegree": 1, "Fidelity": 3, "quad_degree":quad_degree})
+    print(txt+str(output[0][0]),end=',')
+    output = model(param,{"BasisDegree": 1, "Fidelity": 4, "quad_degree":quad_degree})
+    print(txt+str(output[0][0]),end='\n')

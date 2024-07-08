@@ -40,7 +40,7 @@ Model |Dictionary Key | Default value | User control | Description
 ------|---------------|---------------|--------------|-------------
 Both | N | 400 | 100 * config['Fidelity'] or config['N'] integer | The number of cells in each dimension (i.e. a mesh of N^2 elements)
 Both | BasisDegree | 1 | Integer | The degree of the piecewise polynomial FE approximation
-Both | quad_degree | 8 | Integer | The quadrature degree used to evaluate the forcing and coefficient functions
+Both | quad_degree | 8 | Integer | The quadrature degree used to evaluate integrals in the matrix assembly.
 Both | coeffs | None | Float Vector | coeff[0] defines the background diffusion field (equal to 1.0 bu default)
 Elliptic | pc  | "none" | "ILU" or "JACOBI" | Preconditioning for the GM-RES solver
 Elliptic | tol | "LU" | Float | Relative tolerance for the GM-RES solver. "LU" uses exact solution via full LU preconditioning.
@@ -61,4 +61,8 @@ Runs the FEniCS implementation of the benchmark problem in MATLAB via the UM-BRI
 Requires the [Sparse Grids MATLAB Kit](https://sites.google.com/view/sparse-grids-kit).
 
 ### test_output.py
-Python script to generate QoI approximations for testing.
+Python script to generate QoI approximations for testing. This evaluates the quantity of interest for three different parameters at four different fidelities.
+Results can be piped from the console for plotting
+```
+python3 test_output.py http://0.0.0.0:4242 >> results.txt
+```
