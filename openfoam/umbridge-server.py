@@ -17,6 +17,10 @@ class TestModel(umbridge.Model):
         return [1]
 
     def __call__(self, parameters, config):
+        output_dir = './outputdata'
+        np.savetxt(output_dir+'/test.csv', [1.0], fmt='%d')
+
+
         # Decide on fidelity
         if config['Fidelity'] == 1:
             casefile = "./NASA_hump_data_coarse3"
@@ -67,7 +71,6 @@ class TestModel(umbridge.Model):
         print("Reattachment point: " + str(x))
 
         # Step 3: Stack the vectors as columns
-        output_dir = './outputdata'
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         wall_shear = np.column_stack((X, Tx))
