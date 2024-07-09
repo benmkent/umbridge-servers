@@ -27,7 +27,7 @@ class TestModel(umbridge.Model):
         elif config['Fidelity'] == 3:
             casefile = "./NASA_hump_data_coarse1"
         elif config['Fidelity'] == 4:
-            casefile = "./NASA_hump_data_coarse1"
+            casefile = "./NASA_hump_data_baseline"
         else:
             AssertionError("Unknown config")
 
