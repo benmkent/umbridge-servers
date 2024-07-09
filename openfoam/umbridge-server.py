@@ -18,8 +18,6 @@ class TestModel(umbridge.Model):
 
     def __call__(self, parameters, config):
         output_dir = './outputdata'
-        np.savetxt(output_dir+'/test.csv', [1.0], fmt='%d')
-
 
         # Decide on fidelity
         if config['Fidelity'] == 1:
