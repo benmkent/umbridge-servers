@@ -67,7 +67,7 @@ class TestModel(umbridge.Model):
         print("Reattachment point: " + str(x))
 
         # Step 3: Stack the vectors as columns
-        output_dir = './output'
+        output_dir = './outputdata'
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         wall_shear = np.column_stack((X, Tx))
