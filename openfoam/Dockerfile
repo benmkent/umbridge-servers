@@ -31,6 +31,8 @@ RUN openfoam2406 blockMesh -case ./NASA_hump_data_coarse2
 RUN openfoam2406 mapFieldsPar -consistent -case ./NASA_hump_data_coarse2 ./NASA_hump_data_baseline
 RUN openfoam2406 blockMesh -case ./NASA_hump_data_coarse3
 RUN openfoam2406 mapFieldsPar -consistent -case ./NASA_hump_data_coarse3 ./NASA_hump_data_baseline
+RUN openfoam2406 blockMesh -case ./NASA_hump_data_coarse4
+RUN openfoam2406 mapFieldsPar -consistent -case ./NASA_hump_data_coarse4 ./NASA_hump_data_baseline
 
 # Once openfoam folders are configured we can start the server
 CMD python3 umbridge-server.py

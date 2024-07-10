@@ -20,7 +20,9 @@ class TestModel(umbridge.Model):
         output_dir = './outputdata'
 
         # Decide on fidelity
-        if config['Fidelity'] == 1:
+        if config['Fidelity'] == 0:
+            casefile = "./NASA_hump_data_coarse4"
+        elif config['Fidelity'] == 1:
             casefile = "./NASA_hump_data_coarse3"
         elif config['Fidelity'] == 2:
             casefile = "./NASA_hump_data_coarse2"
