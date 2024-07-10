@@ -6,14 +6,14 @@ import numpy as np
 from petsc4py import PETSc
 
 
-class EllipticPDE:
+class CookiePDE:
     """
-    Class representing an elliptic partial differential equation.
+    Class representing an elliptic or parabolic partial differential equation with ``cookie'' diffusion coefficient.
     """
 
-    def __init__(self, N, basis_degree, quad_degree):
+    def __init__(self, N, basis_degree):
         """
-        Initialize the elliptic PDE problem.
+        Initialize the PDE problem.
 
         Parameters:
         N (int): Number of mesh divisions in each direction.
@@ -44,7 +44,7 @@ class EllipticPDE:
         self.mesh = mesh
         self.V = V
 
-    def setupProblem(self, difftype, y, quad_degree=8, varcoeffs=None, advection=False):
+    def setupProblem(self, difftype, y, quad_degree=8, varcoeffs=None, advection=0):
         """
         Set up the variational problem for the PDE.
 
@@ -53,7 +53,7 @@ class EllipticPDE:
         y (array): Array of coefficients for the diffusion field.
         quad_degree (int, optional): Quadrature degree for integration (default is 8).
         varcoeffs (array, optional): Array of variable coefficients (default is None).
-        advection (bool, optional): Whether to include advection term (default is False).
+        advection (integer, optional): Whether to include advection term (default is 0 (false)).
         """
         V = self.V
 
@@ -78,9 +78,6 @@ class EllipticPDE:
         # Define f using the indicator function
         f = 100 * f_indicator
 
-        #f_indicator = Expression(            "abs(x[0] - 0.5) <= 0.1 and abs(x[1] -0.5) <= 0.1", degree=quad_degree)
-        #f = Constant(100.0) * f_indicator
-
         # Diffusion field defined via indicators on appropriate subdomains
         # See the definition of the benchmark problem (https://doi.org/10.48550/arXiv.2402.13768)
         if difftype == 'cookie':
@@ -98,9 +95,6 @@ class EllipticPDE:
             r = 0.13
             diff = a0
             for ii in range(8):
-                # NOTE:I am not sure how this handles the discontinuous indicator function. There may be a better way to implement this.
-                #indicator_ii = Expression("(sqrt(pow(x[0]-cx,2) + pow(x[1]-cy,2)) <= r)",
-                                          #cx=cxlist[ii], cy=cylist[ii], r=r, degree=quad_degree)
                 cx_ii = cxlist[ii]
                 cy_ii = cylist[ii]
                 distance = sqrt(pow(x[0] - cx_ii, 2) + pow(x[1] - cy_ii, 2))
@@ -114,8 +108,7 @@ class EllipticPDE:
         a = inner(diff*grad(u), grad(v))*dx_q
 
         # Optional: additional advection term. This is not included in the benchmark
-        if advection is True:
-            #w = Expression(("4*(x[1]-0.5)*(1-4*pow(x[0]-0.5,2))", "-4*(x[0]-0.5)*(1-4*pow(x[1]-0.5,2))"), degree=4)
+        if advection==1:
             w = as_vector((4*(x[1]-0.5)*(1-4*pow(x[0]-0.5,2)), -4*(x[0]-0.5)*(1-4*pow(x[1]-0.5,2))))
             a = a + inner(w, grad(u)) * v * dx_q
 
@@ -139,13 +132,14 @@ class EllipticPDE:
         self.u = u
         self.y = y
 
-    def solve(self, pctype, tol):
+    def solve(self, directsolver, pctype, tol):
         """
         Solve the elliptic PDE problem using PETSc.
 
         Parameters:
-        pctype (str): Type of preconditioner to use ('ILU', 'JACOBI', or 'none').
-        tol (float or str): Tolerance for the solver. If 'LU', use direct solver.
+        directsolver (int): Use direct LU solver if equal to 1, otherwise GM-RES iterative solver.
+        pctype (str): Type of preconditioner to use with iterative solver ('ILU', 'JACOBI', or 'none').
+        tol (float): Tolerance for the iterative solver (if used).
 
         Returns:
         numpy.ndarray: Solution vector.
@@ -167,31 +161,30 @@ class EllipticPDE:
         ksp = PETSc.KSP().create()
         pc = PETSc.PC().create()
 
-        if tol == "LU":
-            # If tol is string LU use direct solver
+        if directsolver == 1:
             # Direct solver is full LU preconditioner (and hence no iterations required)
             pc.setType(PETSc.PC.Type.LU)  # Set the preconditioner type
             ksp.setType(PETSc.KSP.Type.PREONLY)  # Choose a solver type
             pc.setOperators(A_petsc)  # Attach the matrix to the preconditioner
+            ksp.setPC(pc)
         else:
             # Use GMRES to approximate solution of linear system
             ksp.setType(PETSc.KSP.Type.GMRES)  # Choose a solver type
             ksp.setTolerances(atol=tol)  # Set tolerance
+
+            # Preconditioning
+            if pctype == "ILU":
+                pc.setType(PETSc.PC.Type.ILU)  # Set the preconditioner type
+            elif pctype == "JACOBI":
+                pc.setType(PETSc.PC.Type.JACOBI)  # Set the preconditioner type
+            else:
+                pass
+            pc.setOperators(A_petsc)  # Attach the matrix to the 
+            ksp.setPC(pc)
         # Set up solver operator
         ksp.setOperators(A_petsc)  # Set the operator
         ksp.setFromOptions()  # Set PETSc options for the solver
 
-        # Preconditioning
-        if pctype == "ILU":
-            pc.setType(PETSc.PC.Type.ILU)  # Set the preconditioner type
-        elif pctype == "JACOBI":
-            pc.setType(PETSc.PC.Type.JACOBI)  # Set the preconditioner type
-        else:
-            pass
-        pc.setOperators(A_petsc)  # Attach the matrix to the preconditioner
-        # Set the preconditioner (if desired)
-        if pctype != "none" or tol == "LU":
-            ksp.setPC(pc)
 
         # Solve the linear system
         ksp.solve(b_petsc, u_petsc)  # Solve A*x = b for x
@@ -289,6 +282,7 @@ class EllipticPDE:
 
         print("Solving for y=" + str(self.y))
 
+        # Set up PETSc formulation
         A_petsc = as_backend_type(A).mat()
         M_petsc = as_backend_type(M).mat()
         b_petsc = as_backend_type(b).vec()
@@ -357,6 +351,7 @@ class EllipticPDE:
 
         self.u.vector()[:] = u_petsc[:]
 
+        # Destroy PETSC objects
         A_petsc.destroy()
         M_petsc.destroy()
         b_petsc.destroy()
@@ -367,6 +362,7 @@ class EllipticPDE:
         gc.collect()
         # PETSc.Log.view()
 
+        # Return solution vector at time T
         return self.u.vector().get_local()
 
 
@@ -415,6 +411,7 @@ class EllipticPDE:
 
         ksp = PETSc.KSP().create()
 
+        # Initialise
         t = 0.0
         dt = 1e-5
         dtold = 1e9
@@ -429,6 +426,9 @@ class EllipticPDE:
         e_temp = u_petsc.copy()
 
         ii = 0
+        # Timestepping loop.
+        # Timestep dt is adapted using TR-AB2 pair and the Milne device to estimate local error.
+        # Solution is returned at finalTime
         while t < finalTime:
             if t + dt > finalTime:
                 dt = finalTime - t
@@ -458,10 +458,12 @@ class EllipticPDE:
 
             u_petsc_m1.axpby(1.0, 0.0, u_petsc)
 
+            # Solve linear system for timestep
             ksp.solve(rhs, u_petsc)
 
             # print(u_petsc[:])
 
+            # Estimate local timestepping error
             e_petsc.zeroEntries()
             e_petsc.axpby(1.0, 0.0, abf2)
             e_petsc.axpy(-1.0, u_petsc)
@@ -469,6 +471,8 @@ class EllipticPDE:
             enorm = (dt / (3 * (1 + dtold / dt))) * np.sqrt(e_petsc.dot(e_temp))
             ii += 1
             t += dt
+
+            # Compute timestep acceleration
             acc = float(np.power(tol / enorm, 2 / 3))
             if acc > 10:
                 acc = 10  # Limit to exponential growth
@@ -479,6 +483,7 @@ class EllipticPDE:
 
             ksp.reset()
 
+        # Clean up
         ksp.destroy()
 
         self.u.vector()[:] = u_petsc[:]
@@ -494,4 +499,5 @@ class EllipticPDE:
         lhs_old.destroy()
         rhs.destroy()
 
+        # Return approximation for finalTime T
         return self.u.vector().get_local()

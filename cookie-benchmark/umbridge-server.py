@@ -1,11 +1,11 @@
 import umbridge
-from ellipticpde import EllipticPDE
+from cookiepde import CookiePDE
 from dolfin import *
 
 
 class CookieForward(umbridge.Model):
     """
-    Class representing the forward cookie model of the elliptic PDEs.
+    Class representing the forward cookie elliptic PDE model.
     """
 
     def __init__(self):
@@ -52,11 +52,11 @@ class CookieForward(umbridge.Model):
         # Fill missing entries in config with default values
         config = verifyConfig(config)
         # Initialize PDE model
-        model = EllipticPDE(config['N'], config['BasisDegree'], config['quad_degree'])
+        model = CookiePDE(config['N'], config['BasisDegree'])
         # Set up cookie problem
-        model.setupProblem('cookie', parameters[0], config['quad_degree'], config['coeffs'])
+        model.setupProblem('cookie', parameters[0], config['quad_degree'], varcoeffs=config['diffzero'])
         # Solve linear system with preconditioning pc and solver tolerance tol
-        model.solve(config['pc'], config['tol'])
+        model.solve(config['directsolver'], config['pc'], config['tol'])
         # Compute quantity of interest (QoI) on solution
         integral = model.computebenchmarkqoi()
         # Return QoI
@@ -83,7 +83,7 @@ class CookieForward(umbridge.Model):
 
 class CookieBenchmark(umbridge.Model):
     """
-    Class representing the Cookie Benchmark model for elliptic PDEs.
+    Class representing the Cookie Benchmark elliptic PDE model.
     """
 
     def __init__(self):
@@ -131,12 +131,12 @@ class CookieBenchmark(umbridge.Model):
         config={}
         config = verifyConfig(config)
         # Initialize PDE model
-        model = EllipticPDE(config['N'], config['BasisDegree'], config['quad_degree'])
+        model = CookiePDE(config['N'], config['BasisDegree'])
         # Set up cookie problem
         model.setupProblem(
-            'cookie', parameters[0], config['quad_degree'], config['coeffs'])
-        # Solve linear system with preconditioning pc and solver tolerance tol
-        model.solve(config['pc'], config['tol'])
+            'cookie', parameters[0], config['quad_degree'], varcoeffs=config['diffzero'])
+        # Solve linear system, possibly with preconditioning pc and solver tolerance tol
+        model.solve(config['directsolver'],config['pc'], config['tol'])
         # Compute quantity of interest (QoI) on solution
         integral = model.computebenchmarkqoi()
         # Return QoI
@@ -162,7 +162,7 @@ class CookieBenchmark(umbridge.Model):
 
 class CookieTime(umbridge.Model):
     """
-    A model for Cookie Time.
+    A model for parabolic formulation of the cookie model.
 
     Inherits from umbridge.Model.
 
@@ -180,7 +180,7 @@ class CookieTime(umbridge.Model):
         Returns:
             None
         """
-        super().__init__("cookietime")
+        super().__init__("forwardparabolic")
 
     def get_input_sizes(self, config):
         """
@@ -208,7 +208,7 @@ class CookieTime(umbridge.Model):
     
     def __call__(self, parameters, config):
         """
-        Invokes the model to perform computations.
+        Evaluates the parabolic cookie model.
 
         Args:
             parameters (list): A list of parameters.
@@ -217,12 +217,16 @@ class CookieTime(umbridge.Model):
         Returns:
             list: A list containing the computed integral.
         """
+        # Verfiy config and fills in empty keys.
         config = verifyConfig(config)
 
-        model = EllipticPDE(config['N'], config['BasisDegree'], config['quad_degree'])
-        model.setupProblem('cookie', parameters[0], advection=True)
-        # u = model.solveTime(config['tol'],config['T'])
+        # Set up discrete formulation.
+        model = CookiePDE(config['N'], config['BasisDegree'])
+        # Note that we have an additional advection term
+        model.setupProblem('cookie', parameters[0], varcoeffs=config['diffzero'], advection=config['advection'])
+        # Use the custom TR-AB2 solver. Optional solveTime function uses built in PETSC TS solver.
         u = model.solveTimeSimple(config['letol'],config['T'])
+        # Compute QoI at finalTime T
         integral = model.computebenchmarkqoi()
         # model.writeSln("outputFinal")
         return [[integral]]
@@ -247,7 +251,7 @@ class CookieTime(umbridge.Model):
 
 class CookieTimeBenchmark(umbridge.Model):
     """
-    A benchmark model for Cookie Time.
+    A model for parabolic formulation of the cookie model.
 
     Inherits from umbridge.Model.
 
@@ -257,7 +261,7 @@ class CookieTimeBenchmark(umbridge.Model):
 
     def __init__(self):
         """
-        Initializes the CookieTimeBenchmark object.
+        Initializes the CookieTime object.
 
         Args:
             None
@@ -265,7 +269,7 @@ class CookieTimeBenchmark(umbridge.Model):
         Returns:
             None
         """
-        super().__init__("cookietimebenchmark")
+        super().__init__("benchmarkparabolic")
 
     def get_input_sizes(self, config):
         """
@@ -293,7 +297,7 @@ class CookieTimeBenchmark(umbridge.Model):
     
     def __call__(self, parameters, config):
         """
-        Invokes the model to perform computations.
+        Evaluates the parabolic cookie model.
 
         Args:
             parameters (list): A list of parameters.
@@ -302,14 +306,17 @@ class CookieTimeBenchmark(umbridge.Model):
         Returns:
             list: A list containing the computed integral.
         """
-        # Use default values by ensuring dictionary is empty
-        config={}
+        # Use default config values
+        config = {}
         config = verifyConfig(config)
 
-        model = EllipticPDE(config['N'], config['BasisDegree'], config['quad_degree'])
-        model.setupProblem('cookie', parameters[0], advection=True)
-        # u = model.solveTime(config['tol'],config['T'])
+        # Set up discrete formulation.
+        model = CookiePDE(config['N'], config['BasisDegree'])
+        # Note that we have an additional advection term
+        model.setupProblem('cookie', parameters[0], varcoeffs=config['diffzero'], advection=config['advection'])
+        # Use the custom TR-AB2 solver. Optional solveTime function uses built in PETSC TS solver.
         u = model.solveTimeSimple(config['letol'],config['T'])
+        # Compute QoI at finalTime T
         integral = model.computebenchmarkqoi()
         # model.writeSln("outputFinal")
         return [[integral]]
@@ -337,25 +344,46 @@ def verifyConfig(config):
     if config is None:
         config = {}
 
+    # Use direct solver by default
+    if 'directsolver' not in config:
+        config['directsolver'] = 1
+
+    # Use 400x400 mesh by default
     if 'Fidelity' not in config:
         config['N'] = 400
     else:
         config['N'] = 100 * config['Fidelity']
 
+    # Use Q1 approximation by default
     if 'BasisDegree' not in config:
         config['BasisDegree'] = 1
+    
+    # Use degree 8 quadrature by default
     if 'quad_degree' not in config:
         config['quad_degree'] = 8
-    if 'coeffs' not in config:
-        config['coeffs'] = None
+    
+    # Use background diffusion 1.0 by default
+    if 'diffzero' not in config:
+        config['diffzero'] = [1.0]
+    
+    # Use no preconditioning by default
     if 'pc' not in config:
         config['pc'] = "none"
+
+    # Use GM-RES tol 1e-4 by default
     if 'tol' not in config:
-        config['tol'] = "LU"
+        config['tol'] = 1e-4
+    
+    # Use local timestepping error tolerance 1e-4 by default
     if 'letol' not in config:
         config['letol'] = 1e-4
+    
+    # Use a finalTime T = 10.0 by default
     if 'T' not in config:
         config['T'] = 10.0
+
+    if 'advection' not in config:
+        config['advection'] = 0
 
     print(config)
     return config
