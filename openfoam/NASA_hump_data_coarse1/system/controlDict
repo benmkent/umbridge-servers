@@ -29,7 +29,7 @@ deltaT          1;
 
 writeControl    timeStep;
 
-writeInterval   1000;
+writeInterval   100;
 
 purgeWrite      0;
 
@@ -100,11 +100,5 @@ wallShearStress1
 //     fields  (nut nuEff R);
 // }
 // }
-    writeAtEnd
-    {
-        type            writeObjects;
-        libs            ("libutilityFunctionObjects.so");
-        writeControl    endTime;
-    }
 }
 // ************************************************************************* //
