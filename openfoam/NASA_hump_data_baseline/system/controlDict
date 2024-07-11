@@ -105,8 +105,9 @@ wallShearStress1
     {
         type            writeObjects;
         libs            ("libutilityFunctionObjects.so");
-        writeControl    endTime;
+        writeControl    timeStep;
         writeInterval   1;
+        timeStart       endTime;
     }
 }
 // ************************************************************************* //
