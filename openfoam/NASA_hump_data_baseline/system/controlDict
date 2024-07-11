@@ -100,5 +100,13 @@ wallShearStress1
 //     fields  (nut nuEff R);
 // }
 // }
+
+    writeAtEnd
+    {
+        type            writeObjects;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        writeControl    writeTime;
+        writeInterval   1;
+    }
 }
 // ************************************************************************* //
