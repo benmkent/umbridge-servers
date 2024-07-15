@@ -35,8 +35,8 @@ class TestModel(umbridge.Model):
 
         if 'res_tol' not in config:
             config['res_tol'] = 1e-10
-        # if 'final_time' not in config:
-        #     config['final_time'] = 5000
+        if 'abs_tol' not in config:
+            config['abs_tol'] = 1e-10
 
         # Copy folder to use as realisation
         tempcasefile = "./caserealisation"
@@ -56,6 +56,8 @@ class TestModel(umbridge.Model):
         output_file = input_file
         replacement_value = str(config['res_tol'])
         replace_res_tol(input_file, output_file, replacement_value)
+        replacement_value = str(config['abs_tol'])
+        replace_abs_tol(input_file, output_file, replacement_value)
 
         # Set up boundary conditions
         print("Enforcing boundary conditions jetNasaHump")
@@ -133,6 +135,21 @@ def replace_final_time(input_file, output_file, replacement_value):
         f.write(modified_data)
 
     print(f"Replaced 'FINAL_TIME' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.")
+    
+def replace_abs_tol(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'ABS_TOL' with 'replacement_value'
+    modified_data = file_data.replace('ABS_TOL', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'ABS_TOL' with '{replacement_value}' in '{
           input_file}'. Output saved to '{output_file}'.")
 
 def replace_inflow_mag(input_file, output_file, replacement_value):
