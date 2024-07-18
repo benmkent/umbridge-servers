@@ -109,6 +109,7 @@ class CookiePDE:
 
         # Optional: additional advection term. This is not included in the benchmark
         if advection==1:
+            print("Using advection term")
             w = as_vector((4*(x[1]-0.5)*(1-4*pow(x[0]-0.5,2)), -4*(x[0]-0.5)*(1-4*pow(x[1]-0.5,2))))
             a = a + inner(w, grad(u)) * v * dx_q
 
