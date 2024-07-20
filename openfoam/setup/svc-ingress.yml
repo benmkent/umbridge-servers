@@ -37,10 +37,10 @@ metadata:
   name: kubernetes-ingress
   namespace: haproxy-controller
 data:
-  timeout-server: 1h
-  timeout-connect: 1h
-  timeout-queue: 1h
-  timeout-http-request: 1h
+  timeout-server: 48h
+  timeout-connect: 48h
+  timeout-queue: 48h
+  timeout-http-request: 48h
   syslog-server: "address:stdout, format:raw, facility:daemon"
   #auth-type: basic-auth
   #auth-secret: haproxy-controller/haproxy-credentials
