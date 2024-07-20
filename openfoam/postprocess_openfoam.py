@@ -46,20 +46,20 @@ def get_largest_number_subdirectory(path):
 
     return largest_subdir
 
-def main():
-    # Set up the argument parser
-    parser = argparse.ArgumentParser(description="A script to run different functions based on command-line arguments")
+# def main():
+#     # Set up the argument parser
+#     parser = argparse.ArgumentParser(description="A script to run different functions based on command-line arguments")
 
-    # Add arguments
-    parser.add_argument("--case", type=str, help="This is the case directory")
+#     # Add arguments
+#     parser.add_argument("--case", type=str, help="This is the case directory")
 
-    # Parse the arguments
-    args = parser.parse_args()
+#     # Parse the arguments
+#     args = parser.parse_args()
 
-    if args.case == None
-        print("Please specify a case")
-    else:
-        extract_reattachment_point(args.case, final_time)
+#     if args.case == None:
+#         print("Please specify a case")
+#     else:
+#         extract_reattachment_point(args.case, final_time)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
