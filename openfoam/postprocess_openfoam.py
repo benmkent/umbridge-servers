@@ -13,12 +13,19 @@ def extract_reattachment_point(filename, final_time):
     Tx,Ty,Tz = fluidfoam.readfield(filename,name="wallShearStress",time_name=largest_subdir,boundary="bottomWall")
     # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
 
+    x = extract_reattachment_point_from_dataseries(X,Tx)
+
+    return (x, X, Tx)
+
+def extract_reattachment_point_from_dataseries(X,Tx):
+
     spline = interpolate.CubicSpline(X,Tx, extrapolate=False)
 
     r = spline.roots()
 
     # Return last root
-    return (float(r[-1]) , X, Tx)
+    x = float(r[-1])
+    return x
 
 def get_largest_number_subdirectory(path):
     # List all subdirectories in the specified path
