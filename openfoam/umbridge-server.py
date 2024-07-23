@@ -37,50 +37,58 @@ class TestModel(umbridge.Model):
             config['res_tol'] = 1e-10
         if 'abs_tol' not in config:
             config['abs_tol'] = 1e-10
+        
+        key = (config['Fidelity'],config['res_tol'],config['abs_tol'], parameters)
 
-        # Copy folder to use as realisation
-        tempcasefile = "./caserealisation"
-        os.system('cp -r ' + casefile + ' ' + tempcasefile)
-
-        # For realisation assign parameters
-        input_file = tempcasefile+"/system/controlDict"
-        output_file = input_file
-        replacement_value_jet = str(parameters[0][0])
-        replace_jet_mag(input_file, output_file, replacement_value_jet)
-        replacement_value_inflow = str(parameters[0][1])
-        replace_inflow_mag(input_file, output_file, replacement_value_inflow)
-        # replacement_value = str(config['final_time'])
-        # replace_final_time(input_file, output_file, replacement_value)
-
-        input_file = tempcasefile+"/system/fvSolution"
-        output_file = input_file
-        replacement_value = str(config['res_tol'])
-        replace_res_tol(input_file, output_file, replacement_value)
-        replacement_value = str(config['abs_tol'])
-        replace_abs_tol(input_file, output_file, replacement_value)
-
-        # Set up boundary conditions
-        print("Enforcing boundary conditions jetNasaHump")
-        os.system('openfoam2406 jetNasaHump -case '+tempcasefile)
-
-        # Run simple foam
-        print("Run simplefoam")
-        os.system('openfoam2406 simpleFoam -case '+tempcasefile)
-
-        # Extract quantity of interest (reattachment point)
-        print("Extract reattachment point")
-        (x , X, Tx) = extract_reattachment_point(tempcasefile, 5000)
-        print("Reattachment point: " + str(x))
-
-        # Step 3: Stack the vectors as columns
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-        wall_shear = np.column_stack((X, Tx))
-        np.savetxt(output_dir+'/wallshearJet'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) +'.csv', wall_shear, fmt='%f')
+        s = open(output_dir+'/precomputed_results.txt', 'r').read()
+        results_dict = eval(s)
 
-        # Clean up
-        print("Clean up temporary case file")
-        os.system('rm -r ' + tempcasefile)
+        if key in s:
+            x = s[key]
+        else:
+            # Copy folder to use as realisation
+            tempcasefile = "./caserealisation"
+            os.system('cp -r ' + casefile + ' ' + tempcasefile)
+
+            # For realisation assign parameters
+            input_file = tempcasefile+"/system/controlDict"
+            output_file = input_file
+            replacement_value_jet = str(parameters[0][0])
+            replace_jet_mag(input_file, output_file, replacement_value_jet)
+            replacement_value_inflow = str(parameters[0][1])
+            replace_inflow_mag(input_file, output_file, replacement_value_inflow)
+            # replacement_value = str(config['final_time'])
+            # replace_final_time(input_file, output_file, replacement_value)
+
+            input_file = tempcasefile+"/system/fvSolution"
+            output_file = input_file
+            replacement_value = str(config['res_tol'])
+            replace_res_tol(input_file, output_file, replacement_value)
+            replacement_value = str(config['abs_tol'])
+            replace_abs_tol(input_file, output_file, replacement_value)
+
+            # Set up boundary conditions
+            print("Enforcing boundary conditions jetNasaHump")
+            os.system('openfoam2406 jetNasaHump -case '+tempcasefile)
+
+            # Run simple foam
+            print("Run simplefoam")
+            os.system('openfoam2406 simpleFoam -case '+tempcasefile)
+
+            # Extract quantity of interest (reattachment point)
+            print("Extract reattachment point")
+            (x , X, Tx) = extract_reattachment_point(tempcasefile, 5000)
+            print("Reattachment point: " + str(x))
+
+            # Step 3: Stack the vectors as columns
+            wall_shear = np.column_stack((X, Tx))
+            np.savetxt(output_dir+'/wallshearJet'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) +'.csv', wall_shear, fmt='%f')
+
+            # Clean up
+            print("Clean up temporary case file")
+            os.system('rm -r ' + tempcasefile)
 
         return [[x]]
 
