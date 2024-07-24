@@ -73,6 +73,7 @@ class TestModel(umbridge.Model):
         replace_abs_tol(input_file, output_file, replacement_value)
 
         filename = output_dir+'/wallshearJet'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
+        filename_console = output_dir+'/console_'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.log'
 
         if os.path.exists(filename):
             X = []
@@ -89,11 +90,11 @@ class TestModel(umbridge.Model):
         else:
             # Set up boundary conditions
             print("Enforcing boundary conditions jetNasaHump")
-            os.system('openfoam2406 jetNasaHump -case '+tempcasefile)
+            os.system('openfoam2406 jetNasaHump -case '+tempcasefile + ' | tee -a ' + filename_console)
 
             # Run simple foam
             print("Run simplefoam")
-            os.system('openfoam2406 simpleFoam -case '+tempcasefile)
+            os.system('openfoam2406 simpleFoam -case '+tempcasefile + ' | tee -a ' + filename_console)
 
             # Extract quantity of interest (reattachment point)
             print("Extract reattachment point")
@@ -101,8 +102,7 @@ class TestModel(umbridge.Model):
 
             # Step 3: Stack the vectors as columns
             wall_shear = np.column_stack((X, Tx))
-            np.savetxt(output_dir+'/wallshearJet' + str(replacement_value_jet) + 'Inflow' + str(
-                replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + '.csv', wall_shear, fmt='%f')
+            np.savetxt(filename, wall_shear, fmt='%f')
 
         print("Reattachment point: " + str(x))
 
