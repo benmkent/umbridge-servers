@@ -24,7 +24,12 @@ def extract_reattachment_point_from_dataseries(X,Tx):
     r = spline.roots()
 
     # Return last root
-    x = float(r[-1])
+    if len(r) > 0:
+        x = float(r[-1])
+    else:
+        print('Warning: unable to detect reattachment point -- setting to 0')
+        x = 0.0
+
     return x
 
 def get_largest_number_subdirectory(path):
