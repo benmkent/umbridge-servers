@@ -36,68 +36,79 @@ class TestModel(umbridge.Model):
 
         if 'res_tol' not in config:
             config['res_tol'] = 1e-10
+            res_tol_str = ''
+        elif abs(config['res_tol'] - 1e-10) < 1e-14:
+            res_tol_str = ''
+        else:
+            res_tol_str = '_restol' + str(config['res_tol'])
+
         if 'abs_tol' not in config:
             config['abs_tol'] = 1e-10
+            abs_tol_str = ''
+        elif abs(config['abs_tol'] - 1e-10) < 1e-14:
+            abs_tol_str = ''
+        else:
+            abs_tol_str = '_abstol' + str(config['abs_tol'])
 
-            # Copy folder to use as realisation
-            tempcasefile = "./caserealisation"
-            os.system('cp -r ' + casefile + ' ' + tempcasefile)
+        # Copy folder to use as realisation
+        tempcasefile = "./caserealisation"
+        os.system('cp -r ' + casefile + ' ' + tempcasefile)
 
-            # For realisation assign parameters
-            input_file = tempcasefile+"/system/controlDict"
-            output_file = input_file
-            replacement_value_jet = str(parameters[0][0])
-            replace_jet_mag(input_file, output_file, replacement_value_jet)
-            replacement_value_inflow = str(parameters[0][1])
-            replace_inflow_mag(input_file, output_file,
-                               replacement_value_inflow)
-            # replacement_value = str(config['final_time'])
-            # replace_final_time(input_file, output_file, replacement_value)
+        # For realisation assign parameters
+        input_file = tempcasefile+"/system/controlDict"
+        output_file = input_file
+        replacement_value_jet = str(parameters[0][0])
+        replace_jet_mag(input_file, output_file, replacement_value_jet)
+        replacement_value_inflow = str(parameters[0][1])
+        replace_inflow_mag(input_file, output_file,
+                            replacement_value_inflow)
+        # replacement_value = str(config['final_time'])
+        # replace_final_time(input_file, output_file, replacement_value)
 
-            input_file = tempcasefile+"/system/fvSolution"
-            output_file = input_file
-            replacement_value = str(config['res_tol'])
-            replace_res_tol(input_file, output_file, replacement_value)
-            replacement_value = str(config['abs_tol'])
-            replace_abs_tol(input_file, output_file, replacement_value)
+        input_file = tempcasefile+"/system/fvSolution"
+        output_file = input_file
+        replacement_value = str(config['res_tol'])
+        replace_res_tol(input_file, output_file, replacement_value)
+        replacement_value = str(config['abs_tol'])
+        replace_abs_tol(input_file, output_file, replacement_value)
 
-            filename = output_dir+'/wallshearJet'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) +'.csv'
+        filename = output_dir+'/wallshearJet'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
 
+        if os.path.exists(filename):
+            X = []
+            Tx = []
+
+            print("Reuse precomputed wall shear stress datafile")
+            with open(filename, mode='r') as file:
+                reader = csv.reader(file, delimiter=' ')
+                for row in reader:
+                    if row:  # Check if row is not empty
+                        X.append(row[0])  # First column
+                        Tx.append(row[1])  # Second column
+            x = extract_reattachment_point_from_dataseries(X,Tx)
+        else:
             # Set up boundary conditions
             print("Enforcing boundary conditions jetNasaHump")
             os.system('openfoam2406 jetNasaHump -case '+tempcasefile)
 
-            if os.path.exists(filename):
-                X = []
-                Tx = []
+            # Run simple foam
+            print("Run simplefoam")
+            os.system('openfoam2406 simpleFoam -case '+tempcasefile)
 
-                print("Reuse precomputed wall shear stress datafile")
-                with open(filename, mode='r') as file:
-                    reader = csv.reader(file, delimiter=' ')
-                    for row in reader:
-                        if row:  # Check if row is not empty
-                            X.append(row[0])  # First column
-                            Tx.append(row[1])  # Second column
-                x = extract_reattachment_point_from_dataseries(X,Tx)
-            else:
-                # Run simple foam
-                print("Run simplefoam")
-                os.system('openfoam2406 simpleFoam -case '+tempcasefile)
+            # Extract quantity of interest (reattachment point)
+            print("Extract reattachment point")
+            (x, X, Tx) = extract_reattachment_point(tempcasefile, 5000)
 
-                # Extract quantity of interest (reattachment point)
-                print("Extract reattachment point")
-                (x, X, Tx) = extract_reattachment_point(tempcasefile, 5000)
+            # Step 3: Stack the vectors as columns
+            wall_shear = np.column_stack((X, Tx))
+            np.savetxt(output_dir+'/wallshearJet' + str(replacement_value_jet) + 'Inflow' + str(
+                replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + '.csv', wall_shear, fmt='%f')
 
-                # Step 3: Stack the vectors as columns
-                wall_shear = np.column_stack((X, Tx))
-                np.savetxt(output_dir+'/wallshearJet' + str(replacement_value_jet) + 'Inflow' + str(
-                    replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + '.csv', wall_shear, fmt='%f')
+        print("Reattachment point: " + str(x))
 
-            print("Reattachment point: " + str(x))
-
-            # Clean up
-            print("Clean up temporary case file")
-            os.system('rm -r ' + tempcasefile)
+        # Clean up
+        print("Clean up temporary case file")
+        os.system('rm -r ' + tempcasefile)
 
         return [[x]]
 
