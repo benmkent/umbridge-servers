@@ -72,8 +72,8 @@ class TestModel(umbridge.Model):
         replacement_value = str(config['abs_tol'])
         replace_abs_tol(input_file, output_file, replacement_value)
 
-        replacement_value_jet = f"{replacement_value_jet:.12g}"
-        replacement_value_inflow = f"{replacement_value_inflow:.12g}"
+        replacement_value_jet = f"{float(replacement_value_jet):.12g}"
+        replacement_value_inflow = f"{float(replacement_value_inflow):.12g}"
 
         filename = output_dir+'/wallshearJet'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
         filename_console = output_dir+'/console_'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.log'
