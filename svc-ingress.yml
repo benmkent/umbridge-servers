@@ -21,14 +21,14 @@ kind: Ingress
 metadata:
   name: openfoam-ingress
   annotations:
-    haproxy.org/rewrite-target: /$1
+    haproxy.org/path-rewrite: /openfoam/(.*) /\1
 spec:
   ingressClassName: haproxy
   rules:
     - http:
         paths:
-          - path: /openfoam/(.*)
-            pathType: ImplementationSpecific
+          - path: /openfoam
+            pathType: Prefix
             backend:
               service:
                 name: svc-openfoam
@@ -57,13 +57,13 @@ kind: Ingress
 metadata:
   name: cookies-ingress
   annotations:
-    haproxy.org/rewrite-target: /$1
+    haproxy.org/path-rewrite: /cookies/(.*) /\1
 spec:
   ingressClassName: haproxy
   rules:
     - http:
         paths:
-          - path: /
+          - path: /cookies
             pathType: Prefix
             backend:
               service:
