@@ -63,7 +63,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /openfoam/(.*)
+          - path: /cookies/(.*)
             pathType: ImplementationSpecific
             backend:
               service:
