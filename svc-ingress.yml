@@ -70,7 +70,7 @@ spec:
 #                 name: svc-cookies
 #                 port:
 #                   number: 80
-# ---
+---
 # ConfigMap for HAProxy Ingress Controller
 apiVersion: v1
 kind: ConfigMap
