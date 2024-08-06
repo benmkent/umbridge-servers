@@ -9,7 +9,7 @@ from postprocess_openfoam import extract_reattachment_point, extract_reattachmen
 class TestModel(umbridge.Model):
 
     def __init__(self):
-        super().__init__("forward")
+        super().__init__("forwardopenfoam")
 
     def get_input_sizes(self, config):
         return [2]

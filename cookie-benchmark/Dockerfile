@@ -12,8 +12,8 @@ RUN apt update
 
 # Set up internal folders and files
 WORKDIR /
-COPY umbridge-server.py /
+COPY umbridge_server.py /
 COPY cookiepde.py /
 
 # Start Python UM-BRDIGE server
-CMD python3 umbridge-server.py
+CMD python3 umbridge_server.py
