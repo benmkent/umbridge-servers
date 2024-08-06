@@ -25,7 +25,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /openfoam/
+          - path: /openfoam
             pathType: Prefix
             backend:
               service:
@@ -59,7 +59,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /cookies/
+          - path: /cookies
             pathType: Prefix
             backend:
               service:
