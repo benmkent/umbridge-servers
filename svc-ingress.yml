@@ -32,20 +32,6 @@ spec:
               number: 80
 ---
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: kubernetes-ingress
-  namespace: haproxy-controller
-data:
-  timeout-server: 48h
-  timeout-connect: 48h  
-  timeout-queue: 48h
-  timeout-http-request: 48h
-  syslog-server: "address:stdout, format:raw, facility:daemon"
-  #auth-type: basic-auth
-  #auth-secret: haproxy-controller/haproxy-credentials
----
-apiVersion: v1
 kind: Service
 metadata:
   name: svc-cookies
