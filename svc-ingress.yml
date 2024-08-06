@@ -63,8 +63,8 @@ spec:
   rules:
     - http:
         paths:
-          - path: /(*)
-            pathType: ImplementationSpecific
+          - path: /cookies/(.*)
+            pathType: Prefix
             backend:
               service:
                 name: svc-cookies
