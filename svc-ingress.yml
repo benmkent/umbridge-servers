@@ -81,6 +81,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: haproxy
   rules:
     - http:
       paths:
