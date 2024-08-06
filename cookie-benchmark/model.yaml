@@ -5,15 +5,15 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: model
+      app: model-cookies
   replicas: 12
   template:
     metadata:
       labels:
-        app: model
+        app: model-cookies
     spec:
       containers:
-      - name: model
+      - name: model-cookies
         image: benmkent/cookiebenchmark:latest
         imagePullPolicy: "Always"
         env:
