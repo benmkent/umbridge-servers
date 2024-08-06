@@ -34,42 +34,42 @@ spec:
                 name: svc-openfoam
                 port:
                   number: 80
-# ---
-# # Service for Cookies application
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: svc-cookies
-#   namespace: default
-#   annotations:
-#     haproxy.org/load-balance: "leastconn"  # Use least connections for load balancing
-# spec:
-#   ports:
-#     - port: 80
-#       protocol: TCP
-#       targetPort: 4242
-#   selector:
-#     app: cookies
-# ---
-# # Ingress for Cookies application
-# apiVersion: networking.k8s.io/v1
-# kind: Ingress
-# metadata:
-#   name: cookies-ingress
-#   annotations:
-#     haproxy.org/rewrite-target: /$1
-# spec:
-#   ingressClassName: haproxy
-#   rules:
-#     - http:
-#         paths:
-#           - path: /cookies/(.*)
-#             pathType: ImplementationSpecific
-#             backend:
-#               service:
-#                 name: svc-cookies
-#                 port:
-#                   number: 80
+---
+# Service for Cookies application
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-cookies
+  namespace: default
+  annotations:
+    haproxy.org/load-balance: "leastconn"  # Use least connections for load balancing
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 4242
+  selector:
+    app: cookies
+---
+# Ingress for Cookies application
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cookies-ingress
+  annotations:
+    haproxy.org/rewrite-target: /$1
+spec:
+  ingressClassName: haproxy
+  rules:
+    - http:
+        paths:
+          - path: /cookies/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: svc-cookies
+                port:
+                  number: 80
 ---
 # ConfigMap for HAProxy Ingress Controller
 apiVersion: v1
