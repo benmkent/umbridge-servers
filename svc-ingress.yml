@@ -27,8 +27,8 @@ spec:
   rules:
     - http:
         paths:
-          - path: /openfoam
-            pathType: Prefix
+          - path: /openfoam/(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: svc-openfoam
@@ -63,8 +63,8 @@ spec:
   rules:
     - http:
         paths:
-          - path: /cookies
-            pathType: Prefix
+          - path: /openfoam/(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: svc-cookies
