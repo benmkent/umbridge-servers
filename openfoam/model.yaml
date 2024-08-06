@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: model-openfoam-deployment
+  name: openfoam-deployment
 spec:
   selector:
     matchLabels:
-      app: model-openfoam
+      app: openfoam
   replicas: 8
   template:
     metadata:
       labels:
-        app: model-openfoam
+        app: openfoam
     spec:
       containers:
-      - name: model-openfoam
+      - name: openfoam
         image: benmkent/openfoam2dwmh:latest
         imagePullPolicy: "Always"
         env:

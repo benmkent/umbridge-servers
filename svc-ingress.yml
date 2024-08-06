@@ -1,19 +1,22 @@
+# Service for OpenFOAM application
 apiVersion: v1
 kind: Service
 metadata:
   name: svc-openfoam
   namespace: default
   annotations:
-    haproxy.org/load-balance: "leastconn"
-
+    haproxy.org/load-balance: "leastconn"  # Use least connections for load balancing
 spec:
   ports:
-  - port: 80
-    protocol: TCP
-    targetPort: 4242
+    - port: 80
+      protocol: TCP
+      targetPort: 4242
   selector:
-    app: model-openfoam
+    app: openfoam
+
 ---
+
+# Ingress for OpenFOAM application
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -21,32 +24,37 @@ metadata:
 spec:
   ingressClassName: haproxy
   rules:
-  - http:
-      paths:
-      - path: /openfoam
-        pathType: Prefix
-        backend:
-          service:
-            name: svc-openfoam
-            port:
-              number: 80
+    - http:
+        paths:
+          - path: /openfoam
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-openfoam
+                port:
+                  number: 80
+
 ---
+
+# Service for Cookies application
 apiVersion: v1
 kind: Service
 metadata:
   name: svc-cookies
   namespace: default
   annotations:
-    haproxy.org/load-balance: "leastconn"
-
+    haproxy.org/load-balance: "leastconn"  # Use least connections for load balancing
 spec:
   ports:
-  - port: 81
-    protocol: TCP
-    targetPort: 4242
+    - port: 81
+      protocol: TCP
+      targetPort: 4242
   selector:
-    app: model-cookies
+    app: cookies
+
 ---
+
+# Ingress for Cookies application
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -54,16 +62,19 @@ metadata:
 spec:
   ingressClassName: haproxy
   rules:
-  - http:
-      paths:
-      - path: /cookies
-        pathType: Prefix
-        backend:
-          service:
-            name: svc-cookies
-            port:
-              number: 81
+    - http:
+        paths:
+          - path: /cookies
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-cookies
+                port:
+                  number: 81
+
 ---
+
+# ConfigMap for HAProxy Ingress Controller
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -77,4 +88,3 @@ data:
   syslog-server: "address:stdout, format:raw, facility:daemon"
   #auth-type: basic-auth
   #auth-secret: haproxy-controller/haproxy-credentials
-

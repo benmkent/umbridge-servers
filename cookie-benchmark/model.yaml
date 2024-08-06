@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: model-deployment-cookies
+  name: deployment-cookies
 spec:
   selector:
     matchLabels:
-      app: model-cookies
+      app: cookies
   replicas: 8
   template:
     metadata:
       labels:
-        app: model-cookies
+        app: cookies
     spec:
       containers:
-      - name: model-cookies
+      - name: cookies
         image: benmkent/cookiebenchmark:latest
         imagePullPolicy: "Always"
         env:
