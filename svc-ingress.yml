@@ -41,7 +41,7 @@ metadata:
 
 spec:
   ports:
-  - port: 80
+  - port: 81
     protocol: TCP
     targetPort: 4242
   selector:
@@ -62,7 +62,7 @@ spec:
           service:
             name: svc-cookies
             port:
-              number: 80
+              number: 81
 ---
 apiVersion: v1
 kind: ConfigMap
