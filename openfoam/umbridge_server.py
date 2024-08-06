@@ -212,8 +212,7 @@ def replace_inflow_mag(input_file, output_file, replacement_value):
     with open(output_file, 'w') as f:
         f.write(modified_data)
 
-    print(f"Replaced 'INFLOW_MAG' with '{replacement_value}' in '{
-          input_file}'. Output saved to '{output_file}'.")
+    print(f"Replaced 'INFLOW_MAG' with '{replacement_value}' in '{input_file}'. Output saved to '{output_file}'.")
 
 
 umbridge.serve_models([testmodel], 4242)
