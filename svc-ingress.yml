@@ -46,7 +46,7 @@ metadata:
     haproxy.org/load-balance: "leastconn"  # Use least connections for load balancing
 spec:
   ports:
-    - port: 81
+    - port: 80
       protocol: TCP
       targetPort: 4242
   selector:
@@ -70,7 +70,7 @@ spec:
               service:
                 name: svc-cookies
                 port:
-                  number: 81
+                  number: 80
 
 ---
 
