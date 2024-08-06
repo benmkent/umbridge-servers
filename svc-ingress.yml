@@ -83,5 +83,5 @@ data:
   timeout-queue: 48h
   timeout-http-request: 48h
   syslog-server: "address:stdout, format:raw, facility:daemon"
-  #auth-type: basic-auth
-  #auth-secret: haproxy-controller/haproxy-credentials
+  log-format: '%ci:%cp [%t] %ft %b/%s %HM %HV %TR/%Tw/%Tc/%Tt %B %s'
+  log-level: debug
