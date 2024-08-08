@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-doubleglazing
+spec:
+  selector:
+    matchLabels:
+      app: doubleglazing
+  replicas: 6
+  template:
+    metadata:
+      labels:
+        app: doubleglazing
+    spec:
+      containers:
+      - name: cookies
+        image: benmkent/doubleglazing:latest
+        imagePullPolicy: "Always"
+        env:
+        - name: OMP_NUM_THREADS
+          value: "1"
+        resources:
+          requests:
+            cpu: 1
+            memory: 1Gi
+          limits:
+            cpu: 1
+            memory: 1Gi
