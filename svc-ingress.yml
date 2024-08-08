@@ -71,6 +71,42 @@ spec:
                 port:
                   number: 80
 ---
+# Service for Double Glazing application
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-doubleglazing
+  namespace: default
+  annotations:
+    haproxy.org/load-balance: "leastconn"  # Use least connections for load balancing
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 4242
+  selector:
+    app: doubleglazing
+---
+# Ingress for Cookies application
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: doubleglazing-ingress
+  annotations:
+    haproxy.org/path-rewrite: /doubleglazing/(.*) /\1
+spec:
+  ingressClassName: haproxy
+  rules:
+    - http:
+        paths:
+          - path: /doubleglazing
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-doubleglazing
+                port:
+                  number: 80
+---
 # ConfigMap for HAProxy Ingress Controller
 apiVersion: v1
 kind: ConfigMap
