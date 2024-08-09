@@ -24,6 +24,7 @@ class DoubleGlazingForward(umbridge.Model):
         Returns:
         list: List containing the size of the input parameter vector.
         """
+        config = verifyConfig(config)
         n = 1 + config['advection']
         return [n]
 
@@ -53,7 +54,7 @@ class DoubleGlazingForward(umbridge.Model):
         # Fill missing entries in config with default values
         config = verifyConfig(config)
         # Initialize PDE model
-        model = CookiePDE(config['N'], config['BasisDegree'])
+        model = DoubleGlazingPDE(config['N'], config['BasisDegree'])
         # Set up cookie problem
         model.setupProblem('parameter', parameters[0], config['quad_degree'], varcoeffs=config['diffzero'])
         # Solve linear system with preconditioning pc and solver tolerance tol
@@ -113,6 +114,8 @@ class DoubleGlazingTime(umbridge.Model):
         Returns:
             list: A list containing the input sizes.
         """
+        config = verifyConfig(config)
+
         n = 1 + config['advection']
         return [n]
 
@@ -141,9 +144,9 @@ class DoubleGlazingTime(umbridge.Model):
         """
         # Verfiy config and fills in empty keys.
         config = verifyConfig(config)
-
+        print(config)
         # Initialize PDE model
-        model = CookiePDE(config['N'], config['BasisDegree'])
+        model = DoubleGlazingPDE(config['N'], config['BasisDegree'])
         # Set up cookie problem
         model.setupProblem('parameter', parameters[0], config['quad_degree'], varcoeffs=config['diffzero'])
         # Use the custom TR-AB2 solver. Optional solveTime function uses built in PETSC TS solver.
@@ -214,7 +217,7 @@ def verifyConfig(config):
         config['T'] = 10.0
 
     if 'advection' not in config:
-        config['advection'] = 0
+        config['advection'] = 1 + 4
 
     print(config)
     return config

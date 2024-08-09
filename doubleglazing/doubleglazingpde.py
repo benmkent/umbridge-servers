@@ -34,7 +34,8 @@ class DoubleGlazingPDE:
         p0 = Point(x0,y0)
         p1 = Point(x1,y1)
         # Create a rectangular mesh with quadrilateral elements
-        mesh = RectangleMesh.create([p0,p1],[nx,ny],CellType.Type.quadrilateral)
+        # mesh = RectangleMesh.create([p0,p1],[nx,ny],CellType.Type.quadrilateral)
+        mesh = RectangleMesh.create([p0,p1],[nx,ny], CellType.Type.triangle)
 
         # Can alternatively use a triangular mesh
         # mesh = UnitSquareMesh(N, N)
@@ -55,9 +56,10 @@ class DoubleGlazingPDE:
 
         x = SpatialCoordinate(self.mesh)
         # Define boundary condition
-        ubc = conditional(lt(abs(x[0] - 1.0),DOLFIN_EPS), 1.0, 0.0)
+        # ubc = conditional(lt(abs(x[0] - 1.0),DOLFIN_EPS), 1.0, 0.0)
+        ubc = Expression('abs(x[0]-1.0) < tol ? (1-pow(x[1],4)) : 0.0', tol=DOLFIN_EPS, degree=1)
 
-        # Homogeneous Dirichlet BC for unit square domain
+        # Dirichlet BC for unit square domain
         def boundary(x):
             return x[0] < DOLFIN_EPS or x[0] > 1.0 - DOLFIN_EPS or x[1] < DOLFIN_EPS or x[1] > 1.0 - DOLFIN_EPS
 
@@ -122,7 +124,7 @@ class DoubleGlazingPDE:
                 a = a + ind_ii*y[2+ii]*inner(w, grad(u)) * v * dx_q
 
         # Define linear form on RHS
-        L = 0*v*dx_q
+        L = Constant(0)*v*dx_q
 
         # Bilinear form for mass matrix
         m = inner(u, v)*dx_q
