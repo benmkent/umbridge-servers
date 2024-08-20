@@ -57,7 +57,7 @@ class DoubleGlazingPDE:
         x = SpatialCoordinate(self.mesh)
         # Define boundary condition
         # ubc = conditional(lt(abs(x[0] - 1.0),DOLFIN_EPS), 1.0, 0.0)
-        ubc = Expression('abs(x[0]-1.0) < tol ? (1-pow(x[1],4)) : 0.0', tol=DOLFIN_EPS, degree=1)
+        ubc = Expression('abs(x[0]-1.0) < tol ? (1-pow(x[1],4)) : 0.0', tol=DOLFIN_EPS, degree=4)
 
         # Dirichlet BC for unit square domain
         def boundary(x):
