@@ -61,7 +61,7 @@ class DoubleGlazingPDE:
 
         # Dirichlet BC for unit square domain
         def boundary(x):
-            return x[0] < DOLFIN_EPS or x[0] > 1.0 - DOLFIN_EPS or x[1] < DOLFIN_EPS or x[1] > 1.0 - DOLFIN_EPS
+            return abs(x[0]+1.0) < DOLFIN_EPS or abs(x[0] - 1.0) < DOLFIN_EPS or abs(x[1]+1.0) < DOLFIN_EPS or abs(x[1] - 1.0) < DOLFIN_EPS
 
         bc = DirichletBC(V, ubc, boundary)
 
