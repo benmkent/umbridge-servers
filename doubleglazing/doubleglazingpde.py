@@ -307,7 +307,7 @@ class DoubleGlazingPDE:
 
         def rhs_function(ts, t, u, F, A, b):
             A.mult(u, F)
-            F.axpby(1.0, -1.0, b)
+            F.axpby((1-exp(-t/0.1)), -1.0, b)
             return
 
         def rhs_function_specific(ts, t, u, F):
