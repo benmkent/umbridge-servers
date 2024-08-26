@@ -431,20 +431,21 @@ class DoubleGlazingPDE:
         dt = 1e-5
         dtold = 1e9
 
-        lhs = A_petsc.copy()
-        lhs_old = A_petsc.copy()
-        rhs = u_petsc.copy()
-        rhs_temp = u_petsc.copy()
-        abf2 = u_petsc.copy()
-        u_petsc_m1 = u_petsc.copy()
-        e_petsc = u_petsc.copy()
-        e_temp = u_petsc.copy()
-
         ii = 0
         # Timestepping loop.
         # Timestep dt is adapted using TR-AB2 pair and the Milne device to estimate local error.
         # Solution is returned at finalTime
         while t < finalTime:
+
+            lhs = A_petsc.copy()
+            lhs_old = A_petsc.copy()
+            rhs = u_petsc.copy()
+            rhs_temp = u_petsc.copy()
+            abf2 = u_petsc.copy()
+            u_petsc_m1 = u_petsc.copy()
+            e_petsc = u_petsc.copy()
+            e_temp = u_petsc.copy()
+
             if t + dt > finalTime:
                 dt = finalTime - t
 
@@ -498,6 +499,15 @@ class DoubleGlazingPDE:
                 dt = dt * acc  # Don't adapt first step
 
             ksp.reset()
+            
+            lhs.destroy()
+            lhs_old.destroy()
+            rhs.destroy()
+            rhs_temp.destroy()
+            abf2.destroy()
+            u_petsc_m1.destroy()
+            e_petsc.destroy()
+            e_temp.destroy()
 
         # Clean up
         ksp.destroy()
@@ -510,15 +520,6 @@ class DoubleGlazingPDE:
         M_petsc.destroy()
         b_petsc.destroy()
         u_petsc.destroy()
-
-        lhs.destroy()
-        lhs_old.destroy()
-        rhs.destroy()
-        rhs_temp.destroy()
-        abf2.destroy()
-        u_petsc_m1.destroy()
-        e_petsc.destroy()
-        e_temp.destroy()
 
         # Return approximation for finalTime T
         return self.u.vector().get_local()

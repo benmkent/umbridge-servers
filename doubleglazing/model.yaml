@@ -25,4 +25,4 @@ spec:
             memory: 4Gi
           limits:
             cpu: 1
-            memory: 4Gi
+            memory: 8Gi
