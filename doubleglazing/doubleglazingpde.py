@@ -514,6 +514,11 @@ class DoubleGlazingPDE:
         lhs.destroy()
         lhs_old.destroy()
         rhs.destroy()
+        rhs_temp.destroy()
+        abf2.destroy()
+        u_petsc_m1.destroy()
+        e_petsc.destroy()
+        e_temp.destroy()
 
         # Return approximation for finalTime T
         return self.u.vector().get_local()
