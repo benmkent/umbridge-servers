@@ -57,6 +57,7 @@ class DoubleGlazingPDE:
         x = SpatialCoordinate(self.mesh)
         # Define boundary condition
         # ubc = conditional(lt(abs(x[0] - 1.0),DOLFIN_EPS), 1.0, 0.0)
+        #ubc = Expression('abs(x[0]-1.0) < tol ? (1-pow(x[1],4)) : 0.0', tol=DOLFIN_EPS, degree=4)
         ubc = Expression('abs(x[0]-1.0) < tol ? (1-pow(x[1],4)) : 0.0', tol=DOLFIN_EPS, degree=4)
 
         # Dirichlet BC for unit square domain
@@ -75,7 +76,7 @@ class DoubleGlazingPDE:
         if difftype == 'constant':
             diff = Constant(0.1)
         elif difftype == 'parameter':
-            diff = y[0]
+            diff = Constant(y[0])
         elif difftype == 'cookie':
             # Input varcoeffs allows the background diffusion field to be changed
             if varcoeffs is None:
@@ -109,6 +110,7 @@ class DoubleGlazingPDE:
             w = as_vector((2*(x[1])*(1-pow(x[0],2)), -2*(x[0])*(1-pow(x[1],2))))
             a = a + y[1]*inner(w, grad(u)) * v * dx_q
         elif advection == 5:
+            print("Using four recirculating eddies")
             w = as_vector((2*(x[1])*(1-pow(x[0],2)), -2*(x[0])*(1-pow(x[1],2))))
             a = a + y[1]*inner(w, grad(u)) * v * dx_q
 
@@ -118,8 +120,9 @@ class DoubleGlazingPDE:
             for ii in range(4):
                 xc = xlist[ii]
                 yc = ylist[ii]
-                distance = max(abs(x[0] - xc),abs(x[1]-yc))
-                ind_ii = conditional(lt(distance, 0.5), 1.0, 0.0)
+                d1 = abs(x[0] - xc)
+                d2 = abs(x[1] - yc)
+                ind_ii = conditional(lt(d1, 0.5), 1.0, 0.0) * conditional(lt(d2, 0.5), 1.0, 0.0)
                 w = as_vector((4*(x[1]-yc)*(1-4*pow(x[0]-xc,2)), -4*(x[0]-xc)*(1-4*pow(x[1]-yc,2))))
                 a = a + ind_ii*y[2+ii]*inner(w, grad(u)) * v * dx_q
 
@@ -290,7 +293,7 @@ class DoubleGlazingPDE:
         M = assemble(self.m)
         self.bc.apply(A)
         self.bc.apply(b)
-        self.bc.apply(M)
+        #self.bc.apply(M)
 
         print("Solving for y=" + str(self.y))
 
@@ -417,9 +420,9 @@ class DoubleGlazingPDE:
 
         def monitor(ts, step, t, u, u2, enorm):
             print(f"Time = {t:.4g},\t dt = {ts:.4g},\t E = {enorm:.4g},\t acc = {acc:.4g}")
-            # self.u.vector()[:] = u[:]
-            # self.u.rename("u", "label")
-            # vtkfile << (self.u, t)  # Write function u to VTK file
+            self.u.vector()[:] = u[:]
+            self.u.rename("u", "label")
+            vtkfile << (self.u, t)  # Write function u to VTK file
 
         ksp = PETSc.KSP().create()
 
@@ -436,6 +439,7 @@ class DoubleGlazingPDE:
         u_petsc_m1 = u_petsc.copy()
         e_petsc = u_petsc.copy()
         e_temp = u_petsc.copy()
+        b_petsc_t = b_petsc.copy()
 
         ii = 0
         # Timestepping loop.
@@ -457,16 +461,17 @@ class DoubleGlazingPDE:
             M_petsc.mult(u_petsc, rhs)
             A_petsc.mult(u_petsc, rhs_temp)
             rhs.axpy(-0.5 * dt, rhs_temp)
-            rhs.axpy(dt, b_petsc)
+            #rhs.axpy(dt, b_petsc*(1-exp(-(t)/0.1)))
+            rhs.axpy(dt, b_petsc*(1-exp(-(t)/0.1)))
 
             ksp.setOperators(lhs)  # Set the operator
 
             # abf2 = u_petsc + dt * (-1.5 * A_petsc * u_petsc + 0.5 * A_petsc * u_petsc_m1)
             A_petsc.mult(u_petsc, abf2)
             A_petsc.mult(u_petsc_m1, rhs_temp)
-            abf2.axpby(0.5 * (dt / dtold), -(1 + 0.5 * dt / dtold), rhs_temp)
+            abf2.axpby(0.5 * (dt / dtold), -(1 + 0.5 * (dt / dtold)), rhs_temp)
             abf2.axpby(1.0, dt, u_petsc)
-            abf2.axpy(dt, b_petsc)
+            abf2.axpy(dt, b_petsc*(1-exp(-(t)/0.1)))
 
             u_petsc_m1.axpby(1.0, 0.0, u_petsc)
 
@@ -485,7 +490,7 @@ class DoubleGlazingPDE:
             t += dt
 
             # Compute timestep acceleration
-            acc = float(np.power(tol / enorm, 2 / 3))
+            acc = float(np.power(tol / enorm, 1 / 3))
             if acc > 10:
                 acc = 10  # Limit to exponential growth
             monitor(dt, ii, t, u_petsc, abf2, enorm)
