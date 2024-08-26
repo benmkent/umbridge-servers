@@ -490,7 +490,7 @@ class DoubleGlazingPDE:
             t += dt
 
             # Compute timestep acceleration
-            acc = float(np.power(tol / enorm, 1 / 3))
+            acc = float(np.power(tol / (enorm+1e-15), 1 / 3))
             if acc > 10:
                 acc = 10  # Limit to exponential growth
             monitor(dt, ii, t, u_petsc, abf2, enorm)
