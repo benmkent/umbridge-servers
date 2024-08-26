@@ -439,7 +439,6 @@ class DoubleGlazingPDE:
         u_petsc_m1 = u_petsc.copy()
         e_petsc = u_petsc.copy()
         e_temp = u_petsc.copy()
-        b_petsc_t = b_petsc.copy()
 
         ii = 0
         # Timestepping loop.
