@@ -45,7 +45,7 @@ class DoubleGlazingPDE:
         self.mesh = mesh
         self.V = V
 
-    def setupProblem(self, difftype, y, quad_degree=8, varcoeffs=None, advection=0, bcrate=0):
+    def setupProblem(self, difftype, y, quad_degree=8, varcoeffs=None, advection=0, bcrate=0, point=[0.5,-0.5]):
         """
         Set up the variational problem for the PDE.
 
@@ -145,6 +145,7 @@ class DoubleGlazingPDE:
         self.u = u
         self.y = y
         self.bcrate = bcrate
+        self.point = point
 
     def solve(self, directsolver, pctype, tol):
         """
@@ -245,7 +246,7 @@ class DoubleGlazingPDE:
         Returns:
         float: Solution at the point.
         """
-        point = np.array([0.0, -0.5])  # Specify the point where you want to evaluate the function
+        point = np.array(self.point)  # Specify the point where you want to evaluate the function
         u_at_point = self.u(point)
         return u_at_point
 

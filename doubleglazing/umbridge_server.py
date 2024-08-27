@@ -148,7 +148,7 @@ class DoubleGlazingTime(umbridge.Model):
         # Initialize PDE model
         model = DoubleGlazingPDE(config['N'], config['BasisDegree'])
         # Set up cookie problem
-        model.setupProblem('parameter', parameters[0], config['quad_degree'], varcoeffs=config['diffzero'], advection=config['advection'], bcrate=config['bcrate'])
+        model.setupProblem('parameter', parameters[0], config['quad_degree'], varcoeffs=config['diffzero'], advection=config['advection'], bcrate=config['bcrate'], point=config['qoipoint'])
         # Use the custom TR-AB2 solver. Optional solveTime function uses built in PETSC TS solver.
         u = model.solveTimeSimple(config['letol'],config['T'])
         # Compute QoI at finalTime T
@@ -221,6 +221,9 @@ def verifyConfig(config):
 
     if 'bcrate' not in config:
         config['bcrate'] = 0
+
+    if 'qoipoint' not in config:
+        config['qoipoint'] = [0.5,-0.5]
 
     print(config)
     return config
