@@ -45,7 +45,7 @@ class DoubleGlazingPDE:
         self.mesh = mesh
         self.V = V
 
-    def setupProblem(self, difftype, y, quad_degree=8, varcoeffs=None, advection=0):
+    def setupProblem(self, difftype, y, quad_degree=8, varcoeffs=None, advection=0, bcrate=0):
         """
         Set up the variational problem for the PDE.
 
@@ -144,6 +144,7 @@ class DoubleGlazingPDE:
         self.m = m
         self.u = u
         self.y = y
+        self.bcrate = bcrate
 
     def solve(self, directsolver, pctype, tol):
         """
@@ -404,6 +405,8 @@ class DoubleGlazingPDE:
         self.bc.apply(b)
         self.bc.apply(M)
 
+        bcrate = self.bcrate
+
         print("Solving for y=" + str(self.y))
 
         A_petsc = as_backend_type(A).mat()
@@ -459,7 +462,7 @@ class DoubleGlazingPDE:
             A_petsc.mult(u_petsc, rhs_temp)
             rhs.axpy(-0.5 * dt, rhs_temp)
             #rhs.axpy(dt, b_petsc*(1-exp(-(t)/0.1)))
-            rhs.axpy(dt*(1-exp(-(t)/0.1)), b_petsc)
+            rhs.axpy(dt*(1-exp(-(t)/0.1))*cos(2*np.pi*bcrate*t), b_petsc)
             #PETSc.Log.view()
 
             # abf2 = u_petsc + dt * (-1.5 * A_petsc * u_petsc + 0.5 * A_petsc * u_petsc_m1)
@@ -467,7 +470,7 @@ class DoubleGlazingPDE:
             A_petsc.mult(u_petsc_m1, rhs_temp)
             abf2.axpby(0.5 * (dt / dtold), -(1 + 0.5 * (dt / dtold)), rhs_temp)
             abf2.axpby(1.0, dt, u_petsc)
-            abf2.axpy(dt*(1-exp(-(t)/0.1)), b_petsc)
+            abf2.axpy(dt*(1-exp(-(t)/0.1))*cos(2*np.pi*bcrate*t), b_petsc)
             u_petsc_m1.axpby(1.0, 0.0, u_petsc)
 
             print("Solve KSP")
