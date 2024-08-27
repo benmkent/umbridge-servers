@@ -392,9 +392,9 @@ class DoubleGlazingPDE:
         Returns:
             numpy.ndarray: The local part of the solution vector.
         """
-        # PETSc.Options().setValue('-log_view', '')
-        # PETSc.Options().setValue('-malloc_view', '')
-        # PETSc.Log.begin()
+        PETSc.Options().setValue('-log_view', '')
+        PETSc.Options().setValue('-malloc_view', '')
+        PETSc.Log.begin()
 
         # Compute solution
         A = assemble(self.a)
@@ -410,21 +410,16 @@ class DoubleGlazingPDE:
         M_petsc = as_backend_type(M).mat()
         b_petsc = as_backend_type(b).vec()
         u_petsc = as_backend_type(self.u.vector()).vec()
-        A = None
-        b = None
-        M = None
         gc.collect()
 
         # Output file name (with .pvd extension)
         # vtkfile = File("output" + str(tol) + ".pvd")
 
         def monitor(ts, step, t, u, u2, enorm):
-            print(f"Time = {t:.4g},\t dt = {ts:.4g},\t E = {enorm:.4g},\t acc = {acc:.4g}")
+            print(f"{step}:\t Time = {t:.4g},\t dt = {ts:.4g},\t E = {enorm:.4g},\t acc = {acc:.4g}")
             # self.u.vector()[:] = u[:]
             # self.u.rename("u", "label")
             # vtkfile << (self.u, t)  # Write function u to VTK file
-
-        ksp = PETSc.KSP().create()
 
         # Initialise
         t = 0.0
@@ -435,22 +430,24 @@ class DoubleGlazingPDE:
         # Timestepping loop.
         # Timestep dt is adapted using TR-AB2 pair and the Milne device to estimate local error.
         # Solution is returned at finalTime
+        ksp = PETSc.KSP().create()
+        ksp.reset()
+        #ksp.setType(PETSc.KSP.Type.PREONLY)
+        #ksp.getPC().setType(PETSc.PC.Type.LU)
+        lhs = A_petsc.copy()
+        rhs = u_petsc.copy()
+        rhs_temp = u_petsc.copy()
+        abf2 = u_petsc.copy()
+        u_petsc_m1 = u_petsc.copy()
+        e_petsc = u_petsc.copy()
+        e_temp = u_petsc.copy()
+        
         while t < finalTime:
-
-            lhs = A_petsc.copy()
-            lhs_old = A_petsc.copy()
-            rhs = u_petsc.copy()
-            rhs_temp = u_petsc.copy()
-            abf2 = u_petsc.copy()
-            u_petsc_m1 = u_petsc.copy()
-            e_petsc = u_petsc.copy()
-            e_temp = u_petsc.copy()
-
             if t + dt > finalTime:
                 dt = finalTime - t
+            #PETSc.Log.view()
 
             lhs.zeroEntries()
-            lhs_old.zeroEntries()
             rhs.zeroEntries()
 
             # lhs_old = M_petsc + 0.5*dt*A_petsc
@@ -462,21 +459,22 @@ class DoubleGlazingPDE:
             A_petsc.mult(u_petsc, rhs_temp)
             rhs.axpy(-0.5 * dt, rhs_temp)
             #rhs.axpy(dt, b_petsc*(1-exp(-(t)/0.1)))
-            rhs.axpy(dt, b_petsc*(1-exp(-(t)/0.1)))
-
-            ksp.setOperators(lhs)  # Set the operator
+            rhs.axpy(dt*(1-exp(-(t)/0.1)), b_petsc)
+            #PETSc.Log.view()
 
             # abf2 = u_petsc + dt * (-1.5 * A_petsc * u_petsc + 0.5 * A_petsc * u_petsc_m1)
             A_petsc.mult(u_petsc, abf2)
             A_petsc.mult(u_petsc_m1, rhs_temp)
             abf2.axpby(0.5 * (dt / dtold), -(1 + 0.5 * (dt / dtold)), rhs_temp)
             abf2.axpby(1.0, dt, u_petsc)
-            abf2.axpy(dt, b_petsc*(1-exp(-(t)/0.1)))
-
+            abf2.axpy(dt*(1-exp(-(t)/0.1)), b_petsc)
             u_petsc_m1.axpby(1.0, 0.0, u_petsc)
 
+            print("Solve KSP")
             # Solve linear system for timestep
+            ksp.setOperators(lhs)  # Set the operator
             ksp.solve(rhs, u_petsc)
+            ksp.reset()
 
             # print(u_petsc[:])
 
@@ -498,21 +496,16 @@ class DoubleGlazingPDE:
             if ii != 1:
                 dt = dt * acc  # Don't adapt first step
 
-            ksp.reset()
-            
-            lhs.destroy()
-            lhs_old.destroy()
-            rhs.destroy()
-            rhs_temp.destroy()
-            abf2.destroy()
-            u_petsc_m1.destroy()
-            e_petsc.destroy()
-            e_temp.destroy()
-
         # Clean up
-        ksp.destroy()
-
         self.u.vector()[:] = u_petsc[:]
+        lhs.destroy()
+        rhs.destroy()
+        rhs_temp.destroy()
+        abf2.destroy()
+        u_petsc_m1.destroy()
+        e_petsc.destroy()
+        e_temp.destroy()
+        ksp.destroy()
 
         PETScOptions.clear()
 
@@ -520,6 +513,9 @@ class DoubleGlazingPDE:
         M_petsc.destroy()
         b_petsc.destroy()
         u_petsc.destroy()
+
+        PETSc.Log.view()
+        print("Number of iterations:"+str(ii))
 
         # Return approximation for finalTime T
         return self.u.vector().get_local()
