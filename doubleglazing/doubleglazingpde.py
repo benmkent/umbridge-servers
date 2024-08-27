@@ -462,7 +462,7 @@ class DoubleGlazingPDE:
             A_petsc.mult(u_petsc, rhs_temp)
             rhs.axpy(-0.5 * dt, rhs_temp)
             #rhs.axpy(dt, b_petsc*(1-exp(-(t)/0.1)))
-            rhs.axpy(dt*(1-exp(-(t)/0.1))*cos(2*np.pi*bcrate*t), b_petsc)
+            rhs.axpy(dt*(1-exp(-(t)/0.1))*(1+0.5*sin(2*np.pi*bcrate*t)), b_petsc)
             #PETSc.Log.view()
 
             # abf2 = u_petsc + dt * (-1.5 * A_petsc * u_petsc + 0.5 * A_petsc * u_petsc_m1)
@@ -470,7 +470,7 @@ class DoubleGlazingPDE:
             A_petsc.mult(u_petsc_m1, rhs_temp)
             abf2.axpby(0.5 * (dt / dtold), -(1 + 0.5 * (dt / dtold)), rhs_temp)
             abf2.axpby(1.0, dt, u_petsc)
-            abf2.axpy(dt*(1-exp(-(t)/0.1))*cos(2*np.pi*bcrate*t), b_petsc)
+            abf2.axpy(dt*(1-exp(-(t)/0.1))*(1+0.5*sin(2*np.pi*bcrate*t)), b_petsc)
             u_petsc_m1.axpby(1.0, 0.0, u_petsc)
 
             print("Solve KSP")
