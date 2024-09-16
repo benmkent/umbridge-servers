@@ -334,7 +334,7 @@ class DoubleGlazingPDE:
             print(f"Time Step {step}: Time = {t}")
             self.u.vector()[:] = u[:]
             self.u.rename("u", "label")
-            vtkfile << (self.u, t)  # Write function u to VTK file
+            #vtkfile << (self.u, t)  # Write function u to VTK file
 
         # Set the monitor function for the TS solver
         ts.setMonitor(monitor)
