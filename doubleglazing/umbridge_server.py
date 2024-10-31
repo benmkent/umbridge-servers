@@ -56,8 +56,8 @@ class DoubleGlazingForward(umbridge.Model):
         # Fill missing entries in config with default values
         config = verifyConfig(config)
         output_dir = './outputdata'
-        configstring = json.dumps(config, sort_keys=True)+str(parameters[0])
-        configstring=str(hash(configstring))
+        configstring = json.dumps(config, sort_keys=True, indent=None, separators=(',', ':'))+''.join(map(str, parameters[0]))
+        configstring=configstring+'elliptic'
         filename = output_dir+'/'+configstring+'.csv'
         if os.path.exists(filename):
             print("Opening file "+configstring+"\n")
@@ -162,8 +162,8 @@ class DoubleGlazingTime(umbridge.Model):
         config = verifyConfig(config)
         print(config)
         output_dir = './outputdata'
-        configstring = json.dumps(config, sort_keys=True)+str(parameters[0])
-        configstring=str(hash(configstring+'parabolic'))
+        configstring = json.dumps(config, sort_keys=True, indent=None, separators=(',', ':'))+''.join(map(str, parameters[0]))
+        configstring=configstring+'parabolic'
         filename = output_dir+'/'+configstring+'.csv'
         if os.path.exists(filename):
             print("Opening file "+configstring+"\n")
@@ -177,12 +177,13 @@ class DoubleGlazingTime(umbridge.Model):
             # Use the custom TR-AB2 solver. Optional solveTime function uses built in PETSC TS solver.
             u = model.solveTimeSimple(config['letol'],config['T'])
             # Compute QoI at finalTime T
-            pointval = model.computepointqoi()
+            q = model.computepointqoi()
 
             with open(filename, 'w') as file:
                 file.write(str(q))
                 print("Writing file "+configstring+"\n")
 
+        pointval = q
         # Return QoI
         return [[pointval]]
 
