@@ -57,7 +57,7 @@ class DoubleGlazingForward(umbridge.Model):
         config = verifyConfig(config)
         output_dir = './outputdata'
         configstring = json.dumps(config, sort_keys=True)+str(parameters[0])
-        configstring=hash(configstring)
+        configstring=str(hash(configstring))
         filename = output_dir+'/'+configstring+'.csv'
         if os.path.exists(filename):
             print("Opening file "+configstring+"\n")
@@ -161,14 +161,28 @@ class DoubleGlazingTime(umbridge.Model):
         # Verfiy config and fills in empty keys.
         config = verifyConfig(config)
         print(config)
-        # Initialize PDE model
-        model = DoubleGlazingPDE(config['N'], config['BasisDegree'])
-        # Set up cookie problem
-        model.setupProblem('parameter', parameters[0], config['quad_degree'], varcoeffs=config['diffzero'], advection=config['advection'], bcrate=config['bcrate'], point=config['qoipoint'])
-        # Use the custom TR-AB2 solver. Optional solveTime function uses built in PETSC TS solver.
-        u = model.solveTimeSimple(config['letol'],config['T'])
-        # Compute QoI at finalTime T
-        pointval = model.computepointqoi()
+        output_dir = './outputdata'
+        configstring = json.dumps(config, sort_keys=True)+str(parameters[0])
+        configstring=str(hash(configstring+'parabolic'))
+        filename = output_dir+'/'+configstring+'.csv'
+        if os.path.exists(filename):
+            print("Opening file "+configstring+"\n")
+            with open(filename, 'r') as file:
+                q = float(file.read())
+        else:
+            # Initialize PDE model
+            model = DoubleGlazingPDE(config['N'], config['BasisDegree'])
+            # Set up cookie problem
+            model.setupProblem('parameter', parameters[0], config['quad_degree'], varcoeffs=config['diffzero'], advection=config['advection'], bcrate=config['bcrate'], point=config['qoipoint'])
+            # Use the custom TR-AB2 solver. Optional solveTime function uses built in PETSC TS solver.
+            u = model.solveTimeSimple(config['letol'],config['T'])
+            # Compute QoI at finalTime T
+            pointval = model.computepointqoi()
+
+            with open(filename, 'w') as file:
+                file.write(str(q))
+                print("Writing file "+configstring+"\n")
+
         # Return QoI
         return [[pointval]]
 
