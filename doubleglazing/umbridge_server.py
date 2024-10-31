@@ -56,9 +56,11 @@ class DoubleGlazingForward(umbridge.Model):
         # Fill missing entries in config with default values
         config = verifyConfig(config)
         output_dir = './outputdata'
-        configstring = json.dumps(config, sort_keys=True)
+        configstring = json.dumps(config, sort_keys=True)+str(parameters[0])
+        configstring=hash(configstring)
         filename = output_dir+'/'+configstring+'.csv'
         if os.path.exists(filename):
+            print("Opening file "+configstring+"\n")
             with open(filename, 'r') as file:
                 q = float(file.read())
         else:
@@ -71,6 +73,7 @@ class DoubleGlazingForward(umbridge.Model):
             q = model.computepointqoi()
             with open(filename, 'w') as file:
                 file.write(str(q))
+                print("Writing file "+configstring+"\n")
         # Compute quantity of interest (QoI) on solution
         pointval = q
 
