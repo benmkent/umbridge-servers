@@ -1,4 +1,6 @@
 import umbridge
+import json
+import os
 from doubleglazingpde import DoubleGlazingPDE
 from dolfin import *
 
@@ -53,14 +55,25 @@ class DoubleGlazingForward(umbridge.Model):
         """
         # Fill missing entries in config with default values
         config = verifyConfig(config)
-        # Initialize PDE model
-        model = DoubleGlazingPDE(config['N'], config['BasisDegree'])
-        # Set up cookie problem
-        model.setupProblem('parameter', parameters[0], config['quad_degree'], varcoeffs=config['diffzero'])
-        # Solve linear system with preconditioning pc and solver tolerance tol
-        model.solve(config['directsolver'], config['pc'], config['tol'])
+        output_dir = './outputdata'
+        configstring = json.dumps(config, sort_keys=True)
+        filename = output_dir+'/'+configstring+'.csv'
+        if os.path.exists(filename):
+            with open(filename, 'r') as file:
+                q = float(file.read())
+        else:
+            # Initialize PDE model
+            model = DoubleGlazingPDE(config['N'], config['BasisDegree'])
+            # Set up cookie problem
+            model.setupProblem('parameter', parameters[0], config['quad_degree'], varcoeffs=config['diffzero'])
+            # Solve linear system with preconditioning pc and solver tolerance tol
+            model.solve(config['directsolver'], config['pc'], config['tol'])
+            q = model.computepointqoi()
+            with open(filename, 'w') as file:
+                file.write(str(q))
         # Compute quantity of interest (QoI) on solution
-        pointval = model.computepointqoi()
+        pointval = q
+
         # Return QoI
         return [[pointval]]
 
