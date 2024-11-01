@@ -57,7 +57,7 @@ class DoubleGlazingForward(umbridge.Model):
         config = verifyConfig(config)
         output_dir = './outputdata'
         configstring = json.dumps(config, sort_keys=True, indent=None, separators=(',', ':'))+''.join(map(str, parameters[0]))
-        configstring=configstring+'elliptic'
+        configstring=str(hash(configstring))+'elliptic'
         filename = output_dir+'/'+configstring+'.csv'
         if os.path.exists(filename):
             print("Opening file "+configstring+"\n")
@@ -163,7 +163,7 @@ class DoubleGlazingTime(umbridge.Model):
         print(config)
         output_dir = './outputdata'
         configstring = json.dumps(config, sort_keys=True, indent=None, separators=(',', ':'))+''.join(map(str, parameters[0]))
-        configstring=configstring+'parabolic'
+        configstring=str(hash(configstring))+'parabolic'
         filename = output_dir+'/'+configstring+'.csv'
         if os.path.exists(filename):
             print("Opening file "+configstring+"\n")
