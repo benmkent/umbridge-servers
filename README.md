@@ -42,7 +42,7 @@ spec:
     app: openfoam
 ```
 Ingress specifies how this service is reached.
-The ingress has a `rule` identifying paths `/openfoam' that connect to the Kubernetes access port.
+The ingress has a `rule` identifying paths `/openfoam` that connect to the Kubernetes access port.
 The `http` message is passed on, with `/openfoam` stripped from the message so that it can be properly parsed by UM-BRIDGE.
 ```
 # Ingress for OpenFOAM application
