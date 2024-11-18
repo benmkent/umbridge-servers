@@ -1,5 +1,6 @@
 import fluidfoam as fluidfoam
 from scipy import interpolate
+from numpy import linspace
 import os
 import re
 import argparse
@@ -31,6 +32,28 @@ def extract_reattachment_point_from_dataseries(X,Tx):
         x = 0.0
 
     return x
+
+def extract_cp(filename, final_time, xmin, xmax, n):
+    X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
+
+    # Find latestTime (may not be final_time if converges early)
+    largest_subdir = get_largest_number_subdirectory(filename)
+
+    Tx,Ty,Tz = fluidfoam.readfield(filename,name="wallShearStress",time_name=largest_subdir,boundary="bottomWall")
+    # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
+
+    cp = extract_cp_from_dataseries(X,Tx, xmin, xmax, n)
+
+    return (cp, X, Tx)
+
+def extract_cp_from_dataseries(X,Tx,xmin,xmax,n):
+
+    spline = interpolate.CubicSpline(X,Tx, extrapolate=False)
+
+    xeval = linspace(xmin, xmax, n)
+    cp_at_x = spline(xeval)
+
+    return [cp_at_x]
 
 def get_largest_number_subdirectory(path):
     # List all subdirectories in the specified path
