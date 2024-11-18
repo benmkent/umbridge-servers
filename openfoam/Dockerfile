@@ -1,10 +1,8 @@
 FROM ubuntu:jammy
 
 RUN apt update
-RUN apt-get install ca-certificates
-RUN apt update
 
-RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget gmsh
+RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget gmsh gnupg
 # Add the repository
 # RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
 WORKDIR /
