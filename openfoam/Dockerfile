@@ -3,7 +3,8 @@ FROM ubuntu:latest
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget gmsh
 # Add the repository
-RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
+# RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
+RUN bash ./addopenfoamrepo.sh
 RUN apt-get install -y openfoam2406-dev
 
 RUN pip3 install --break-system-packages umbridge numpy fluidfoam
