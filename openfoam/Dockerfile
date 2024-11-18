@@ -1,22 +1,19 @@
-FROM ubuntu:jammy
+FROM ubuntu:latest
 
 RUN apt update
 
 RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget gmsh gnupg
 # Add the repository
-# RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
-RUN sh -c "wget -O - https://dl.openfoam.org/gpg.key > /etc/apt/trusted.gpg.d/openfoam.asc"
-RUN add-apt-repository http://dl.openfoam.org/ubuntu
 RUN apt update
-RUN apt -y install openfoam12
+RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
+RUN apt-get install -y openfoam2406-dev
 
 WORKDIR /
 # Copy files and subdirectories (i.e. the openfoam setup)
 COPY . .
 
-# Set up openfoam
-RUN bash ./addopenfoamrepo.sh
-RUN apt-get install -y openfoam2406-dev
+
+
 # Set up python environment
 RUN pip3 install --break-system-packages umbridge numpy fluidfoam
 # Expose port for umbridge
