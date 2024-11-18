@@ -4,20 +4,21 @@ RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget gmsh
 # Add the repository
 # RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
+WORKDIR /
+# Copy files and subdirectories (i.e. the openfoam setup)
+COPY . .
+
+# Set up openfoam
 RUN bash ./addopenfoamrepo.sh
 RUN apt-get install -y openfoam2406-dev
-
+# Set up python environment
 RUN pip3 install --break-system-packages umbridge numpy fluidfoam
-
+# Expose port for umbridge
 EXPOSE 4242
 
 RUN apt update
 
-WORKDIR /
 
-
-# Copy files and subdirectories (i.e. the openfoam setup)
-COPY . .
 
 # Make sure we build the jetNasaHump tool
 RUN openfoam2406 wclean ./jetNasaHump
