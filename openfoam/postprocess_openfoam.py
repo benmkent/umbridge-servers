@@ -33,7 +33,7 @@ def extract_reattachment_point_from_dataseries(X,Tx):
 
     return x
 
-def extract_cf(filename, final_time, xmin, xmax, n):
+def extract_cf(filename, final_time, xmin, xmax, n, rhoinf, uinf):
     X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
 
     # Find latestTime (may not be final_time if converges early)
@@ -53,6 +53,27 @@ def extract_cf_from_dataseries(X,Tx,xmin,xmax,n, rhoinf, uinf):
     cf_at_x = spline(xeval) / (0.5*rhoinf*uinf^2)
 
     return [cf_at_x]
+
+def extract_cp(filename, final_time, xmin, xmax, n, rhoinf, uinf):
+    X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
+
+    # Find latestTime (may not be final_time if converges early)
+    largest_subdir = get_largest_number_subdirectory(filename)
+
+    P = fluidfoam.readfield(filename,name="nearWallFields",time_name=largest_subdir,boundary="bottomWall")
+    # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
+
+    cp = extract_cp_from_dataseries(X,P, xmin, xmax, n, rhoinf, uinf)
+    return (extract_cp_from_dataseries, X, Tx)
+
+def extract_cp_from_dataseries(X,Tx,xmin,xmax,n, rhoinf, uinf):
+
+    spline = interpolate.CubicSpline(X,Tx, extrapolate=False)
+
+    xeval = linspace(xmin, xmax, n)
+    cp_at_x = spline(xeval) / (0.5*rhoinf*uinf^2)
+
+    return [cp_at_x]
 
 def get_largest_number_subdirectory(path):
     # List all subdirectories in the specified path
