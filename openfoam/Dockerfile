@@ -5,8 +5,8 @@ RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget gmsh gnupg
 # Add the repository
 RUN apt update
-RUN wget https://dl.openfoam.com/add-debian-repo.sh
-RUN wget https://dl.openfoam.com/add-debian-repo.sh | bash
+RUN curl https://dl.openfoam.com/add-debian-repo.sh
+RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
 RUN apt-get install -y openfoam2406-dev
 
 WORKDIR /
