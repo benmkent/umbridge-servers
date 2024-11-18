@@ -5,6 +5,11 @@ RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget gmsh gnupg
 # Add the repository
 # RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
+RUN sh -c "wget -O - https://dl.openfoam.org/gpg.key > /etc/apt/trusted.gpg.d/openfoam.asc"
+RUN add-apt-repository http://dl.openfoam.org/ubuntu
+RUN apt update
+RUN apt -y install openfoam12
+
 WORKDIR /
 # Copy files and subdirectories (i.e. the openfoam setup)
 COPY . .
