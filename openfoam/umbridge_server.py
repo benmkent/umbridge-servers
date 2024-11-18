@@ -4,6 +4,7 @@ import sys
 import csv
 import numpy as np
 from postprocess_openfoam import extract_reattachment_point, extract_reattachment_point_from_dataseries
+from postprocess_openfoam import extract_cf, extract_cf_from_dataseries
 
 
 class ReattachmentModel(umbridge.Model):
@@ -132,10 +133,10 @@ class ReattachmentModel(umbridge.Model):
     def supports_evaluate(self):
         return True
 
-class CpModel(umbridge.Model):
+class CfModel(umbridge.Model):
 
     def __init__(self):
-        super().__init__("forwardcp")
+        super().__init__("forwardcf")
 
     def get_input_sizes(self, config):
         return [2]
@@ -240,7 +241,7 @@ class CpModel(umbridge.Model):
                             X.append(row[0])  # First column
                             Tx.append(row[1])  # Second column
                 
-                cp = extract_cp_from_dataseries(X,Tx,xmin,xmax,ninterp)
+                cf = extract_cf_from_dataseries(X,Tx,xmin,xmax,ninterp)
             else:
                 # Set up boundary conditions
                 print("Enforcing boundary conditions jetNasaHump")
@@ -252,7 +253,7 @@ class CpModel(umbridge.Model):
 
                 # Extract quantity of interest (reattachment point)
                 print("Extract reattachment point")
-                (cp, X, Tx) = extract_cp(tempcasefile, 5000, xmin, xmax, ninterp)
+                (cf, X, Tx) = extract_cf(tempcasefile, 5000, xmin, xmax, ninterp)
 
                 # Step 3: Stack the vectors as columns
                 wall_shear = np.column_stack((X, Tx))
@@ -268,14 +269,14 @@ class CpModel(umbridge.Model):
             print(f"An error occurred: {e}")
             raise Exception("A generic error occurred.")
         
-        return [[cp]]
+        return [[cf]]
 
     def supports_evaluate(self):
         return True
 
 
 reattachment_model = ReattachmentModel()
-cp_model = CpModel()
+cf_model = CfModel()
 
 
 def replace_jet_mag(input_file, output_file, replacement_value):
@@ -357,4 +358,4 @@ def replace_inflow_mag(input_file, output_file, replacement_value):
     print(f"Replaced 'INFLOW_MAG' with '{replacement_value}' in '{input_file}'. Output saved to '{output_file}'.")
 
 
-umbridge.serve_models([reattachment_model,cp_model], 4242)
+umbridge.serve_models([reattachment_model,cf_model], 4242)
