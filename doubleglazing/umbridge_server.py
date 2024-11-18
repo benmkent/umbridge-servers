@@ -56,9 +56,11 @@ class DoubleGlazingForward(umbridge.Model):
         # Fill missing entries in config with default values
         config = verifyConfig(config)
         output_dir = './outputdata'
-        configstring = json.dumps(config, sort_keys=True)
+        configstring = json.dumps(config, sort_keys=True, indent=None, separators=(',', ':'))+''.join(map(str, parameters[0]))
+        configstring=str(hash(configstring))+'elliptic'
         filename = output_dir+'/'+configstring+'.csv'
         if os.path.exists(filename):
+            print("Opening file "+configstring+"\n")
             with open(filename, 'r') as file:
                 q = float(file.read())
         else:
@@ -71,6 +73,7 @@ class DoubleGlazingForward(umbridge.Model):
             q = model.computepointqoi()
             with open(filename, 'w') as file:
                 file.write(str(q))
+                print("Writing file "+configstring+"\n")
         # Compute quantity of interest (QoI) on solution
         pointval = q
 
@@ -158,14 +161,29 @@ class DoubleGlazingTime(umbridge.Model):
         # Verfiy config and fills in empty keys.
         config = verifyConfig(config)
         print(config)
-        # Initialize PDE model
-        model = DoubleGlazingPDE(config['N'], config['BasisDegree'])
-        # Set up cookie problem
-        model.setupProblem('parameter', parameters[0], config['quad_degree'], varcoeffs=config['diffzero'], advection=config['advection'], bcrate=config['bcrate'], point=config['qoipoint'])
-        # Use the custom TR-AB2 solver. Optional solveTime function uses built in PETSC TS solver.
-        u = model.solveTimeSimple(config['letol'],config['T'])
-        # Compute QoI at finalTime T
-        pointval = model.computepointqoi()
+        output_dir = './outputdata'
+        configstring = json.dumps(config, sort_keys=True, indent=None, separators=(',', ':'))+''.join(map(str, parameters[0]))
+        configstring=str(hash(configstring))+'parabolic'
+        filename = output_dir+'/'+configstring+'.csv'
+        if os.path.exists(filename):
+            print("Opening file "+configstring+"\n")
+            with open(filename, 'r') as file:
+                q = float(file.read())
+        else:
+            # Initialize PDE model
+            model = DoubleGlazingPDE(config['N'], config['BasisDegree'])
+            # Set up cookie problem
+            model.setupProblem('parameter', parameters[0], config['quad_degree'], varcoeffs=config['diffzero'], advection=config['advection'], bcrate=config['bcrate'], point=config['qoipoint'])
+            # Use the custom TR-AB2 solver. Optional solveTime function uses built in PETSC TS solver.
+            u = model.solveTimeSimple(config['letol'],config['T'])
+            # Compute QoI at finalTime T
+            q = model.computepointqoi()
+
+            with open(filename, 'w') as file:
+                file.write(str(q))
+                print("Writing file "+configstring+"\n")
+
+        pointval = q
         # Return QoI
         return [[pointval]]
 
