@@ -11,7 +11,7 @@
 # -----------------------------------------------------------------------------
 
 # Input locations
-pubkey_url="https://dl.openfoam.com/pubkey.gpg"
+pubkey_url="http://dl.openfoam.com/pubkey.gpg"
 repos_url="https://dl.openfoam.com/repos/deb"
 
 # Output names for trusted.gpg.d and sources.list.d
