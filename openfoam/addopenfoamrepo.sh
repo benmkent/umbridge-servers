@@ -137,10 +137,7 @@ echo -n "Importing openfoam gpg key... "
 if [ -n "$have_curl" ]
 then
     curl -L -k -sS "${pubkey_url}"
-    curl -L -k -sS "${pubkey_url}" 2>/dev/null | gpg --dearmor > "$apt_pubkey_path"
-    curl -k -sS "${pubkey_url}" 2>/dev/null |
-    gpg --dearmor |
-    tee "$apt_pubkey_path" > /dev/null 
+    cat openfoam.pkey | gpg --dearmor > "$apt_pubkey_path"
 else
     wget --no-check-certificate -O - -nv "${pubkey_url}" 2>/dev/null | gpg --dearmor > "$apt_pubkey_path"
 fi
