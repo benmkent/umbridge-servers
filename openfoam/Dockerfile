@@ -13,7 +13,7 @@ WORKDIR /
 # Copy files and subdirectories (i.e. the openfoam setup)
 COPY . .
 
-RUN ./addopenfoamrepo.sh
+RUN bash addopenfoamrepo.sh
 RUN apt update
 RUN apt-get install -y openfoam2406-dev
 
