@@ -388,7 +388,7 @@ class CpModel(umbridge.Model):
                             X.append(row[0])  # First column
                             Tx.append(row[1])  # Second column
                 
-                cf = extract_cp_from_dataseries(X,Tx,xmin,xmax,ninterp, rhoinf, uinf))
+                cf = extract_cp_from_dataseries(X,Tx,xmin,xmax,ninterp, rhoinf, uinf)
             else:
                 # Set up boundary conditions
                 print("Enforcing boundary conditions jetNasaHump")
@@ -400,7 +400,7 @@ class CpModel(umbridge.Model):
 
                 # Extract quantity of interest (reattachment point)
                 print("Extract reattachment point")
-                (cf, X, Tx) = extract_cp(tempcasefile, 5000, xmin, xmax, ninterp, rhoinf, uinf))
+                (cf, X, Tx) = extract_cp(tempcasefile, 5000, xmin, xmax, ninterp, rhoinf, uinf)
 
                 # Step 3: Stack the vectors as columns
                 wall_shear = np.column_stack((X, Tx))
