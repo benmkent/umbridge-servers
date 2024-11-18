@@ -139,7 +139,7 @@ then
     curl -L -k "${pubkey_url}" 2>/dev/null | gpg --dearmor > "$apt_pubkey_path"
     curl -k "${pubkey_url}" 2>/dev/null |
     gpg --dearmor |
-    sudo tee "$apt_pubkey_path" > /dev/null 
+    tee "$apt_pubkey_path" > /dev/null 
 else
     wget --no-check-certificate -O - -nv "${pubkey_url}" 2>/dev/null | gpg --dearmor > "$apt_pubkey_path"
 fi
