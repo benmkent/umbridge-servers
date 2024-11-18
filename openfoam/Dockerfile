@@ -2,7 +2,8 @@ FROM ubuntu:latest
 
 RUN apt update
 
-RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget gmsh gnupg
+RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget gmsh gnupg ca-certificates
+
 # Add the repository
 RUN apt update
 # RUN curl https://dl.openfoam.com/add-debian-repo.sh
