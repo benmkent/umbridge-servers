@@ -5,14 +5,17 @@ RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget gmsh gnupg
 # Add the repository
 RUN apt update
-RUN curl https://dl.openfoam.com/add-debian-repo.sh
-RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
-RUN apt-get install -y openfoam2406-dev
+# RUN curl https://dl.openfoam.com/add-debian-repo.sh
+# RUN curl https://dl.openfoam.com/add-debian-repo.sh | bash
+# RUN apt-get install -y openfoam2406-dev
 
 WORKDIR /
 # Copy files and subdirectories (i.e. the openfoam setup)
 COPY . .
 
+RUN ./addopenfoamrepo.sh
+RUN apt update
+RUN apt-get install -y openfoam2406-dev
 
 
 # Set up python environment
