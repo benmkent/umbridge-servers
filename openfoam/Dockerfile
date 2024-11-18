@@ -2,7 +2,7 @@ FROM ubuntu:latest
 
 RUN apt update
 
-RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git curl wget gmsh gnupg ca-certificates
+RUN DEBIAN_FRONTEND=noninteractive apt install -y bash python3-pip git openssl curl wget gmsh gnupg ca-certificates
 
 # Add the repository
 RUN apt update
