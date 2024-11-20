@@ -270,7 +270,7 @@ class CfModel(umbridge.Model):
             print(f"An error occurred: {e}")
             raise Exception("A generic error occurred.", file=sys.stdout, flush=True)
         
-        return [cf]
+        return [cf.tolist()]
 
     def supports_evaluate(self):
         return True
@@ -413,9 +413,7 @@ class CpModel(umbridge.Model):
             print(f"An error occurred: {e}", file=sys.stdout, flush=True)
             raise Exception("A generic error occurred.")
         
-        print(cp)
-        print([cp])
-        return [cp]
+        return [cp.tolist()]
 
     def supports_evaluate(self):
         return True
