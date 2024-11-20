@@ -262,8 +262,6 @@ class CfModel(umbridge.Model):
                 wall_shear = np.column_stack((X, Tx))
                 np.savetxt(filename, wall_shear, fmt='%f')
 
-            print("Reattachment point: " + str(x))
-
             # Clean up
             print("Clean up temporary case file")
             os.system('rm -r ' + tempcasefile)
@@ -405,8 +403,6 @@ class CpModel(umbridge.Model):
                 # Step 3: Stack the vectors as columns
                 wall_shear = np.column_stack((X, Tx))
                 np.savetxt(filename, wall_shear, fmt='%f')
-
-            print("Reattachment point: " + str(x))
 
             # Clean up
             print("Clean up temporary case file")
