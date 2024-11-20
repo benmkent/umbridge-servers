@@ -47,7 +47,7 @@ def extract_cf(filename, final_time, xmin, xmax, n, rhoinf, uinf):
 
 def extract_cf_from_dataseries(X,Tx,xmin,xmax,n, rhoinf, uinf):
 
-    spline = interpolate.CubicSpline(X,Tx, extrapolate=False)
+    spline = interpolate.CubicSpline(X,Tx, extrapolate=True)
 
     xeval = linspace(xmin, xmax, n)
     cf_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
@@ -68,7 +68,7 @@ def extract_cp(filename, final_time, xmin, xmax, n, rhoinf, uinf):
 
 def extract_cp_from_dataseries(X,Tx,xmin,xmax,n, rhoinf, uinf):
 
-    spline = interpolate.CubicSpline(X,Tx, extrapolate=False)
+    spline = interpolate.CubicSpline(X,Tx, extrapolate=True)
 
     xeval = linspace(xmin, xmax, n)
     cp_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
