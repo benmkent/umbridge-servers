@@ -60,7 +60,7 @@ def extract_cp(filename, final_time, xmin, xmax, n, rhoinf, uinf):
     # Find latestTime (may not be final_time if converges early)
     largest_subdir = get_largest_number_subdirectory(filename)
 
-    P = fluidfoam.readfield(filename,name="nearWallFields",time_name=largest_subdir,boundary="bottomWall")
+    P = fluidfoam.readfield(filename,name="pWall",time_name=largest_subdir,boundary="bottomWall")
     # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
 
     cp = extract_cp_from_dataseries(X,P, xmin, xmax, n, rhoinf, uinf)

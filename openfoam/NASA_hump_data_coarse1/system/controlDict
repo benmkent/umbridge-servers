@@ -100,14 +100,13 @@ nearWallFields1
     libs     ("libfieldFunctionObjects.so");
     fields
     (
-        (p p)
+        (p pWall)
     );
     patches  ("bottomWall");
-    distance        0.01;
+    distance        0;
 
     outputControl outputTime;
 }
-
 // turbulenceFields1
 // {
 //     type    turbulenceFields;
