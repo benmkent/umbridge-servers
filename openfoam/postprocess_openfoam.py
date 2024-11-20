@@ -64,7 +64,7 @@ def extract_cp(filename, final_time, xmin, xmax, n, rhoinf, uinf):
     # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
 
     cp = extract_cp_from_dataseries(X,P, xmin, xmax, n, rhoinf, uinf)
-    return (extract_cp_from_dataseries, X, Tx)
+    return (cp, X, P)
 
 def extract_cp_from_dataseries(X,Tx,xmin,xmax,n, rhoinf, uinf):
 
