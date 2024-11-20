@@ -25,19 +25,19 @@ class ReattachmentModel(umbridge.Model):
             # Decide on fidelity
             if config['Fidelity'] == 0:
                 casefile = "./NASA_hump_data_coarse4"
-                print("Selecting fidelity 0")
+                print("Selecting fidelity 0", file=sys.stdout, flush=True)
             elif config['Fidelity'] == 1:
                 casefile = "./NASA_hump_data_coarse3"
-                print("Selecting fidelity 1")
+                print("Selecting fidelity 1", file=sys.stdout, flush=True)
             elif config['Fidelity'] == 2:
                 casefile = "./NASA_hump_data_coarse2"
-                print("Selecting fidelity 2")
+                print("Selecting fidelity 2", file=sys.stdout, flush=True)
             elif config['Fidelity'] == 3:
                 casefile = "./NASA_hump_data_coarse1"
-                print("Selecting fidelity 3")
+                print("Selecting fidelity 3", file=sys.stdout, flush=True)
             elif config['Fidelity'] == 4:
                 casefile = "./NASA_hump_data_baseline"
-                print("Selecting fidelity 4")
+                print("Selecting fidelity 4", file=sys.stdout, flush=True)
             else:
                 AssertionError("Unknown config")
 
@@ -48,7 +48,7 @@ class ReattachmentModel(umbridge.Model):
                 res_tol_str = ''
             else:
                 res_tol_str = '_restol' + str(config['res_tol'])
-            print("Residual tolerance "+str(config['res_tol']))
+            print("Residual tolerance "+str(config['res_tol']), file=sys.stdout, flush=True)
 
             if 'abs_tol' not in config:
                 config['abs_tol'] = 1e-10
@@ -57,12 +57,12 @@ class ReattachmentModel(umbridge.Model):
                 abs_tol_str = ''
             else:
                 abs_tol_str = '_abstol' + str(config['abs_tol'])
-            print("Iterative solver tolerance "+str(config['abs_tol']))
+            print("Iterative solver tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
 
             # Copy folder to use as realisation
             tempcasefile = "./caserealisation"
             os.system('cp -r ' + casefile + ' ' + tempcasefile)
-            print("Create temporary case files")
+            print("Create temporary case files", file=sys.stdout, flush=True)
 
             # For realisation assign parameters
             input_file = tempcasefile+"/system/controlDict"
@@ -88,13 +88,13 @@ class ReattachmentModel(umbridge.Model):
             filename = output_dir+'/wallshearJet'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
             filename_console = output_dir+'/console_'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.log'
 
-            print("Case configured")
+            print("Case configured", file=sys.stdout, flush=True)
 
             if os.path.exists(filename):
                 X = []
                 Tx = []
 
-                print("Reuse precomputed wall shear stress datafile")
+                print("Reuse precomputed wall shear stress datafile", file=sys.stdout, flush=True)
                 with open(filename, mode='r') as file:
                     reader = csv.reader(file, delimiter=' ')
                     for row in reader:
@@ -104,29 +104,29 @@ class ReattachmentModel(umbridge.Model):
                 x = extract_reattachment_point_from_dataseries(X,Tx)
             else:
                 # Set up boundary conditions
-                print("Enforcing boundary conditions jetNasaHump")
+                print("Enforcing boundary conditions jetNasaHump", file=sys.stdout, flush=True)
                 os.system('openfoam2406 jetNasaHump -case '+tempcasefile + ' | tee -a ' + filename_console)
 
                 # Run simple foam
-                print("Run simplefoam")
+                print("Run simplefoam", file=sys.stdout, flush=True)
                 os.system('openfoam2406 simpleFoam -case '+tempcasefile + ' | tee -a ' + filename_console)
 
                 # Extract quantity of interest (reattachment point)
-                print("Extract reattachment point")
+                print("Extract reattachment point", file=sys.stdout, flush=True)
                 (x, X, Tx) = extract_reattachment_point(tempcasefile, 5000)
 
                 # Step 3: Stack the vectors as columns
                 wall_shear = np.column_stack((X, Tx))
                 np.savetxt(filename, wall_shear, fmt='%f')
 
-            print("Reattachment point: " + str(x))
+            print("Reattachment point: " + str(x), file=sys.stdout, flush=True)
 
             # Clean up
-            print("Clean up temporary case file")
+            print("Clean up temporary case file", file=sys.stdout, flush=True)
             os.system('rm -r ' + tempcasefile)
         except Exception as e:
             # Code to handle any exception
-            print(f"An error occurred: {e}")
+            print(f"An error occurred: {e}", file=sys.stdout, flush=True)
             raise Exception("A generic error occurred.")
         
         return [[x]]
@@ -153,21 +153,21 @@ class CfModel(umbridge.Model):
             # Decide on fidelity
             if config['Fidelity'] == 0:
                 casefile = "./NASA_hump_data_coarse4"
-                print("Selecting fidelity 0")
+                print("Selecting fidelity 0", file=sys.stdout, flush=True)
             elif config['Fidelity'] == 1:
                 casefile = "./NASA_hump_data_coarse3"
-                print("Selecting fidelity 1")
+                print("Selecting fidelity 1", file=sys.stdout, flush=True)
             elif config['Fidelity'] == 2:
                 casefile = "./NASA_hump_data_coarse2"
-                print("Selecting fidelity 2")
+                print("Selecting fidelity 2", file=sys.stdout, flush=True)
             elif config['Fidelity'] == 3:
                 casefile = "./NASA_hump_data_coarse1"
-                print("Selecting fidelity 3")
+                print("Selecting fidelity 3", file=sys.stdout, flush=True)
             elif config['Fidelity'] == 4:
                 casefile = "./NASA_hump_data_baseline"
-                print("Selecting fidelity 4")
+                print("Selecting fidelity 4", file=sys.stdout, flush=True)
             else:
-                AssertionError("Unknown config")
+                AssertionError("Unknown config", file=sys.stdout, flush=True)
 
             if 'res_tol' not in config:
                 config['res_tol'] = 1e-10
@@ -176,7 +176,7 @@ class CfModel(umbridge.Model):
                 res_tol_str = ''
             else:
                 res_tol_str = '_restol' + str(config['res_tol'])
-            print("Residual tolerance "+str(config['res_tol']))
+            print("Residual tolerance "+str(config['res_tol']), file=sys.stdout, flush=True)
 
             if 'abs_tol' not in config:
                 config['abs_tol'] = 1e-10
@@ -185,12 +185,12 @@ class CfModel(umbridge.Model):
                 abs_tol_str = ''
             else:
                 abs_tol_str = '_abstol' + str(config['abs_tol'])
-            print("Iterative solver tolerance "+str(config['abs_tol']))
+            print("Iterative solver tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
 
             # Copy folder to use as realisation
             tempcasefile = "./caserealisation"
             os.system('cp -r ' + casefile + ' ' + tempcasefile)
-            print("Create temporary case files")
+            print("Create temporary case files", file=sys.stdout, flush=True)
 
             # For realisation assign parameters
             input_file = tempcasefile+"/system/controlDict"
@@ -236,7 +236,7 @@ class CfModel(umbridge.Model):
                 X = []
                 Tx = []
 
-                print("Reuse precomputed wall shear stress datafile")
+                print("Reuse precomputed wall shear stress datafile", file=sys.stdout, flush=True)
                 with open(filename, mode='r') as file:
                     reader = csv.reader(file, delimiter=' ')
                     for row in reader:
@@ -247,15 +247,15 @@ class CfModel(umbridge.Model):
                 cf = extract_cf_from_dataseries(X,Tx,xmin,xmax,ninterp,rhoinf,uinf)
             else:
                 # Set up boundary conditions
-                print("Enforcing boundary conditions jetNasaHump")
+                print("Enforcing boundary conditions jetNasaHump", file=sys.stdout, flush=True)
                 os.system('openfoam2406 jetNasaHump -case '+tempcasefile + ' | tee -a ' + filename_console)
 
                 # Run simple foam
-                print("Run simplefoam")
+                print("Run simplefoam", file=sys.stdout, flush=True)
                 os.system('openfoam2406 simpleFoam -case '+tempcasefile + ' | tee -a ' + filename_console)
 
                 # Extract quantity of interest (reattachment point)
-                print("Extract reattachment point")
+                print("Extract reattachment point", file=sys.stdout, flush=True)
                 (cf, X, Tx) = extract_cf(tempcasefile, 5000, xmin, xmax, ninterp,rhoinf,uinf)
 
                 # Step 3: Stack the vectors as columns
@@ -268,9 +268,9 @@ class CfModel(umbridge.Model):
         except Exception as e:
             # Code to handle any exception
             print(f"An error occurred: {e}")
-            raise Exception("A generic error occurred.")
+            raise Exception("A generic error occurred.", file=sys.stdout, flush=True)
         
-        return [[cf]]
+        return [cf]
 
     def supports_evaluate(self):
         return True
@@ -294,21 +294,21 @@ class CpModel(umbridge.Model):
             # Decide on fidelity
             if config['Fidelity'] == 0:
                 casefile = "./NASA_hump_data_coarse4"
-                print("Selecting fidelity 0")
+                print("Selecting fidelity 0", file=sys.stdout, flush=True)
             elif config['Fidelity'] == 1:
                 casefile = "./NASA_hump_data_coarse3"
-                print("Selecting fidelity 1")
+                print("Selecting fidelity 1", file=sys.stdout, flush=True)
             elif config['Fidelity'] == 2:
                 casefile = "./NASA_hump_data_coarse2"
-                print("Selecting fidelity 2")
+                print("Selecting fidelity 2", file=sys.stdout, flush=True)
             elif config['Fidelity'] == 3:
                 casefile = "./NASA_hump_data_coarse1"
-                print("Selecting fidelity 3")
+                print("Selecting fidelity 3", file=sys.stdout, flush=True)
             elif config['Fidelity'] == 4:
                 casefile = "./NASA_hump_data_baseline"
-                print("Selecting fidelity 4")
+                print("Selecting fidelity 4", file=sys.stdout, flush=True)
             else:
-                AssertionError("Unknown config")
+                AssertionError("Unknown config", file=sys.stdout, flush=True)
 
             if 'res_tol' not in config:
                 config['res_tol'] = 1e-10
@@ -317,7 +317,7 @@ class CpModel(umbridge.Model):
                 res_tol_str = ''
             else:
                 res_tol_str = '_restol' + str(config['res_tol'])
-            print("Residual tolerance "+str(config['res_tol']))
+            print("Residual tolerance "+str(config['res_tol']), file=sys.stdout, flush=True)
 
             if 'abs_tol' not in config:
                 config['abs_tol'] = 1e-10
@@ -326,12 +326,12 @@ class CpModel(umbridge.Model):
                 abs_tol_str = ''
             else:
                 abs_tol_str = '_abstol' + str(config['abs_tol'])
-            print("Iterative solver tolerance "+str(config['abs_tol']))
+            print("Iterative solver tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
 
             # Copy folder to use as realisation
             tempcasefile = "./caserealisation"
             os.system('cp -r ' + casefile + ' ' + tempcasefile)
-            print("Create temporary case files")
+            print("Create temporary case files", file=sys.stdout, flush=True)
 
             # For realisation assign parameters
             input_file = tempcasefile+"/system/controlDict"
@@ -357,7 +357,7 @@ class CpModel(umbridge.Model):
             filename = output_dir+'/nearWallField'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
             filename_console = output_dir+'/console_'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.log'
 
-            print("Case configured")
+            print("Case configured", file=sys.stdout, flush=True)
 
             # Interpolation parameters
             if 'ninterp' not in config:
@@ -378,7 +378,7 @@ class CpModel(umbridge.Model):
                 X = []
                 Tx = []
 
-                print("Reuse precomputed wall shear stress datafile")
+                print("Reuse precomputed wall pressure datafile", file=sys.stdout, flush=True)
                 with open(filename, mode='r') as file:
                     reader = csv.reader(file, delimiter=' ')
                     for row in reader:
@@ -389,30 +389,30 @@ class CpModel(umbridge.Model):
                 cp = extract_cp_from_dataseries(X,Tx,xmin,xmax,ninterp, rhoinf, uinf)
             else:
                 # Set up boundary conditions
-                print("Enforcing boundary conditions jetNasaHump")
+                print("Enforcing boundary conditions jetNasaHump", file=sys.stdout, flush=True)
                 os.system('openfoam2406 jetNasaHump -case '+tempcasefile + ' | tee -a ' + filename_console)
 
                 # Run simple foam
-                print("Run simplefoam")
+                print("Run simplefoam", file=sys.stdout, flush=True)
                 os.system('openfoam2406 simpleFoam -case '+tempcasefile + ' | tee -a ' + filename_console)
 
                 # Extract quantity of interest (reattachment point)
-                print("Extract reattachment point")
+                print("Extract reattachment point", file=sys.stdout, flush=True)
                 (cp, X, Tx) = extract_cp(tempcasefile, 5000, xmin, xmax, ninterp, rhoinf, uinf)
 
                 # Step 3: Stack the vectors as columns
-                wall_shear = np.column_stack((X, Tx))
-                np.savetxt(filename, wall_shear, fmt='%f')
+                wall_pressure = np.column_stack((X, Tx))
+                np.savetxt(filename, wall_pressure, fmt='%f')
 
             # Clean up
-            print("Clean up temporary case file")
+            print("Clean up temporary case file", file=sys.stdout, flush=True)
             os.system('rm -r ' + tempcasefile)
         except Exception as e:
             # Code to handle any exception
-            print(f"An error occurred: {e}")
+            print(f"An error occurred: {e}", file=sys.stdout, flush=True)
             raise Exception("A generic error occurred.")
         
-        return [[cp]]
+        return [cp]
 
     def supports_evaluate(self):
         return True
@@ -430,7 +430,7 @@ def replace_jet_mag(input_file, output_file, replacement_value):
         f.write(modified_data)
 
     print(f"Replaced 'JET_MAG' with '{replacement_value}' in '{
-          input_file}'. Output saved to '{output_file}'.")
+          input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
 
 def replace_res_tol(input_file, output_file, replacement_value):
@@ -446,7 +446,7 @@ def replace_res_tol(input_file, output_file, replacement_value):
         f.write(modified_data)
 
     print(f"Replaced 'RES_TOL' with '{replacement_value}' in '{
-          input_file}'. Output saved to '{output_file}'.")
+          input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
 
 def replace_final_time(input_file, output_file, replacement_value):
@@ -462,7 +462,7 @@ def replace_final_time(input_file, output_file, replacement_value):
         f.write(modified_data)
 
     print(f"Replaced 'FINAL_TIME' with '{replacement_value}' in '{
-          input_file}'. Output saved to '{output_file}'.")
+          input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
 
 def replace_abs_tol(input_file, output_file, replacement_value):
@@ -478,7 +478,7 @@ def replace_abs_tol(input_file, output_file, replacement_value):
         f.write(modified_data)
 
     print(f"Replaced 'ABS_TOL' with '{replacement_value}' in '{
-          input_file}'. Output saved to '{output_file}'.")
+          input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
 
 def replace_inflow_mag(input_file, output_file, replacement_value):
@@ -493,7 +493,7 @@ def replace_inflow_mag(input_file, output_file, replacement_value):
     with open(output_file, 'w') as f:
         f.write(modified_data)
 
-    print(f"Replaced 'INFLOW_MAG' with '{replacement_value}' in '{input_file}'. Output saved to '{output_file}'.")
+    print(f"Replaced 'INFLOW_MAG' with '{replacement_value}' in '{input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
 # Define UM-BRIDGE Models and serve
 reattachment_model = ReattachmentModel()

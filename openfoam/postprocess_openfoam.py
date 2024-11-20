@@ -52,7 +52,7 @@ def extract_cf_from_dataseries(X,Tx,xmin,xmax,n, rhoinf, uinf):
     xeval = linspace(xmin, xmax, n)
     cf_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
 
-    return [cf_at_x]
+    return cf_at_x
 
 def extract_cp(filename, final_time, xmin, xmax, n, rhoinf, uinf):
     X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
@@ -73,7 +73,7 @@ def extract_cp_from_dataseries(X,Tx,xmin,xmax,n, rhoinf, uinf):
     xeval = linspace(xmin, xmax, n)
     cp_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
 
-    return [cp_at_x]
+    return cp_at_x
 
 def get_largest_number_subdirectory(path):
     # List all subdirectories in the specified path
