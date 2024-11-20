@@ -421,10 +421,6 @@ class CpModel(umbridge.Model):
     def supports_evaluate(self):
         return True
 
-reattachment_model = ReattachmentModel()
-cf_model = CfModel()
-
-
 def replace_jet_mag(input_file, output_file, replacement_value):
     # Read input file
     with open(input_file, 'r') as f:
@@ -503,5 +499,8 @@ def replace_inflow_mag(input_file, output_file, replacement_value):
 
     print(f"Replaced 'INFLOW_MAG' with '{replacement_value}' in '{input_file}'. Output saved to '{output_file}'.")
 
-
-umbridge.serve_models([reattachment_model,cf_model], 4242)
+# Define UM-BRIDGE Models and serve
+reattachment_model = ReattachmentModel()
+cf_model = CfModel()
+cp_model = CpModel()
+umbridge.serve_models([reattachment_model,cf_model,cp_model], 4242)
