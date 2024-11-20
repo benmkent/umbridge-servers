@@ -50,7 +50,7 @@ def extract_cf_from_dataseries(X,Tx,xmin,xmax,n, rhoinf, uinf):
     spline = interpolate.CubicSpline(X,Tx, extrapolate=False)
 
     xeval = linspace(xmin, xmax, n)
-    cf_at_x = spline(xeval) / (0.5*rhoinf*uinf^2)
+    cf_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
 
     return [cf_at_x]
 
@@ -71,7 +71,7 @@ def extract_cp_from_dataseries(X,Tx,xmin,xmax,n, rhoinf, uinf):
     spline = interpolate.CubicSpline(X,Tx, extrapolate=False)
 
     xeval = linspace(xmin, xmax, n)
-    cp_at_x = spline(xeval) / (0.5*rhoinf*uinf^2)
+    cp_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
 
     return [cp_at_x]
 
