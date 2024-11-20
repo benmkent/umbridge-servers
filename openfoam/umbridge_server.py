@@ -256,7 +256,7 @@ class CfModel(umbridge.Model):
 
                 # Extract quantity of interest (reattachment point)
                 print("Extract reattachment point")
-                (cf, X, Tx) = extract_cf(tempcasefile, 5000, xmin, xmax, ninterprhoinf,uinf)
+                (cf, X, Tx) = extract_cf(tempcasefile, 5000, xmin, xmax, ninterp,rhoinf,uinf)
 
                 # Step 3: Stack the vectors as columns
                 wall_shear = np.column_stack((X, Tx))
