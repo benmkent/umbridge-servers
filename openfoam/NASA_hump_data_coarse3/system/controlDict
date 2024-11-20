@@ -93,6 +93,21 @@ wallShearStress1
     patches  ("bottomWall");
 }
 
+nearWallFields1
+{
+    // Mandatory entries (unmodifiable)
+    type            nearWallFields;
+    libs     ("libfieldFunctionObjects.so");
+    fields
+    (
+        (p pWall)
+    );
+    patches  ("bottomWall");
+    distance        0;
+
+    outputControl outputTime;
+}
+
 // turbulenceFields1
 // {
 //     type    turbulenceFields;
