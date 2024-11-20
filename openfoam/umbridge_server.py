@@ -386,6 +386,7 @@ class CpModel(umbridge.Model):
                             X.append(row[0])  # First column
                             Tx.append(row[1])  # Second column
                 
+                print("Extract Cp", file=sys.stdout, flush=True)
                 cp = extract_cp_from_dataseries(X,Tx,xmin,xmax,ninterp, rhoinf, uinf)
             else:
                 # Set up boundary conditions
@@ -397,7 +398,7 @@ class CpModel(umbridge.Model):
                 os.system('openfoam2406 simpleFoam -case '+tempcasefile + ' | tee -a ' + filename_console)
 
                 # Extract quantity of interest (reattachment point)
-                print("Extract reattachment point", file=sys.stdout, flush=True)
+                print("Extract Cp", file=sys.stdout, flush=True)
                 (cp, X, Tx) = extract_cp(tempcasefile, 5000, xmin, xmax, ninterp, rhoinf, uinf)
 
                 # Step 3: Stack the vectors as columns
@@ -412,6 +413,8 @@ class CpModel(umbridge.Model):
             print(f"An error occurred: {e}", file=sys.stdout, flush=True)
             raise Exception("A generic error occurred.")
         
+        print(cp)
+        print([cp])
         return [cp]
 
     def supports_evaluate(self):
