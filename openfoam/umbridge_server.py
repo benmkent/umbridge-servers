@@ -229,8 +229,8 @@ class CfModel(umbridge.Model):
             xmax = config['xmax']
             ninterp = config['ninterp']
 
-            uinf = 1.0
-            rhoinf = 1.0
+            uinf = replacement_value_inflow
+            rhoinf = 1.185
 
             if os.path.exists(filename):
                 X = []
@@ -367,8 +367,8 @@ class CpModel(umbridge.Model):
             if 'xmax' not in config:
                 config['xmax'] = 4.9
 
-            uinf = 1.0
-            rhoinf = 1.0
+            uinf = replacement_value_inflow
+            rhoinf = 1.185
 
             xmin = config['xmin']
             xmax = config['xmax']
