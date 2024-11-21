@@ -1,6 +1,7 @@
 import fluidfoam as fluidfoam
 from scipy import interpolate
 from numpy import linspace
+import numpy as np
 import os
 import re
 import argparse
@@ -51,6 +52,7 @@ def extract_cf_from_dataseries(X,Tx, rhoinf, uinf):
 
     #xeval = linspace(xmin, xmax, n)
     #cf_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
+    Tx = np.array(Tx, dtype=float)
     cf_at_x = Tx / (0.5*rhoinf*uinf**2)
 
     return cf_at_x
@@ -69,10 +71,11 @@ def extract_cp(filename, final_time,rhoinf, uinf):
 
 def extract_cp_from_dataseries(X,Tx,rhoinf, uinf):
 
-    spline = interpolate.CubicSpline(X,Tx, extrapolate=True)
+    #spline = interpolate.CubicSpline(X,Tx, extrapolate=True)
 
     #xeval = linspace(xmin, xmax, n)
     #cp_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
+    Tx = np.array(Tx, dtype=float)
     cp_at_x = Tx / (0.5*rhoinf*uinf**2)
 
     return cp_at_x
