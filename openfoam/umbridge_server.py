@@ -254,17 +254,20 @@ class CfModel(umbridge.Model):
             # Clean up
             print("Clean up temporary case file")
             os.system('rm -r ' + tempcasefile)
+
+            X_return = np.zeros(1000)
+            X_return[0:len(X)] = X
+            cf_return = np.zeros(1000)
+            cf_return[0:len(X)] = cf
+            X_out = X_return.tolist()
+            cf_out = cf_return.tolist()
+
         except Exception as e:
             # Code to handle any exception
             print(f"An error occurred: {e}")
             raise Exception("A generic error occurred.", file=sys.stdout, flush=True)
                
-        X_return = np.zeros(1000)
-        X_return[0:len(X)] = X
-        cf_return = np.zeros(1000)
-        cf_return[0:len(X)] = cf
-
-        return [X_return.tolist(), cf_return.tolist()]
+        return [X_out, cf_out]
 
     def supports_evaluate(self):
         return True
@@ -390,17 +393,19 @@ class CpModel(umbridge.Model):
             # Clean up
             print("Clean up temporary case file", file=sys.stdout, flush=True)
             os.system('rm -r ' + tempcasefile)
+
+            X_return = np.zeros(1000)
+            X_return[0:len(X)] = X
+            cp_return = np.zeros(1000)
+            cp_return[0:len(X)] = cp
+            x_out = X_return.tolist()
+            cp_out = cp_return.tolist()
         except Exception as e:
             # Code to handle any exception
             print(f"An error occurred: {e}", file=sys.stdout, flush=True)
             raise Exception("A generic error occurred.")
-        
-        X_return = np.zeros(1000)
-        X_return[0:len(X)] = X
-        cp_return = np.zeros(1000)
-        cp_return[0:len(X)] = cp
 
-        return [X_return.tolist(), cp_return.tolist()]
+        return [x_out, cp_out]
 
     def supports_evaluate(self):
         return True
