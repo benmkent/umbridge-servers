@@ -33,7 +33,7 @@ def extract_reattachment_point_from_dataseries(X,Tx):
 
     return x
 
-def extract_cf(filename, final_time, xmin, xmax, n, rhoinf, uinf):
+def extract_cf(filename, final_time, rhoinf, uinf):
     X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
 
     # Find latestTime (may not be final_time if converges early)
@@ -42,19 +42,20 @@ def extract_cf(filename, final_time, xmin, xmax, n, rhoinf, uinf):
     Tx,Ty,Tz = fluidfoam.readfield(filename,name="wallShearStress",time_name=largest_subdir,boundary="bottomWall")
     # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
 
-    cf = extract_cf_from_dataseries(X,Tx, xmin, xmax, n, rhoinf, uinf)
+    cf = extract_cf_from_dataseries(X,Tx, rhoinf, uinf)
     return (cf, X, Tx)
 
-def extract_cf_from_dataseries(X,Tx,xmin,xmax,n, rhoinf, uinf):
+def extract_cf_from_dataseries(X,Tx, rhoinf, uinf):
 
-    spline = interpolate.CubicSpline(X,Tx, extrapolate=True)
+    #spline = interpolate.CubicSpline(X,Tx, extrapolate=True)
 
-    xeval = linspace(xmin, xmax, n)
-    cf_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
+    #xeval = linspace(xmin, xmax, n)
+    #cf_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
+    cf_at_x = Tx / (0.5*rhoinf*uinf**2)
 
     return cf_at_x
 
-def extract_cp(filename, final_time, xmin, xmax, n, rhoinf, uinf):
+def extract_cp(filename, final_time,rhoinf, uinf):
     X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
 
     # Find latestTime (may not be final_time if converges early)
@@ -63,15 +64,16 @@ def extract_cp(filename, final_time, xmin, xmax, n, rhoinf, uinf):
     P = fluidfoam.readfield(filename,name="pWall",time_name=largest_subdir,boundary="bottomWall")
     # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
 
-    cp = extract_cp_from_dataseries(X,P, xmin, xmax, n, rhoinf, uinf)
+    cp = extract_cp_from_dataseries(X,P, rhoinf, uinf)
     return (cp, X, P)
 
-def extract_cp_from_dataseries(X,Tx,xmin,xmax,n, rhoinf, uinf):
+def extract_cp_from_dataseries(X,Tx,rhoinf, uinf):
 
     spline = interpolate.CubicSpline(X,Tx, extrapolate=True)
 
-    xeval = linspace(xmin, xmax, n)
-    cp_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
+    #xeval = linspace(xmin, xmax, n)
+    #cp_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
+    cp_at_x = Tx / (0.5*rhoinf*uinf**2)
 
     return cp_at_x
 

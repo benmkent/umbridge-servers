@@ -17,7 +17,7 @@ class ReattachmentModel(umbridge.Model):
         return [2]
 
     def get_output_sizes(self, config):
-        return [1]
+        return [1000,1000]
 
     def __call__(self, parameters, config):
         output_dir = './outputdata'
@@ -218,17 +218,6 @@ class CfModel(umbridge.Model):
 
             print("Case configured")
 
-            # Interpolation parameters
-            if 'ninterp' not in config:
-                config['ninterp'] = 1000
-            if 'xmin' not in config:
-                config['xmin'] = -6.4
-            if 'xmax' not in config:
-                config['xmax'] = 4.9
-            xmin = config['xmin']
-            xmax = config['xmax']
-            ninterp = config['ninterp']
-
             uinf = parameters[0][1]
             rhoinf = 1.185
 
@@ -244,7 +233,7 @@ class CfModel(umbridge.Model):
                             X.append(row[0])  # First column
                             Tx.append(row[1])  # Second column
                 
-                cf = extract_cf_from_dataseries(X,Tx,xmin,xmax,ninterp,rhoinf,uinf)
+                cf = extract_cf_from_dataseries(X,Tx,rhoinf,uinf)
             else:
                 # Set up boundary conditions
                 print("Enforcing boundary conditions jetNasaHump", file=sys.stdout, flush=True)
@@ -256,7 +245,7 @@ class CfModel(umbridge.Model):
 
                 # Extract quantity of interest (reattachment point)
                 print("Extract reattachment point", file=sys.stdout, flush=True)
-                (cf, X, Tx) = extract_cf(tempcasefile, 5000, xmin, xmax, ninterp,rhoinf,uinf)
+                (cf, X, Tx) = extract_cf(tempcasefile, 5000,rhoinf,uinf)
 
                 # Step 3: Stack the vectors as columns
                 wall_shear = np.column_stack((X, Tx))
@@ -269,8 +258,13 @@ class CfModel(umbridge.Model):
             # Code to handle any exception
             print(f"An error occurred: {e}")
             raise Exception("A generic error occurred.", file=sys.stdout, flush=True)
-        
-        return [cf.tolist()]
+               
+        X_return = np.zeros(1000)
+        X_return[0:len(X)] = X
+        cf_return = np.zeros(1000)
+        cf_return[0:len(X)] = cf
+
+        return [X_return.tolist(), cf_return.tolist()]
 
     def supports_evaluate(self):
         return True
@@ -359,20 +353,8 @@ class CpModel(umbridge.Model):
 
             print("Case configured", file=sys.stdout, flush=True)
 
-            # Interpolation parameters
-            if 'ninterp' not in config:
-                config['ninterp'] = 1000
-            if 'xmin' not in config:
-                config['xmin'] = -6.4
-            if 'xmax' not in config:
-                config['xmax'] = 4.9
-
             uinf = parameters[0][1]
             rhoinf = 1.185
-
-            xmin = config['xmin']
-            xmax = config['xmax']
-            ninterp = config['ninterp']
 
             if os.path.exists(filename):
                 X = []
@@ -387,7 +369,7 @@ class CpModel(umbridge.Model):
                             Tx.append(row[1])  # Second column
                 
                 print("Extract Cp", file=sys.stdout, flush=True)
-                cp = extract_cp_from_dataseries(X,Tx,xmin,xmax,ninterp, rhoinf, uinf)
+                cp = extract_cp_from_dataseries(X,Tx, rhoinf, uinf)
             else:
                 # Set up boundary conditions
                 print("Enforcing boundary conditions jetNasaHump", file=sys.stdout, flush=True)
@@ -399,7 +381,7 @@ class CpModel(umbridge.Model):
 
                 # Extract quantity of interest (reattachment point)
                 print("Extract Cp", file=sys.stdout, flush=True)
-                (cp, X, Tx) = extract_cp(tempcasefile, 5000, xmin, xmax, ninterp, rhoinf, uinf)
+                (cp, X, Tx) = extract_cp(tempcasefile, 5000, rhoinf, uinf)
 
                 # Step 3: Stack the vectors as columns
                 wall_pressure = np.column_stack((X, Tx))
@@ -413,7 +395,12 @@ class CpModel(umbridge.Model):
             print(f"An error occurred: {e}", file=sys.stdout, flush=True)
             raise Exception("A generic error occurred.")
         
-        return [cp.tolist()]
+        X_return = np.zeros(1000)
+        X_return[0:len(X)] = X
+        cp_return = np.zeros(1000)
+        cp_return[0:len(X)] = cp
+
+        return [X_return.tolist(), cp_return.tolist()]
 
     def supports_evaluate(self):
         return True
