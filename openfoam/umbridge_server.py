@@ -17,7 +17,7 @@ class ReattachmentModel(umbridge.Model):
         return [2]
 
     def get_output_sizes(self, config):
-        return [1000,1000]
+        return [1]
 
     def __call__(self, parameters, config):
         output_dir = './outputdata'
@@ -143,9 +143,7 @@ class CfModel(umbridge.Model):
         return [2]
 
     def get_output_sizes(self, config):
-        if 'ninterp' not in config:
-            config['ninterp'] = 1000
-        return [config['ninterp']]
+        return [1000,1000]
 
     def __call__(self, parameters, config):
         output_dir = './outputdata'
@@ -281,9 +279,7 @@ class CpModel(umbridge.Model):
         return [2]
 
     def get_output_sizes(self, config):
-        if 'ninterp' not in config:
-            config['ninterp'] = 1000
-        return [config['ninterp']]
+        return [1000,1000]
 
     def __call__(self, parameters, config):
         output_dir = './outputdata'
