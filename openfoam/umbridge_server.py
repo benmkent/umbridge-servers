@@ -81,7 +81,8 @@ class ReattachmentModel(umbridge.Model):
             replace_res_tol(input_file, output_file, replacement_value)
             replacement_value = str(config['abs_tol'])
             replace_abs_tol(input_file, output_file, replacement_value)
-            replace_wallpressuredist(input_file, output_file, 0.0)
+            replacement_value = str(0.0)
+            replace_wallpressuredist(input_file, output_file, replacement_value)
 
             replacement_value_jet = f"{float(replacement_value_jet):.12g}"
             replacement_value_inflow = f"{float(replacement_value_inflow):.12g}"
@@ -209,7 +210,8 @@ class CfModel(umbridge.Model):
             replace_res_tol(input_file, output_file, replacement_value)
             replacement_value = str(config['abs_tol'])
             replace_abs_tol(input_file, output_file, replacement_value)
-            replace_wallpressuredist(input_file, output_file, 0.0)
+            replacement_value = str(0.0)
+            replace_wallpressuredist(input_file, output_file, replacement_value)
 
             replacement_value_jet = f"{float(replacement_value_jet):.12g}"
             replacement_value_inflow = f"{float(replacement_value_inflow):.12g}"
@@ -328,6 +330,7 @@ class CpModel(umbridge.Model):
                 wall_pressure_dist = 0.0
                 wp_str = ''
             else:
+                wall_pressure_dist = config['wall_pressure_dist']
                 wp_str = '_wpd' + string(config['wall_pressure_dist'])
 
             # Copy folder to use as realisation
@@ -343,7 +346,8 @@ class CpModel(umbridge.Model):
             replacement_value_inflow = str(parameters[0][1])
             replace_inflow_mag(input_file, output_file,
                                 replacement_value_inflow)
-            replace_wallpressuredist(input_file, output_file, wall_pressure_dist)
+            replacement_value = str(wall_pressure_dist)
+            replace_wallpressuredist(input_file, output_file, replacement_value)
             # replacement_value = str(config['final_time'])
             # replace_final_time(input_file, output_file, replacement_value)
 
