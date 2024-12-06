@@ -81,6 +81,7 @@ class ReattachmentModel(umbridge.Model):
             replace_res_tol(input_file, output_file, replacement_value)
             replacement_value = str(config['abs_tol'])
             replace_abs_tol(input_file, output_file, replacement_value)
+            replace_wallpressuredist(input_file, output_file, 0.0)
 
             replacement_value_jet = f"{float(replacement_value_jet):.12g}"
             replacement_value_inflow = f"{float(replacement_value_inflow):.12g}"
@@ -198,6 +199,7 @@ class CfModel(umbridge.Model):
             replacement_value_inflow = str(parameters[0][1])
             replace_inflow_mag(input_file, output_file,
                                 replacement_value_inflow)
+            
             # replacement_value = str(config['final_time'])
             # replace_final_time(input_file, output_file, replacement_value)
 
@@ -207,6 +209,7 @@ class CfModel(umbridge.Model):
             replace_res_tol(input_file, output_file, replacement_value)
             replacement_value = str(config['abs_tol'])
             replace_abs_tol(input_file, output_file, replacement_value)
+            replace_wallpressuredist(input_file, output_file, 0.0)
 
             replacement_value_jet = f"{float(replacement_value_jet):.12g}"
             replacement_value_inflow = f"{float(replacement_value_inflow):.12g}"
@@ -321,6 +324,12 @@ class CpModel(umbridge.Model):
                 abs_tol_str = '_abstol' + str(config['abs_tol'])
             print("Iterative solver tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
 
+            if 'wall_pressure_dist' not in config:
+                wall_pressure_dist = 0.0
+                wp_str = ''
+            else:
+                wp_str = '_wpd' + string(config['wall_pressure_dist'])
+
             # Copy folder to use as realisation
             tempcasefile = "./caserealisation"
             os.system('cp -r ' + casefile + ' ' + tempcasefile)
@@ -334,6 +343,7 @@ class CpModel(umbridge.Model):
             replacement_value_inflow = str(parameters[0][1])
             replace_inflow_mag(input_file, output_file,
                                 replacement_value_inflow)
+            replace_wallpressuredist(input_file, output_file, wall_pressure_dist)
             # replacement_value = str(config['final_time'])
             # replace_final_time(input_file, output_file, replacement_value)
 
@@ -347,8 +357,8 @@ class CpModel(umbridge.Model):
             replacement_value_jet = f"{float(replacement_value_jet):.12g}"
             replacement_value_inflow = f"{float(replacement_value_inflow):.12g}"
 
-            filename = output_dir+'/nearWallField'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
-            filename_console = output_dir+'/console_'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.log'
+            filename = output_dir+'/nearWallField'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str + wp_str +'.csv'
+            filename_console = output_dir+'/console_'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str + wp_str +'.log'
 
             print("Case configured", file=sys.stdout, flush=True)
 
@@ -483,6 +493,21 @@ def replace_inflow_mag(input_file, output_file, replacement_value):
         f.write(modified_data)
 
     print(f"Replaced 'INFLOW_MAG' with '{replacement_value}' in '{input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
+
+def replace_wallpressuredist(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'WALLPRESSUREDIST' with 'replacement_value'
+    modified_data = file_data.replace('WALLPRESSUREDIST', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'WALLPRESSUREDIST' with '{replacement_value}' in '{input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
+
 
 # Define UM-BRIDGE Models and serve
 reattachment_model = ReattachmentModel()

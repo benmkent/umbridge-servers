@@ -114,7 +114,7 @@ nearWallFields1
         (p pWall)
     );
     patches  ("bottomWall");
-    distance        0;
+    distance        WALLPRESSUREDIST;
 
     outputControl outputTime;
 }
