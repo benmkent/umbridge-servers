@@ -76,7 +76,7 @@ def extract_cp_from_dataseries(X,Tx,rhoinf, uinf):
     #xeval = linspace(xmin, xmax, n)
     #cp_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
     Tx = np.array(Tx, dtype=float)
-    cp_at_x = Tx / (0.5*rhoinf*uinf**2)
+    cp_at_x = Tx / (0.5*uinf**2)
 
     return cp_at_x
 
