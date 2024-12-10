@@ -72,6 +72,9 @@ class ReattachmentModel(umbridge.Model):
             replacement_value_inflow = str(parameters[0][1])
             replace_inflow_mag(input_file, output_file,
                                 replacement_value_inflow)
+            wpd = 0.0
+            replacement_value = str(wpd)
+            replace_wallpressuredist(input_file, output_file, replacement_value)
             # replacement_value = str(config['final_time'])
             # replace_final_time(input_file, output_file, replacement_value)
 
@@ -81,8 +84,6 @@ class ReattachmentModel(umbridge.Model):
             replace_res_tol(input_file, output_file, replacement_value)
             replacement_value = str(config['abs_tol'])
             replace_abs_tol(input_file, output_file, replacement_value)
-            replacement_value = str(0.0)
-            replace_wallpressuredist(input_file, output_file, replacement_value)
 
             replacement_value_jet = f"{float(replacement_value_jet):.12g}"
             replacement_value_inflow = f"{float(replacement_value_inflow):.12g}"
@@ -200,7 +201,10 @@ class CfModel(umbridge.Model):
             replacement_value_inflow = str(parameters[0][1])
             replace_inflow_mag(input_file, output_file,
                                 replacement_value_inflow)
-            
+            wpd = 0.0
+            replacement_value = str(wpd)
+            replace_wallpressuredist(input_file, output_file, replacement_value)
+
             # replacement_value = str(config['final_time'])
             # replace_final_time(input_file, output_file, replacement_value)
 
@@ -210,8 +214,7 @@ class CfModel(umbridge.Model):
             replace_res_tol(input_file, output_file, replacement_value)
             replacement_value = str(config['abs_tol'])
             replace_abs_tol(input_file, output_file, replacement_value)
-            replacement_value = str(0.0)
-            replace_wallpressuredist(input_file, output_file, replacement_value)
+
 
             replacement_value_jet = f"{float(replacement_value_jet):.12g}"
             replacement_value_inflow = f"{float(replacement_value_inflow):.12g}"
