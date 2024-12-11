@@ -38,6 +38,9 @@ class ReattachmentModel(umbridge.Model):
             elif config['Fidelity'] == 4:
                 casefile = "./NASA_hump_data_baseline"
                 print("Selecting fidelity 4", file=sys.stdout, flush=True)
+            elif config['Fidelity'] == -1:
+                casefile = "./NASA_hump_data_coarse5"
+                print("Selecting fidelity -1", file=sys.stdout, flush=True)
             else:
                 AssertionError("Unknown config")
 
