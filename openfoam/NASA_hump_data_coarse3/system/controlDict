@@ -62,25 +62,37 @@ jet_mag         JET_MAG;
 
 functions
 {
-// wallPressure
-// {
-//     type surfaces;
-//     functionObjectLibs ("libsampling.so");
-//     surfaceFormat raw; // vtk;
-//     outputControl outputTime;
-//     interpolationScheme cellPoint;
-//     fields (p);
-//     surfaces    
-//     (
-//         bottomWall
-//         {
-//             type    wall;
-//             patches ("bottomWall");
-//             interpolate true;
-//             triangulate false;
-//         }
-//     );
-// }
+    wallPressure
+    {
+        type            surfaces;
+        functionObjectLibs ("libsampling.so");
+        surfaceFormat   raw;  // You can use "vtk" if you need visualization in Paraview
+        outputControl   outputTime;
+        interpolationScheme cell;  // Sampling on cell centers
+        fields          (p);  // Sampling the pressure field
+        surfaces
+        (
+            bottomWall
+            {
+                type        patch;  // Use "patch" for sampling on a specific patch
+                patches     ("bottomWall");  // Ensure the patch name matches your mesh
+                interpolate false;  // Avoid interpolation if raw cell data is required
+                triangulate false;  // Optional, set to "true" for triangulated output
+            }
+        );
+    }
+
+    yPlus1
+    {
+        // Mandatory entries (unmodifiable)
+        type            yPlus;
+        libs            (fieldFunctionObjects);
+        outputControl outputTime;
+
+        // Restrict to a set of patches
+        patches  ("bottomWall");
+    }
+
 
 wallShearStress1
 {

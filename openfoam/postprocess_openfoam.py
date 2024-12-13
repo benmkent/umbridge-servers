@@ -80,6 +80,28 @@ def extract_cp_from_dataseries(X,Tx,rhoinf, uinf):
 
     return cp_at_x
 
+def extract_yplus(filename, final_time):
+    X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
+
+    # Find latestTime (may not be final_time if converges early)
+    largest_subdir = get_largest_number_subdirectory(filename)
+
+    yPlus = fluidfoam.readfield(filename,name="yPlus",time_name=largest_subdir,boundary="bottomWall")
+    # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
+
+    return (X,yPlus)
+    
+def extract_pWall(filename, final_time):
+    X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
+
+    # Find latestTime (may not be final_time if converges early)
+    largest_subdir = get_largest_number_subdirectory(filename)
+
+    p = fluidfoam.readfield(filename,name="p",time_name=largest_subdir,boundary="bottomWall")
+    # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
+
+    return (X,p)
+
 def get_largest_number_subdirectory(path):
     # List all subdirectories in the specified path
     subdirs = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
