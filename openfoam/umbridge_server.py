@@ -9,6 +9,9 @@ from postprocess_openfoam import extract_cp, extract_cp_from_dataseries
 from postprocess_openfoam import extract_yplus, extract_pWall
 
 def configure_case(config,parameters):
+
+    print("==========START CONFIGURE CASE==========")
+
     # Decide on fidelity
     if config['Fidelity'] == 0:
         casefile = "./NASA_hump_data_coarse4"
@@ -88,6 +91,7 @@ def run_case(filename_console, filename, parameters):
     tempcasefile = "./caserealisation"
 
     # BlockMesh for info
+    os.system('cat '+tempcasefile/system/blockMeshDict + ' | tee -a ' + output_dir+'/'+filename_console)
     os.system('openfoam2406 blockMesh -case '+tempcasefile + ' | tee -a ' + output_dir+'/'+filename_console)
 
     # Set up boundary conditions
@@ -194,7 +198,6 @@ class CfModel(umbridge.Model):
             print("Case configured: "+filename, file=sys.stdout, flush=True)
 
             output_dir = './outputdata'
-
 
             if not os.path.exists(output_dir+'/wallshearJet'+filename):
                 run_case(filename_console, filename, parameters)
