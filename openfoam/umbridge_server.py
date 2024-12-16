@@ -106,7 +106,8 @@ def run_case(filename_console, filename, parameters):
     (rp_value, X, Tx) = extract_reattachment_point(tempcasefile, 5000)
     wall_shear = np.column_stack((X, Tx))
     np.savetxt(output_dir+'/wallshearJet'+filename, wall_shear, fmt='%f')
-    
+    print("Reattachment point "+str(rp_value))
+
     # Save out nearWallField data
     uinf = parameters[0][1]
     rhoinf = 1.185
@@ -114,16 +115,19 @@ def run_case(filename_console, filename, parameters):
     (cp_value_nwf, X, Tx) = extract_cp(tempcasefile, 5000, rhoinf, uinf)
     cp = np.column_stack((X, Tx))
     np.savetxt(output_dir+'/nearWallField'+filename, cp, fmt='%f')
+    print("Cp max min "+str(max(Tx))+" "+str(min(Tx)))
 
     print("Extract pressure field at wall", file=sys.stdout, flush=True)
     (X, Tx) = extract_pWall(tempcasefile, 5000)
     pwall= np.column_stack((X, Tx))
     np.savetxt(output_dir+'/wallPressure'+filename, pwall, fmt='%f')
+    print("p wall max min "+str(max(Tx))+" "+str(min(Tx)))
 
     print("Extract yPlus at wall", file=sys.stdout, flush=True)
     (X,Tx) = extract_yplus(tempcasefile, 5000)
     yp= np.column_stack((X, Tx))
     np.savetxt(output_dir+'/yPlus'+filename, yp, fmt='%f')
+    print("yPlus max min "+str(max(Tx))+" "+str(min(Tx)))
 
     # Clean up
     print("Clean up temporary case file", file=sys.stdout, flush=True)
@@ -143,7 +147,7 @@ class ReattachmentModel(umbridge.Model):
     def __call__(self, parameters, config):
         try:
             filename, filename_console = configure_case(config,parameters)
-            print("Case configured", file=sys.stdout, flush=True)
+            print("Case configured: "+filename, file=sys.stdout, flush=True)
             
             output_dir = './outputdata'
 
@@ -187,7 +191,7 @@ class CfModel(umbridge.Model):
     def __call__(self, parameters, config):
         try:
             filename, filename_console = configure_case(config,parameters)
-            print("Case configured", file=sys.stdout, flush=True)
+            print("Case configured: "+filename, file=sys.stdout, flush=True)
 
             output_dir = './outputdata'
 
@@ -240,7 +244,7 @@ class CpModel(umbridge.Model):
     def __call__(self, parameters, config):
         try:
             filename, filename_console = configure_case(config,parameters)
-            print("Case configured", file=sys.stdout, flush=True)
+            print("Case configured: "+filename, file=sys.stdout, flush=True)
 
             output_dir = './outputdata'
 
@@ -250,7 +254,7 @@ class CpModel(umbridge.Model):
             X = []
             Tx = []
 
-            print("Reuse precomputed wall pressure datafile", file=sys.stdout, flush=True)
+            print("Reuse precomputed nearWallField datafile", file=sys.stdout, flush=True)
             with open(output_dir+'/nearWallField'+filename, mode='r') as file:
                 reader = csv.reader(file, delimiter=' ')
                 for row in reader:
@@ -294,7 +298,7 @@ class PwallModel(umbridge.Model):
     def __call__(self, parameters, config):
         try:
             filename, filename_console = configure_case(config,parameters)
-            print("Case configured", file=sys.stdout, flush=True)
+            print("Case configured: "+filename, file=sys.stdout, flush=True)
 
             output_dir = './outputdata'
 
@@ -344,7 +348,7 @@ class yPlusModel(umbridge.Model):
     def __call__(self, parameters, config):
         try:
             filename, filename_console = configure_case(config,parameters)
-            print("Case configured", file=sys.stdout, flush=True)
+            print("Case configured: "+filename, file=sys.stdout, flush=True)
             
             output_dir = './outputdata'
 
