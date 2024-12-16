@@ -8,7 +8,7 @@ from postprocess_openfoam import extract_cf, extract_cf_from_dataseries
 from postprocess_openfoam import extract_cp, extract_cp_from_dataseries
 from postprocess_openfoam import extract_yplus, extract_pWall
 
-def configure_case(config):
+def configure_case(config,parameters):
     # Decide on fidelity
     if config['Fidelity'] == 0:
         casefile = "./NASA_hump_data_coarse4"
@@ -83,8 +83,9 @@ def configure_case(config):
 
     return filename, filename_console
 
-def run_case(tempcasefile, filename_console, filename, parameters):
+def run_case(filename_console, filename, parameters):
     output_dir = './outputdata'
+    tempcasefile = "./caserealisation"
 
     # Set up boundary conditions
     print("Enforcing boundary conditions jetNasaHump", file=sys.stdout, flush=True)
@@ -135,11 +136,13 @@ class ReattachmentModel(umbridge.Model):
 
     def __call__(self, parameters, config):
         try:
-            filename, filename_console = configure_case(config)
+            filename, filename_console = configure_case(config,parameters)
             print("Case configured", file=sys.stdout, flush=True)
+            
+            output_dir = './outputdata'
 
             if not os.path.exists(output_dir+'/wallshear'+filename):
-                run_case(tempcasefile, filename_console, filename, parameters)
+                run_case(filename_console, filename, parameters)
 
             X = []
             Tx = []
@@ -177,11 +180,14 @@ class CfModel(umbridge.Model):
 
     def __call__(self, parameters, config):
         try:
-            filename, filename_console = configure_case(config)
+            filename, filename_console = configure_case(config,parameters)
             print("Case configured", file=sys.stdout, flush=True)
 
+            output_dir = './outputdata'
+
+
             if not os.path.exists(output_dir+'/wallshear'+filename):
-                run_case(tempcasefile, filename_console, filename, parameters)
+                run_case(filename_console, filename, parameters)
 
             X = []
             Tx = []
@@ -192,6 +198,9 @@ class CfModel(umbridge.Model):
                     if row:  # Check if row is not empty
                         X.append(row[0])  # First column
                         Tx.append(row[1])  # Second column
+            
+            rhoinf = 1.0
+            uinf = parameters[0][1]
             cf = extract_cf_from_dataseries(X,Tx,rhoinf,uinf)
 
             X_return = np.zeros(1000)
@@ -224,11 +233,13 @@ class CpModel(umbridge.Model):
 
     def __call__(self, parameters, config):
         try:
-            filename, filename_console = configure_case(config)
+            filename, filename_console = configure_case(config,parameters)
             print("Case configured", file=sys.stdout, flush=True)
 
+            output_dir = './outputdata'
+
             if not os.path.exists(output_dir+'/nearWallField'+filename):
-                run_case(tempcasefile, filename_console, filename, parameters)
+                run_case(filename_console, filename, parameters)
 
             X = []
             Tx = []
@@ -276,11 +287,13 @@ class PwallModel(umbridge.Model):
 
     def __call__(self, parameters, config):
         try:
-            filename, filename_console = configure_case(config)
+            filename, filename_console = configure_case(config,parameters)
             print("Case configured", file=sys.stdout, flush=True)
 
+            output_dir = './outputdata'
+
             if not os.path.exists(output_dir+'/wallPressure'+filename):
-                run_case(tempcasefile, filename_console, filename, parameters)
+                run_case(filename_console, filename, parameters)
 
             X = []
             Tx = []
@@ -324,11 +337,13 @@ class yPlusModel(umbridge.Model):
 
     def __call__(self, parameters, config):
         try:
-            filename, filename_console = configure_case(config)
+            filename, filename_console = configure_case(config,parameters)
             print("Case configured", file=sys.stdout, flush=True)
+            
+            output_dir = './outputdata'
 
             if not os.path.exists(output_dir+'/yPlus'+filename):
-                run_case(tempcasefile, filename_console, filename, parameters)
+                run_case(filename_console, filename, parameters)
 
             X = []
             Tx = []
