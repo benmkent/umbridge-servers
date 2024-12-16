@@ -34,6 +34,11 @@ def configure_case(config,parameters):
     else:
         AssertionError("Unknown config")
 
+    # Copy folder to use as realisation
+    tempcasefile = "./caserealisation"
+    os.system('cp -r ' + casefile + ' ' + tempcasefile)
+    print("Create temporary case files", file=sys.stdout, flush=True)
+
     if 'res_tol' not in config:
         config['res_tol'] = 1e-10
         res_tol_str = ''
@@ -51,11 +56,6 @@ def configure_case(config,parameters):
     else:
         abs_tol_str = '_abstol' + str(config['abs_tol'])
     print("Iterative solver tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
-
-    # Copy folder to use as realisation
-    tempcasefile = "./caserealisation"
-    os.system('cp -r ' + casefile + ' ' + tempcasefile)
-    print("Create temporary case files", file=sys.stdout, flush=True)
 
     # For realisation assign parameters
     input_file = tempcasefile+"/system/controlDict"
@@ -84,6 +84,7 @@ def configure_case(config,parameters):
     filename = str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
     filename_console = 'console_'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.log'
 
+    print('======CASE CONFIGURED======')
     return filename, filename_console
 
 def run_case(filename_console, filename, parameters):
@@ -91,7 +92,7 @@ def run_case(filename_console, filename, parameters):
     tempcasefile = "./caserealisation"
 
     # BlockMesh for info
-    os.system('cat '+tempcasefile/system/blockMeshDict + ' | tee -a ' + output_dir+'/'+filename_console)
+    os.system('cat '+ tempcasefile+'/system/blockMeshDict' + ' | tee -a ' + output_dir+'/'+filename_console)
     os.system('openfoam2406 blockMesh -case '+tempcasefile + ' | tee -a ' + output_dir+'/'+filename_console)
 
     # Set up boundary conditions
