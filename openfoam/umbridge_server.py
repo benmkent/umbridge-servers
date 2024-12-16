@@ -78,7 +78,7 @@ def configure_case(config,parameters):
     replacement_value_jet = f"{float(replacement_value_jet):.12g}"
     replacement_value_inflow = f"{float(replacement_value_inflow):.12g}"
 
-    filename = 'Jet'+str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
+    filename = str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
     filename_console = 'console_'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.log'
 
     return filename, filename_console
@@ -99,7 +99,7 @@ def run_case(filename_console, filename, parameters):
     print("Extract reattachment point", file=sys.stdout, flush=True)
     (rp_value, X, Tx) = extract_reattachment_point(tempcasefile, 5000)
     wall_shear = np.column_stack((X, Tx))
-    np.savetxt(output_dir+'/wallshear'+filename, wall_shear, fmt='%f')
+    np.savetxt(output_dir+'/wallshearJet'+filename, wall_shear, fmt='%f')
     
     # Save out nearWallField data
     uinf = parameters[0][1]
@@ -141,13 +141,13 @@ class ReattachmentModel(umbridge.Model):
             
             output_dir = './outputdata'
 
-            if not os.path.exists(output_dir+'/wallshear'+filename):
+            if not os.path.exists(output_dir+'/wallshearJet'+filename):
                 run_case(filename_console, filename, parameters)
 
             X = []
             Tx = []
             print("Reuse precomputed wall shear stress datafile", file=sys.stdout, flush=True)
-            with open(filename, mode='r') as file:
+            with open(output_dir+'/wallshearJet'+filename, mode='r') as file:
                 reader = csv.reader(file, delimiter=' ')
                 for row in reader:
                     if row:  # Check if row is not empty
@@ -186,13 +186,13 @@ class CfModel(umbridge.Model):
             output_dir = './outputdata'
 
 
-            if not os.path.exists(output_dir+'/wallshear'+filename):
+            if not os.path.exists(output_dir+'/wallshearJet'+filename):
                 run_case(filename_console, filename, parameters)
 
             X = []
             Tx = []
             print("Reuse precomputed wall shear stress datafile", file=sys.stdout, flush=True)
-            with open(output_dir+'/wallshear'+filename, mode='r') as file:
+            with open(output_dir+'/wallshearJet'+filename, mode='r') as file:
                 reader = csv.reader(file, delimiter=' ')
                 for row in reader:
                     if row:  # Check if row is not empty
