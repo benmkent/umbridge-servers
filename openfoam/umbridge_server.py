@@ -89,11 +89,11 @@ def run_case(filename_console, filename, parameters):
 
     # Set up boundary conditions
     print("Enforcing boundary conditions jetNasaHump", file=sys.stdout, flush=True)
-    os.system('openfoam2406 jetNasaHump -case '+tempcasefile + ' | tee -a ' + filename_console)
+    os.system('openfoam2406 jetNasaHump -case '+tempcasefile + ' | tee -a ' + output_dir+'/'+filename_console)
 
     # Run simple foam
     print("Run simplefoam", file=sys.stdout, flush=True)
-    os.system('openfoam2406 simpleFoam -case '+tempcasefile + ' | tee -a ' + filename_console)
+    os.system('openfoam2406 simpleFoam -case '+tempcasefile + ' | tee -a ' + output_dir+'/'+filename_console)
 
     # Save out wallshear data
     print("Extract reattachment point", file=sys.stdout, flush=True)
