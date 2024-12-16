@@ -87,6 +87,9 @@ def run_case(filename_console, filename, parameters):
     output_dir = './outputdata'
     tempcasefile = "./caserealisation"
 
+    # BlockMesh for info
+    os.system('openfoam2406 blockMesh -case '+tempcasefile + ' | tee -a ' + output_dir+'/'+filename_console)
+
     # Set up boundary conditions
     print("Enforcing boundary conditions jetNasaHump", file=sys.stdout, flush=True)
     os.system('openfoam2406 jetNasaHump -case '+tempcasefile + ' | tee -a ' + output_dir+'/'+filename_console)
