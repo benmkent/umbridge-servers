@@ -36,6 +36,7 @@ def configure_case(config,parameters):
 
     # Copy folder to use as realisation
     tempcasefile = "./caserealisation"
+    os.system('rm -rf ' + tempcasefile)
     os.system('cp -r ' + casefile + ' ' + tempcasefile)
     print("Create temporary case files", file=sys.stdout, flush=True)
 
