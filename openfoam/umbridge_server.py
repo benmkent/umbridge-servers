@@ -456,4 +456,6 @@ def replace_wallpressuredist(input_file, output_file, replacement_value):
 reattachment_model = ReattachmentModel()
 cf_model = CfModel()
 cp_model = CpModel()
-umbridge.serve_models([reattachment_model,cf_model,cp_model], 4242)
+pWall_model = PwallModel()
+yplus_model = yPlusModel()
+umbridge.serve_models([reattachment_model,cf_model,cp_model,yplus_model,pWall_model], 4242)
