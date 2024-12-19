@@ -97,10 +97,41 @@ def extract_pWall(filename, final_time):
     # Find latestTime (may not be final_time if converges early)
     largest_subdir = get_largest_number_subdirectory(filename)
 
+    print(filename)
+    print(largest_subdir)
+
     p = fluidfoam.readfield(filename,name="p",time_name=largest_subdir,boundary="bottomWall")
     # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
 
     return (X,p)
+
+def extract_integrals(filename):
+    beforeIntegral = None
+    afterIntegral = None
+    
+    # Open the file and process line by line
+    with open(filename+'/postProcessing/integrationBeforeJet/0/surfaceFieldValue.dat', 'r') as file:
+        for line in file:
+            # Split the line into columns and check if it matches the data format
+            parts = line.split()
+            if len(parts) == 2:  # Assuming data lines have exactly 2 columns
+                try:
+                    # Attempt to convert the second column to a float
+                    beforeIntegral = float(parts[1])
+                except ValueError:
+                    pass  # Skip lines that don't match the expected format
+    # Open the file and process line by line
+    with open(filename+'/postProcessing/integrationAfterJet/0/surfaceFieldValue.dat', 'r') as file:
+        for line in file:
+            # Split the line into columns and check if it matches the data format
+            parts = line.split()
+            if len(parts) == 2:  # Assuming data lines have exactly 2 columns
+                try:
+                    # Attempt to convert the second column to a float
+                    afterIntegral = float(parts[1])
+                except ValueError:
+                    pass  # Skip lines that don't match the expected format                
+    return [beforeIntegral,afterIntegral]
 
 def get_largest_number_subdirectory(path):
     # List all subdirectories in the specified path

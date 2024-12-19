@@ -121,6 +121,56 @@ nearWallFields1
     outputControl outputTime;
 }
 
+    integrationBeforeJet
+    {
+         type            surfaceFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        writeToFile     true;
+	    regionType		faceZone;
+        name			"xBeforeFaceZone";
+        enabled true;
+        writeControl outputTime;
+        log true;
+        writeFields false;
+		
+        operation areaIntegrate;  // Change to sum or areaAverage if needed
+
+        fields
+        (
+            p
+        );
+        // type surfaceFieldValue;
+        // libs     ("libfieldFunctionObjects.so");
+
+        // fields p;// Specify the fields to process
+        // operation areaIntegrate;  // Change to sum or areaAverage if needed
+        // regionType faceZone;
+        // name "xBeforeFaceZone";
+
+        // outputControl outputTime;
+    }
+
+    integrationAfterJet
+    {
+         type            surfaceFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        writeToFile     true;
+	    regionType		faceZone;
+        name			"xAfterFaceZone";
+        enabled true;
+        writeControl outputTime;
+        log true;
+        writeFields false;
+
+		
+        operation areaIntegrate;  // Change to sum or areaAverage if needed
+
+        fields
+        (
+            p
+        );
+    }
+
 // turbulenceFields1
 // {
 //     type    turbulenceFields;

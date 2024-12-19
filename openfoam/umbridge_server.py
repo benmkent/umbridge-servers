@@ -3,10 +3,13 @@ import os
 import sys
 import csv
 import numpy as np
+import time
 from postprocess_openfoam import extract_reattachment_point, extract_reattachment_point_from_dataseries
 from postprocess_openfoam import extract_cf, extract_cf_from_dataseries
 from postprocess_openfoam import extract_cp, extract_cp_from_dataseries
 from postprocess_openfoam import extract_yplus, extract_pWall
+from postprocess_openfoam import get_largest_number_subdirectory
+from postprocess_openfoam import extract_integrals
 
 def configure_case(config,parameters):
 
@@ -46,7 +49,7 @@ def configure_case(config,parameters):
     elif abs(config['res_tol'] - 1e-10) < 1e-14:
         res_tol_str = ''
     else:
-        res_tol_str = '_restol' + str(config['res_tol'])
+        res_tol_str = 'restol_' + str(config['res_tol'])
     print("Residual tolerance "+str(config['res_tol']), file=sys.stdout, flush=True)
 
     if 'abs_tol' not in config:
@@ -55,7 +58,7 @@ def configure_case(config,parameters):
     elif abs(config['abs_tol'] - 1e-10) < 1e-14:
         abs_tol_str = ''
     else:
-        abs_tol_str = '_abstol' + str(config['abs_tol'])
+        abs_tol_str = 'abstol_' + str(config['abs_tol'])
     print("Iterative solver tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
 
     # For realisation assign parameters
@@ -82,11 +85,27 @@ def configure_case(config,parameters):
     replacement_value_jet = f"{float(replacement_value_jet):.12g}"
     replacement_value_inflow = f"{float(replacement_value_inflow):.12g}"
 
-    filename = str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
-    filename_console = 'console_'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.log'
+    if 'qoi' in config:
+        # nasa2dwmh naming convention
+        filename = 'Jet_'+str(replacement_value_jet) + '_Inflow_' + str(replacement_value_inflow) + '_Fidelity_' + str(config['Fidelity']) +'_' +res_tol_str + abs_tol_str +'.csv'
+        filename_console = 'console_Jet_'+str(replacement_value_jet) + '_Inflow_' + str(replacement_value_inflow) + '_Fidelity_' + str(config['Fidelity']) +'_' +res_tol_str + abs_tol_str +'.log'
+    else:
+        # legacy naming convention
+        filename = str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
+        filename_console = 'console_'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.log'
+
+    # BlockMesh for info
+    os.system('openfoam2406 blockMesh -case '+tempcasefile)
+    os.system('openfoam2406 topoSet -case '+tempcasefile)
+
 
     print('======CASE CONFIGURED======')
     return filename, filename_console
+
+def copy_case(foldername):
+    tempcasefile = "./caserealisation"
+    os.system('cp -r outputdata/'+ foldername +'/* '+tempcasefile)
+
 
 def run_case(filename_console, filename, parameters):
     output_dir = './outputdata'
@@ -95,6 +114,7 @@ def run_case(filename_console, filename, parameters):
     # BlockMesh for info
     os.system('cat '+ tempcasefile+'/system/blockMeshDict' + ' | tee -a ' + output_dir+'/'+filename_console)
     os.system('openfoam2406 blockMesh -case '+tempcasefile + ' | tee -a ' + output_dir+'/'+filename_console)
+    os.system('openfoam2406 topoSet -case '+tempcasefile + ' | tee -a ' + output_dir+'/'+filename_console)
 
     # Set up boundary conditions
     print("Enforcing boundary conditions jetNasaHump", file=sys.stdout, flush=True)
@@ -135,9 +155,121 @@ def run_case(filename_console, filename, parameters):
     np.savetxt(output_dir+'/yPlus'+filename, yp, fmt='%f')
     print("yPlus max min "+str(max(Tx))+" "+str(min(Tx)))
 
+    max_iteration_number = get_largest_number_subdirectory(tempcasefile)
+    foldername = filename[0:-4]
+    os.system('mkdir -p outputdata/'+foldername)
+    os.system('cp -r ' + tempcasefile +'/' + max_iteration_number +' outputdata/'+foldername+'/' + max_iteration_number)
+
     # Clean up
     print("Clean up temporary case file", file=sys.stdout, flush=True)
     os.system('rm -r ' + tempcasefile)
+
+class Nasa2DWMHModel(umbridge.Model):
+    def __init__(self):
+        super().__init__("forward2dwmh")
+
+    def get_input_sizes(self, config):
+        return [2]
+
+    def get_output_sizes(self, config):
+        if config['qoi'] == 'reattachmentpoint' or config['qoi'] == 'exectime':
+            return [1]
+        elif config['qoi'] == 'cf' or config['qoi'] == 'cp' or config['qoi'] == 'yplus' or config['qoi'] == 'p':
+            return [1000,1000]
+        elif config['qoi'] == 'pressureintegrals':
+            return [2]
+        else:
+            raise Exception('unknown qoi')
+        
+    def __call__(self, parameters, config):
+        # First configure case based on input parameters
+        filename, filename_console = configure_case(config,parameters)
+        print("Case configured: "+filename, file=sys.stdout, flush=True)
+        foldername = filename[0:-4]
+
+        # Now check if we have saved case data
+        if os.path.exists(foldername) and os.path.isdir(foldername):
+            # Copy the final saved case data
+            copy_case(foldername)
+        else:
+            # We must run the case and save out the data
+            t = time.time()
+            run_case(filename_console, filename, parameters)
+            elapsed = time.time() - t
+            # Write the number to the file
+            with open('outputdata/exectime_'+filename, mode="w", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow([elapsed])  # Write the number as a single row
+
+            # Run case deletes the temporary case so we recreate it and copy the data
+            filename, filename_console = configure_case(config,parameters)
+            copy_case(foldername)
+
+        # Use post process to evaluate the OpenFOAM functions
+        tempcasefile = './caserealisation'
+        os.system('openfoam2406 simpleFoam -postProcess -case '+tempcasefile + ' | tee -a outputdata/'+filename_console)
+
+        # Now extract the proper QoI
+        uinf=parameters[0][1]
+        rhoinf=1.0
+        if config['qoi'] == 'reattachmentpoint':
+            print("Extract reattachment point", file=sys.stdout, flush=True)
+            (rp_value, X, Tx) = extract_reattachment_point(tempcasefile, 5000)
+            print("Reattachment point "+str(rp_value))
+            return [[rp_value]]
+        elif config['qoi'] == 'cf':
+            (cf, X, Tx) = extract_cf(tempcasefile, 999999, rhoinf, uinf)
+            X_return = np.zeros(1000)
+            X_return[0:len(X)] = X
+            cf_return = np.zeros(1000)
+            cf_return[0:len(X)] = cf
+            X_out = X_return.tolist()
+            cf_out = cf_return.tolist()
+            return [X_out, cf_out]
+        elif config['qoi'] == 'cp':
+            (cp, X, Tx) = extract_cp(tempcasefile, 999999, rhoinf, uinf)
+            X_return = np.zeros(1000)
+            X_return[0:len(X)] = X
+            cp_return = np.zeros(1000)
+            cp_return[0:len(X)] = cp
+            X_out = X_return.tolist()
+            cp_out = cp_return.tolist()
+            return [X_out, cp_out]            
+        elif config['qoi'] == 'yplus':
+            (X,Tx) = extract_yplus(tempcasefile, 5000)
+            X_return = np.zeros(1000)
+            X_return[0:len(X)] = X
+            yplus_return = np.zeros(1000)
+            yplus_return[0:len(X)] = Tx
+            X_out = X_return.tolist()
+            yplus_out = yplus_return.tolist()
+            return [X_out,yplus_out]
+        elif config['qoi'] == 'p':
+            (X, Tx) = extract_pWall(tempcasefile, 5000)
+            X_return = np.zeros(1000)
+            X_return[0:len(X)] = X
+            pwall_return = np.zeros(1000)
+            pwall_return[0:len(X)] = Tx
+            X_out = X_return.tolist()
+            pwall_out = pwall_return.tolist()
+            return [X_out,pwall_out]
+        elif config['qoi'] == 'pressureintegrals':
+            integrals = extract_integrals(tempcasefile)
+            return [integrals]
+        elif config['qoi'] == 'exectime':
+            # Read the number from the file
+            with open('outputdata/exectime_'+filename, mode="r") as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if row:  # Skip empty rows
+                        t = float(row[0])  # Convert the first value to a float
+            return [[t]]
+        else:
+            raise Exception('unknown qoi')
+        
+    def supports_evaluate(self):
+        return True
+    
 
 class ReattachmentModel(umbridge.Model):
 
@@ -488,4 +620,6 @@ cf_model = CfModel()
 cp_model = CpModel()
 pWall_model = PwallModel()
 yplus_model = yPlusModel()
-umbridge.serve_models([reattachment_model,cf_model,cp_model,yplus_model,pWall_model], 4242)
+nasa2dwmh = Nasa2DWMHModel()
+
+umbridge.serve_models([reattachment_model,cf_model,cp_model,yplus_model,pWall_model,nasa2dwmh], 4242)
