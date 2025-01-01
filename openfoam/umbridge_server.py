@@ -188,7 +188,7 @@ class Nasa2DWMHModel(umbridge.Model):
         foldername = filename[0:-4]
 
         # Now check if we have saved case data
-        if os.path.exists(foldername) and os.path.isdir(foldername):
+        if os.path.exists('outputdata/'+foldername) and os.path.isdir('outputdata/'+foldername):
             # Copy the final saved case data
             copy_case(foldername)
         else:
