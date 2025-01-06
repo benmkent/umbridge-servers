@@ -12,7 +12,6 @@ from postprocess_openfoam import get_largest_number_subdirectory
 from postprocess_openfoam import extract_integrals
 
 def configure_case(config,parameters):
-
     print("==========START CONFIGURE CASE==========")
 
     # Decide on fidelity
@@ -95,7 +94,7 @@ def configure_case(config,parameters):
         filename_console = 'console_'+ str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.log'
 
     # BlockMesh for info
-    os.system('openfoam2406 blockMesh -case '+tempcasefile)
+    # os.system('openfoam2406 blockMesh -case '+tempcasefile)
     os.system('openfoam2406 topoSet -case '+tempcasefile)
 
 
