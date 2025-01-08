@@ -39,6 +39,9 @@ def configure_case(config,parameters):
     elif config['Fidelity'] == 10:
         casefile = "./NASA_hump_data_fine"
         print("Selecting fidelity <<fine>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 11:
+        casefile = "./NASA_hump_data_coarse"
+        print("Selecting fidelity <<coarse>>", file=sys.stdout, flush=True)
     else:
         AssertionError("Unknown config")
 
