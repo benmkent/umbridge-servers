@@ -42,6 +42,9 @@ def configure_case(config,parameters):
     elif config['Fidelity'] == 11:
         casefile = "./NASA_hump_data_coarse"
         print("Selecting fidelity <<coarse>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 12:
+        casefile = "./NASA_hump_data_coarse_2"
+        print("Selecting fidelity <<coarse 2>>", file=sys.stdout, flush=True)
     else:
         AssertionError("Unknown config")
 
@@ -168,10 +171,6 @@ def run_case(filename_console, filename, parameters):
     os.system('mkdir -p outputdata/'+foldername)
     os.system('cp -r ' + tempcasefile +'/' + max_iteration_number +' outputdata/'+foldername+'/' + max_iteration_number)
 
-    # Clean up
-    print("Clean up temporary case file", file=sys.stdout, flush=True)
-    os.system('rm -r ' + tempcasefile)
-
 class Nasa2DWMHModel(umbridge.Model):
     def __init__(self):
         super().__init__("forward2dwmh")
@@ -209,9 +208,10 @@ class Nasa2DWMHModel(umbridge.Model):
                 writer = csv.writer(file)
                 writer.writerow([elapsed])  # Write the number as a single row
 
-            # Run case deletes the temporary case so we recreate it and copy the data
-            filename, filename_console = configure_case(config,parameters)
-            copy_case(foldername)
+            if 'debug' not in config:
+                # Run case usually deletes the temporary case so we recreate it and copy the data
+                filename, filename_console = configure_case(config,parameters)
+                copy_case(foldername)
 
         # Use post process to evaluate the OpenFOAM functions
         tempcasefile = './caserealisation'
