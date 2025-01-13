@@ -102,6 +102,8 @@ def configure_case(config,parameters):
     replace_res_tol_u(input_file, output_file, replacement_value)
     replacement_value = str(config['res_tol_p'])
     replace_res_tol_p(input_file, output_file, replacement_value)
+    replacement_value = str(config['res_tol'])
+    replace_res_tol(input_file, output_file, replacement_value)
     replacement_value = str(config['abs_tol'])
     replace_abs_tol(input_file, output_file, replacement_value)
 
