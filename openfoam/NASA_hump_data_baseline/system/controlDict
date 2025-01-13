@@ -180,8 +180,8 @@ functions
             {
                 type            face;
                 axis            y;
-                start           (xForUSlice 0 0);
-                end             (xForUSlice 1 0);
+                start           (XFORYSLICE 0 0);
+                end             (XFORYSLICE 1 0);
             }
         }
     }
