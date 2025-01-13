@@ -211,29 +211,26 @@ functions
 
     lineSample
     {
-        type            sample;
-        functionObjectLibs ("libsampling.so");
+        type            sets;
+        libs            ("libsampling.so");
         writeControl  outputTime;
 
-        setFormat       raw; // Output format (e.g., raw, vtk, csv)
-        interpolationScheme cellPoint;
+
+        interpolationScheme cell;
+        setFormat       raw;
+
+        fields          ( U p );
 
         sets
-        (
-            line
+        {
+            ySlice
             {
-                type    face;
-                axis    y; // Aligns with the y-axis
-                start   (0 0 0);
-                end     (0 1 0);
+                type            face;
+                axis            y;
+                start           (xForUSlice 0 0);
+                end             (xForUSlice 1 0);
             }
-        );
-
-        fields
-        (
-            U      // Velocity
-            p      // Pressure
-        );
+        }
     }
 
 }

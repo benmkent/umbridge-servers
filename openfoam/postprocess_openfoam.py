@@ -154,6 +154,22 @@ def extract_forces(filename):
                 viscous_forces = [float(components[i]) for i in range(7, 10)]         
     return [total_forces,pressure_forces,viscous_forces]
 
+def extract_linesamples(filename, final_time):
+    # Find latestTime (may not be final_time if converges early)
+    largest_subdir = get_largest_number_subdirectory(filename)
+
+    # Open the file and process line by line
+    with open(filename+'/postProcessing/lineSample/+'string(largest_subdir)'+/ySlice_p_U.xy', 'r') as file:    
+        for line in file:
+            columns = line.strip().split()
+            if len(columns) == 5:
+                row = [float(value) for value in columns]
+                data.append(row)
+
+    y, p, ux, uy, uz = zip(*data)
+
+    return (y, p, ux, uy, uz)
+
 def get_largest_number_subdirectory(path):
     # List all subdirectories in the specified path
     subdirs = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]

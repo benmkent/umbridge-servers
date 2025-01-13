@@ -11,6 +11,7 @@ from postprocess_openfoam import extract_yplus, extract_pWall
 from postprocess_openfoam import get_largest_number_subdirectory
 from postprocess_openfoam import extract_integrals
 from postprocess_openfoam import extract_forces
+from postprocess_openfoam import extract_linesamples
 
 def configure_case(config,parameters):
     print("==========START CONFIGURE CASE==========")
@@ -51,11 +52,21 @@ def configure_case(config,parameters):
     replacement_value_inflow = str(parameters[0][1])
     replace_inflow_mag(input_file, output_file,
                         replacement_value_inflow)
+
+    
     wpd = 0.0
     replacement_value = str(wpd)
     replace_wallpressuredist(input_file, output_file, replacement_value)
     # replacement_value = str(config['final_time'])
     # replace_final_time(input_file, output_file, replacement_value)
+
+    # Ste up yslice
+    if 'yslice_x' not in config:
+        config['yslice_x'] = 0.5
+    replacement_value = str(config['yslice_x'])
+    input_file = tempcasefile+"/system/controlDict"
+    output_file = input_file
+    replace_xforyslice(input_file, output_file, replacement_value)
 
     # Set up residual tolerances (could be simplified)
     if 'res_tol' not in config:
@@ -204,6 +215,8 @@ class Nasa2DWMHModel(umbridge.Model):
             return [2]
         elif config['qoi'] == 'forces':
             return [3,3,3]
+        elif config['qoi'] == 'yslice':
+            return [200,200,200,200,200]
         else:
             raise Exception('unknown qoi')
         
@@ -300,6 +313,19 @@ class Nasa2DWMHModel(umbridge.Model):
                     if row:  # Skip empty rows
                         t = float(row[0])  # Convert the first value to a float
             return [[t]]
+        elif config['qoi'] == 'yslice':
+            (y, p, ux, uy, uz) = extract_linesamples(tempcasefile, 5000)
+            y_return = np.zeros(200)
+            y_return[0:len(y)] = y
+            p_return = np.zeros(200)
+            p_return[0:len(p)] = p
+            ux_return = np.zeros(200)
+            ux_return[0:len(ux)] = ux
+            uy_return = np.zeros(200)
+            uy_return[0:len(uy)] = uy
+            uz_return = np.zeros(200)
+            uz_return[0:len(uz)] = uz
+            return [y_return.tolist(),p_return.tolist(),ux_return.tolist(),uy_return.tolist(),uz_return.tolist()]
         else:
             raise Exception('unknown qoi')
         
@@ -679,6 +705,19 @@ def replace_wallpressuredist(input_file, output_file, replacement_value):
 
     print(f"Replaced 'WALLPRESSUREDIST' with '{replacement_value}' in '{input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
+def replace_xforyslice(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'XFORYSLICE' with 'replacement_value'
+    modified_data = file_data.replace('XFORYSLICE', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'XFORYSLICE' with '{replacement_value}' in '{input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
 # Define UM-BRIDGE Models and serve
 reattachment_model = ReattachmentModel()
