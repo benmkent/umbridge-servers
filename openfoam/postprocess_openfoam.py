@@ -159,7 +159,7 @@ def extract_linesamples(filename, final_time):
     largest_subdir = get_largest_number_subdirectory(filename)
 
     # Open the file and process line by line
-    with open(filename+'/postProcessing/lineSample/'+string(largest_subdir)+'/ySlice_p_U.xy', 'r') as file:
+    with open(filename+'/postProcessing/lineSample/'+str(largest_subdir)+'/ySlice_p_U.xy', 'r') as file:
         for line in file:
             columns = line.strip().split()
             if len(columns) == 5:
