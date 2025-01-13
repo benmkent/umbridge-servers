@@ -10,33 +10,13 @@ from postprocess_openfoam import extract_cp, extract_cp_from_dataseries
 from postprocess_openfoam import extract_yplus, extract_pWall
 from postprocess_openfoam import get_largest_number_subdirectory
 from postprocess_openfoam import extract_integrals
+from postprocess_openfoam import extract_forces
 
 def configure_case(config,parameters):
     print("==========START CONFIGURE CASE==========")
 
     # Decide on fidelity
-    if config['Fidelity'] == 0:
-        casefile = "./NASA_hump_data_coarse4"
-        print("Selecting fidelity 0", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 1:
-        casefile = "./NASA_hump_data_coarse3"
-        print("Selecting fidelity 1", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 2:
-        casefile = "./NASA_hump_data_coarse2"
-        print("Selecting fidelity 2", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 3:
-        casefile = "./NASA_hump_data_coarse1"
-        print("Selecting fidelity 3", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 4:
-        casefile = "./NASA_hump_data_baseline"
-        print("Selecting fidelity 4", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == -1:
-        casefile = "./NASA_hump_data_coarse5"
-        print("Selecting fidelity -1", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == -2:
-        casefile = "./NASA_hump_data_coarse6"
-        print("Selecting fidelity -2", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 10:
+    if config['Fidelity'] == 10:
         casefile = "./NASA_hump_data_fine"
         print("Selecting fidelity <<fine>>", file=sys.stdout, flush=True)
     elif config['Fidelity'] == 11:
@@ -45,6 +25,15 @@ def configure_case(config,parameters):
     elif config['Fidelity'] == 12:
         casefile = "./NASA_hump_data_coarse_2"
         print("Selecting fidelity <<coarse 2>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 20:
+        casefile = "./NASA_hump_data_jan25_fine"
+        print("Selecting fidelity <<jan25_fine>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 21:
+        casefile = "./NASA_hump_data_jan25_coarse_1"
+        print("Selecting fidelity <<jan25_coarse_1>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 22:
+        casefile = "./NASA_hump_data_jan25_coarse_2"
+        print("Selecting fidelity <<jan25_coarse_1>>", file=sys.stdout, flush=True)
     else:
         AssertionError("Unknown config")
 
@@ -60,7 +49,7 @@ def configure_case(config,parameters):
     elif abs(config['res_tol'] - 1e-10) < 1e-14:
         res_tol_str = ''
     else:
-        res_tol_str = 'restol_' + str(config['res_tol'])
+        res_tol_str = '_restol_' + str(config['res_tol'])
     print("Residual tolerance "+str(config['res_tol']), file=sys.stdout, flush=True)
 
     if 'abs_tol' not in config:
@@ -69,7 +58,7 @@ def configure_case(config,parameters):
     elif abs(config['abs_tol'] - 1e-10) < 1e-14:
         abs_tol_str = ''
     else:
-        abs_tol_str = 'abstol_' + str(config['abs_tol'])
+        abs_tol_str = '_abstol_' + str(config['abs_tol'])
     print("Iterative solver tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
 
     # For realisation assign parameters
@@ -99,7 +88,7 @@ def configure_case(config,parameters):
     if 'qoi' in config:
         # nasa2dwmh naming convention
         filename = 'Jet_'+str(replacement_value_jet) + '_Inflow_' + str(replacement_value_inflow) + '_Fidelity_' + str(config['Fidelity']) +'_' +res_tol_str + abs_tol_str +'.csv'
-        filename_console = 'console_Jet_'+str(replacement_value_jet) + '_Inflow_' + str(replacement_value_inflow) + '_Fidelity_' + str(config['Fidelity']) +'_' +res_tol_str + abs_tol_str +'.log'
+        filename_console = 'console_Jet_'+str(replacement_value_jet) + '_Inflow_' + str(replacement_value_inflow) + '_Fidelity_' + str(config['Fidelity']) +res_tol_str + abs_tol_str +'.log'
     else:
         # legacy naming convention
         filename = str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
@@ -118,7 +107,7 @@ def copy_case(foldername):
     os.system('cp -r outputdata/'+ foldername +'/* '+tempcasefile)
 
 
-def run_case(filename_console, filename, parameters):
+def run_case(filename_console, filename, parameters,copywholecase=False):
     output_dir = './outputdata'
     tempcasefile = "./caserealisation"
 
@@ -169,7 +158,11 @@ def run_case(filename_console, filename, parameters):
     max_iteration_number = get_largest_number_subdirectory(tempcasefile)
     foldername = filename[0:-4]
     os.system('mkdir -p outputdata/'+foldername)
-    os.system('cp -r ' + tempcasefile +'/' + max_iteration_number +' outputdata/'+foldername+'/' + max_iteration_number)
+    if copywholecase == False:
+        os.system('cp -r ' + tempcasefile +'/' + max_iteration_number +' outputdata/'+foldername+'/' + max_iteration_number)
+        os.system('cp -r ' + tempcasefile +'/postProcessing' +' outputdata/'+foldername+'/postProcessing')
+    else:
+        os.system('cp -r ' + tempcasefile +' outputdata/'+foldername)
 
 class Nasa2DWMHModel(umbridge.Model):
     def __init__(self):
@@ -185,6 +178,8 @@ class Nasa2DWMHModel(umbridge.Model):
             return [1000,1000]
         elif config['qoi'] == 'pressureintegrals':
             return [2]
+        elif config['qoi'] == 'forces':
+            return [3,3,3]
         else:
             raise Exception('unknown qoi')
         
@@ -201,7 +196,13 @@ class Nasa2DWMHModel(umbridge.Model):
         else:
             # We must run the case and save out the data
             t = time.time()
-            run_case(filename_console, filename, parameters)
+            if 'saveall' not in config:
+                run_case(filename_console, filename, parameters)
+            elif config['saveall'] == 1:
+                run_case(filename_console, filename, parameters, copywholecase=True)
+            else:
+                run_case(filename_console, filename, parameters)
+
             elapsed = time.time() - t
             # Write the number to the file
             with open('outputdata/exectime_'+filename, mode="w", newline="") as file:
@@ -264,6 +265,9 @@ class Nasa2DWMHModel(umbridge.Model):
         elif config['qoi'] == 'pressureintegrals':
             integrals = extract_integrals(tempcasefile)
             return [integrals]
+        elif config['qoi'] == 'forces':
+            [total_forces,pressure_forces,viscous_forces] = extract_forces(tempcasefile)
+            return [total_forces,pressure_forces,viscous_forces]
         elif config['qoi'] == 'exectime':
             # Read the number from the file
             with open('outputdata/exectime_'+filename, mode="r") as file:

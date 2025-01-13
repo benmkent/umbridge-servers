@@ -75,7 +75,7 @@ functions
             bottomWall
             {
                 type        patch;  // Use "patch" for sampling on a specific patch
-                patches     ("bottomWall");  // Ensure the patch name matches your mesh
+                patches     (".*BottomWall");  // Ensure the patch name matches your mesh
                 interpolate false;  // Avoid interpolation if raw cell data is required
                 triangulate false;  // Optional, set to "true" for triangulated output
             }
@@ -90,7 +90,7 @@ functions
         outputControl outputTime;
 
         // Restrict to a set of patches
-        patches  ("bottomWall");
+        patches   (".*BottomWall");
     }
 
 
@@ -102,7 +102,7 @@ wallShearStress1
     outputControl outputTime;
 
     // Restrict to a set of patches
-    patches  ("bottomWall");
+    patches   (".*BottomWall");
 }
 
 
@@ -115,7 +115,7 @@ nearWallFields1
     (
         (p pWall)
     );
-    patches  ("bottomWall");
+    patches   (".*BottomWall");
     distance        WALLPRESSUREDIST;
 
     outputControl outputTime;
@@ -169,6 +169,15 @@ nearWallFields1
         (
             p
         );
+    }
+
+    forcesPostProcessing
+    {
+        type            forces;
+        libs            ("libforces.so");
+        patches         (forcesBottomWall);
+
+        enabled false;
     }
 
 // turbulenceFields1

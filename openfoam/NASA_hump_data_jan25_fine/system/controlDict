@@ -1,0 +1,212 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1606+                                |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     isoFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         5000;
+
+deltaT          1;
+
+writeControl    timeStep;
+
+writeInterval   100;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+// INLET: NASA ratio
+inlet_mag       INFLOW_MAG;
+
+// INLET: TEST ratio
+//inlet_mag       0.0;
+
+// JET: NASA ratio
+// jet_mag         23.4;
+jet_mag         JET_MAG;
+
+// JET: 90% TEST ratio
+//jet_mag         21.06;
+// JET: 10% TEST ratio
+//jet_mag         2.34;
+
+functions
+{
+    wallPressure
+    {
+        type            surfaces;
+        functionObjectLibs ("libsampling.so");
+        surfaceFormat   raw;  // You can use "vtk" if you need visualization in Paraview
+        outputControl   outputTime;
+        interpolationScheme cell;  // Sampling on cell centers
+        fields          (p);  // Sampling the pressure field
+        surfaces
+        (
+            bottomWall
+            {
+                type        patch;  // Use "patch" for sampling on a specific patch
+                patches     (bottomWall hump);  // Ensure the patch name matches your mesh
+                interpolate false;  // Avoid interpolation if raw cell data is required
+                triangulate false;  // Optional, set to "true" for triangulated output
+            }
+        );
+    }
+
+    yPlus1
+    {
+        // Mandatory entries (unmodifiable)
+        type            yPlus;
+        libs            (fieldFunctionObjects);
+        outputControl outputTime;
+
+        // Restrict to a set of patches
+        patches     (bottomWall hump);  // Ensure the patch name matches your mesh
+    }
+
+
+    wallShearStress1
+    {
+        type wallShearStress;
+        libs     ("libfieldFunctionObjects.so");
+        // Optional Entries
+        outputControl outputTime;
+
+        // Restrict to a set of patches
+        patches     (bottomWall hump);  // Ensure the patch name matches your mesh
+    }
+
+
+    nearWallFields1
+    {
+        // Mandatory entries (unmodifiable)
+        type            nearWallFields;
+        libs     ("libfieldFunctionObjects.so");
+        fields
+        (
+            (p pWall)
+        );
+        patches     (bottomWall hump);  // Ensure the patch name matches your mesh
+        distance        WALLPRESSUREDIST;
+
+        outputControl outputTime;
+    }
+
+    integrationBeforeJet
+    {
+         type            surfaceFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        writeToFile     true;
+	    regionType		faceZone;
+        name			"xBeforeFaceZone";
+        enabled true;
+        writeControl outputTime;
+        log true;
+        writeFields false;
+		
+        operation areaIntegrate;  // Change to sum or areaAverage if needed
+
+        fields
+        (
+            p
+        );
+        // type surfaceFieldValue;
+        // libs     ("libfieldFunctionObjects.so");
+
+        // fields p;// Specify the fields to process
+        // operation areaIntegrate;  // Change to sum or areaAverage if needed
+        // regionType faceZone;
+        // name "xBeforeFaceZone";
+
+        // outputControl outputTime;
+    }
+
+    integrationAfterJet
+    {
+        type            surfaceFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        writeToFile     true;
+	    regionType		faceZone;
+        name			"xAfterFaceZone";
+        enabled true;
+        writeControl outputTime;
+        log true;
+        writeFields false;
+
+		
+        operation areaIntegrate;  // Change to sum or areaAverage if needed
+
+        fields
+        (
+            p
+        );
+    }
+
+    solverInfo
+    {
+        type            solverInfo;
+        libs            ("libutilityFunctionObjects.so");
+        fields          (U p);
+        writeResidualFields yes;
+        writeControl  outputTime;
+    }
+
+    
+    forces1
+    {
+        type            forces;
+        libs            ("libforces.so");
+
+        writeControl  outputTime;
+
+        patches      (hump);  // Ensure the patch name matches your mesh
+        rho             rhoInf;     // Indicates incompressible
+
+        // Field names
+        p               p;
+        U               U;
+
+        // Reference pressure [Pa]
+        pRef            0;
+
+        // Include porosity effects?
+        porosity        no;
+
+        // Store and write volume field representations of forces and moments
+        writeFields     yes;
+
+        rhoInf      1.225;    // Fluid density
+        CofR        (0 0 0);
+        pitchAxis   (0 1 0);
+    }
+}
+// ************************************************************************* //

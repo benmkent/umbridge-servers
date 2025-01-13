@@ -133,6 +133,27 @@ def extract_integrals(filename):
                     pass  # Skip lines that don't match the expected format                
     return [beforeIntegral,afterIntegral]
 
+def extract_forces(filename):
+    total_forces = None
+    pressure_forces = None
+    viscous_forces = None
+    
+    # Open the file and process line by line
+    with open(filename+'/postProcessing/forces1/0/force.dat', 'r') as file:
+        for line in file:
+            # Split the line into columns and check if it matches the data format
+            # Input line (last line)
+
+            # Split the line into components
+            components = line.split()
+            if len(components) == 10:  # Assuming data lines have exactly 2 columns
+                # Extract the forces
+                time = float(components[0])
+                total_forces = [float(components[i]) for i in range(1, 4)]
+                pressure_forces = [float(components[i]) for i in range(4, 7)]
+                viscous_forces = [float(components[i]) for i in range(7, 10)]         
+    return [total_forces,pressure_forces,viscous_forces]
+
 def get_largest_number_subdirectory(path):
     # List all subdirectories in the specified path
     subdirs = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]

@@ -89,4 +89,52 @@ actions
             faceSet       "xAfterFaces";  // Patch name to select faces from
         }
     }
+
+    {
+        name        integrationBottomWallFaceSet;    // Name of the new face set
+        type        faceSet;   // Type of set to create
+        action      new;       // Create a new face set
+
+        source      patchToFace;  // Filter source type
+        sourceInfo
+        {
+            patch       "bottomWall";  // Patch name to select faces from
+        }
+    }
+    {
+        name        integrationBottomWallFaceSet;    // Name of the new face set
+        type        faceSet;         // Type of set to create
+        action      subset;             // Create a new face set
+
+        source      boxToFace;       // Filter source type
+        sourceInfo
+        {
+            faceSet    "xAfterFaces";      // Use previously created face set
+            min         (0 -1 -1);  // Minimum bounds (x, y, z)
+            max         (1.2 1 1);  // Maximum bounds (x, y, z)
+        }
+    }
+
+    {
+        name        bottomWallFaceSet;    // Name of the new face set
+        type        faceSet;   // Type of set to create
+        action      new;       // Create a new face set
+
+        source      patchToFace;  // Filter source type
+        sourceInfo
+        {
+            patch       "bottomWall";  // Patch name to select faces from
+        }
+    }
+    {
+        name        bottomWallFaceSet;    // Name of the new face set
+        type        faceSet;   // Type of set to create
+        action      subtract;       // Create a new face set
+
+        source      faceToFace;  // Filter source type
+        sourceInfo
+        {
+            set       "integrationBottomWallFaceSet";  // Patch name to select faces from
+        }
+    }
 );
