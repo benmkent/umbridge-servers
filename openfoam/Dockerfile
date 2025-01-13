@@ -35,14 +35,14 @@ RUN openfoam2406 blockMesh -case ./NASA_hump_data_baseline
 # Build Jan25 test meshes 
 # This is currently zero - an initial guess, perhaps from a lofi solve could be used.
 # These meshes seperate out the `hump' as a separate patch.
-RUN openfoam2406 blockMesh -case ./NASA_hump_jan25_data_fine
+RUN openfoam2406 blockMesh -case ./NASA_hump_data_jan25_fine
 #RUN openfoam2406 mapFieldsPar -consistent -case ./NASA_hump_data_jan25_fine ./NASA_hump_data_baseline
 
 RUN openfoam2406 blockMesh -case ./NASA_hump_data_coarse
-RUN openfoam2406 mapFieldsPar -consistent -case ./NASA_hump_data_jan25_coarse ./NASA_hump_jan25_data_fine
+RUN openfoam2406 mapFieldsPar -consistent -case ./NASA_hump_data_jan25_coarse ./NASA_hump_data_jan25_fine
 
 RUN openfoam2406 blockMesh -case ./NASA_hump_data_coarse_2
-RUN openfoam2406 mapFieldsPar -consistent -case ./NASA_hump_data_jan25_coarse_2 ./NASA_hump_jan25_data_fine
+RUN openfoam2406 mapFieldsPar -consistent -case ./NASA_hump_data_jan25_coarse_2 ./NASA_hump_data_jan25_fine
 
 # Once openfoam folders are configured we can start the server
 CMD python3 umbridge_server.py
