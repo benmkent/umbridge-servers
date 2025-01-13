@@ -43,24 +43,6 @@ def configure_case(config,parameters):
     os.system('cp -r ' + casefile + ' ' + tempcasefile)
     print("Create temporary case files", file=sys.stdout, flush=True)
 
-    if 'res_tol' not in config:
-        config['res_tol'] = 1e-10
-        res_tol_str = ''
-    elif abs(config['res_tol'] - 1e-10) < 1e-14:
-        res_tol_str = ''
-    else:
-        res_tol_str = '_restol_' + str(config['res_tol'])
-    print("Residual tolerance "+str(config['res_tol']), file=sys.stdout, flush=True)
-
-    if 'abs_tol' not in config:
-        config['abs_tol'] = 1e-10
-        abs_tol_str = ''
-    elif abs(config['abs_tol'] - 1e-10) < 1e-14:
-        abs_tol_str = ''
-    else:
-        abs_tol_str = '_abstol_' + str(config['abs_tol'])
-    print("Iterative solver tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
-
     # For realisation assign parameters
     input_file = tempcasefile+"/system/controlDict"
     output_file = input_file
@@ -75,10 +57,51 @@ def configure_case(config,parameters):
     # replacement_value = str(config['final_time'])
     # replace_final_time(input_file, output_file, replacement_value)
 
+    # Set up residual tolerances (could be simplified)
+    if 'res_tol' not in config:
+        config['res_tol'] = 1e-10
+        res_tol_str = ''
+    elif abs(config['res_tol'] - 1e-10) < 1e-14:
+        config['res_tol'] = 1e-10
+        res_tol_str = ''
+    else:
+        res_tol_str = '_restol_' + str(config['res_tol'])
+
+    if 'res_tol_u' not in config:
+        config['res_tol_u'] = config['res_tol']
+        res_tol_str = res_tol_str+'_resU_'+ str(config['res_tol_u'])
+    elif abs(config['res_tol_u'] - 1e-10) < 1e-14:
+        config['res_tol_u'] = 1e-10
+        res_tol_str = res_tol_str+''
+    else:
+        res_tol_str = res_tol_str+'_resU_' + str(config['res_tol_u'])
+
+    if 'res_tol_p' not in config:
+        config['res_tol_p'] = config['res_tol']
+        res_tol_str = res_tol_str+''
+    elif abs(config['res_tol_p'] - 1e-10) < 1e-14:
+        config['res_tol_p'] = 1e-10
+        res_tol_str = res_tol_str+''
+    else:
+        res_tol_str = res_tol_str+'_resP_' + str(config['res_tol_p'])
+
+    print("Residual tolerances "+res_tol_str, file=sys.stdout, flush=True)
+
+    if 'abs_tol' not in config:
+        config['abs_tol'] = 1e-10
+        abs_tol_str = ''
+    elif abs(config['abs_tol'] - 1e-10) < 1e-14:
+        abs_tol_str = ''
+    else:
+        abs_tol_str = '_abstol_' + str(config['abs_tol'])
+    print("Iterative solver tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
+
     input_file = tempcasefile+"/system/fvSolution"
     output_file = input_file
-    replacement_value = str(config['res_tol'])
-    replace_res_tol(input_file, output_file, replacement_value)
+    replacement_value = str(config['res_tol_u'])
+    replace_res_tol_u(input_file, output_file, replacement_value)
+    replacement_value = str(config['res_tol_p'])
+    replace_res_tol_p(input_file, output_file, replacement_value)
     replacement_value = str(config['abs_tol'])
     replace_abs_tol(input_file, output_file, replacement_value)
 
@@ -562,6 +585,36 @@ def replace_res_tol(input_file, output_file, replacement_value):
         f.write(modified_data)
 
     print(f"Replaced 'RES_TOL' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
+
+def replace_res_tol_u(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'RES_TOL_U' with 'replacement_value'
+    modified_data = file_data.replace('RES_TOL_U', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'RES_TOL_U' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
+
+def replace_res_tol_p(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'RES_TOL_P' with 'replacement_value'
+    modified_data = file_data.replace('RES_TOL_P', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'RES_TOL_P' with '{replacement_value}' in '{
           input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
 

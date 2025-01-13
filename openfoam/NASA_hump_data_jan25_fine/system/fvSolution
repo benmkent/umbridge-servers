@@ -60,8 +60,8 @@ SIMPLE
 
     residualControl
     {
-        p               RES_TOL;
-        U               RES_TOL;
+        p               RES_TOL_P;
+        U               RES_TOL_U;
         nuTilda         RES_TOL;
         epsilon         RES_TOL;
         k               RES_TOL;
