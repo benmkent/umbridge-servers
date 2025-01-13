@@ -186,7 +186,7 @@ def run_case(filename_console, filename, parameters,copywholecase=False):
         os.system('cp -r ' + tempcasefile +'/' + max_iteration_number +' outputdata/'+foldername+'/' + max_iteration_number)
         os.system('cp -r ' + tempcasefile +'/postProcessing' +' outputdata/'+foldername+'/postProcessing')
     else:
-        os.system('cp -r ' + tempcasefile +' outputdata/'+foldername)
+        os.system('cp -r ' + tempcasefile +'/* outputdata/'+foldername)
 
 class Nasa2DWMHModel(umbridge.Model):
     def __init__(self):
