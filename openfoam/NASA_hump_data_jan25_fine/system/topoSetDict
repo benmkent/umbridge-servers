@@ -26,7 +26,7 @@ actions
         source      patchToFace;  // Filter source type
         sourceInfo
         {
-            patch       "bottomWall";  // Patch name to select faces from
+            patch       "hump";  // Patch name to select faces from
         }
     }
     {
@@ -62,7 +62,7 @@ actions
         source      patchToFace;  // Filter source type
         sourceInfo
         {
-            patch       "bottomWall";  // Patch name to select faces from
+            patch       "hump";  // Patch name to select faces from
         }
     }
     {
