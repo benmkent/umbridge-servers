@@ -66,10 +66,9 @@ def configure_case(config,parameters):
         res_tol_str = ''
     else:
         res_tol_str = '_restol_' + str(config['res_tol'])
-
     if 'res_tol_u' not in config:
         config['res_tol_u'] = config['res_tol']
-        res_tol_str = res_tol_str+'_resU_'+ str(config['res_tol_u'])
+        res_tol_str = res_tol_str+''
     elif abs(config['res_tol_u'] - 1e-10) < 1e-14:
         config['res_tol_u'] = 1e-10
         res_tol_str = res_tol_str+''
