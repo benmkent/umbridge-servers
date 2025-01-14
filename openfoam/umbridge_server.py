@@ -245,7 +245,7 @@ class Nasa2DWMHModel(umbridge.Model):
         elif config['qoi'] == 'forces':
             return [3,3,3]
         elif config['qoi'] == 'yslice':
-            return [200,200,200,200,200]
+            return [500,500,500,500,500]
         else:
             raise Exception('unknown qoi')
         
@@ -344,15 +344,15 @@ class Nasa2DWMHModel(umbridge.Model):
             return [[t]]
         elif config['qoi'] == 'yslice':
             (y, p, ux, uy, uz) = extract_linesamples(tempcasefile, 5000)
-            y_return = np.zeros(200)
+            y_return = np.zeros(500)
             y_return[0:len(y)] = y
-            p_return = np.zeros(200)
+            p_return = np.zeros(500)
             p_return[0:len(p)] = p
-            ux_return = np.zeros(200)
+            ux_return = np.zeros(500)
             ux_return[0:len(ux)] = ux
-            uy_return = np.zeros(200)
+            uy_return = np.zeros(500)
             uy_return[0:len(uy)] = uy
-            uz_return = np.zeros(200)
+            uz_return = np.zeros(500)
             uz_return[0:len(uz)] = uz
             return [y_return.tolist(),p_return.tolist(),ux_return.tolist(),uy_return.tolist(),uz_return.tolist()]
         else:

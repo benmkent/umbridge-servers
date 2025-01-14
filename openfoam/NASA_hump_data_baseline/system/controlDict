@@ -169,7 +169,7 @@ functions
         writeControl  outputTime;
 
 
-        interpolationScheme cell;
+        interpolationScheme cellPoint;
         setFormat       raw;
 
         fields          ( U p );
@@ -178,7 +178,7 @@ functions
         {
             ySlice
             {
-                type            face;
+                type            midPoint;
                 axis            y;
                 start           (XFORYSLICE 0 0);
                 end             (XFORYSLICE 1 0);
