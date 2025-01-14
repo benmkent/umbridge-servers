@@ -301,7 +301,7 @@ class Nasa2DWMHModel(umbridge.Model):
 
         # Use post process to evaluate the OpenFOAM functions
         tempcasefile = './caserealisation'
-        os.system('openfoam2406 simpleFoam -postProcess -latestTime -case '+tempcasefile + ' | tee -a outputdata/'+filename_console)
+        os.system('openfoam2406 simpleFoam -postProcess -latestTime -case '+tempcasefile)
 
         # Now extract the proper QoI
         uinf=parameters[0][1]
