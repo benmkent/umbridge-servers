@@ -160,6 +160,11 @@ def copy_case(foldername):
         if os.path.isdir(subdir_path) and number_pattern.match(subdir):
             # Construct the target path in the temp case file
             target_dir = os.path.join(tempcasefile, subdir)
+
+            # If the target directory exists, remove it before copying
+            if os.path.exists(target_dir):
+                shutil.rmtree(target_dir)
+                print(f"Removed existing directory {target_dir}")
             
             # Copy the directory to the temp case file
             shutil.copytree(subdir_path, target_dir)
