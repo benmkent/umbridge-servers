@@ -4,6 +4,9 @@ import sys
 import csv
 import numpy as np
 import time
+import re
+import shutil
+
 from postprocess_openfoam import extract_reattachment_point, extract_reattachment_point_from_dataseries
 from postprocess_openfoam import extract_cf, extract_cf_from_dataseries
 from postprocess_openfoam import extract_cp, extract_cp_from_dataseries
@@ -139,7 +142,28 @@ def configure_case(config,parameters):
 
 def copy_case(foldername):
     tempcasefile = "./caserealisation"
-    os.system('cp -r outputdata/'+ foldername +'/* '+tempcasefile)
+
+    # List all items in the source folder
+    source_dir = f'outputdata/{foldername}'
+    if not os.path.exists(source_dir):
+        print(f"Error: Source directory {source_dir} does not exist.")
+        return
+    
+    # Create a regular expression to match directories that start with a number
+    number_pattern = re.compile(r'^\d')
+
+    # Iterate over the contents of the source directory
+    for subdir in os.listdir(source_dir):
+        subdir_path = os.path.join(source_dir, subdir)
+
+        # Check if it's a directory and starts with a number
+        if os.path.isdir(subdir_path) and number_pattern.match(subdir):
+            # Construct the target path in the temp case file
+            target_dir = os.path.join(tempcasefile, subdir)
+            
+            # Copy the directory to the temp case file
+            shutil.copytree(subdir_path, target_dir)
+            print(f"Copied {subdir} to {tempcasefile}")
 
 
 def run_case(filename_console, filename, parameters,copywholecase=False):
