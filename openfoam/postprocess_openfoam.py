@@ -6,106 +6,247 @@ import os
 import re
 import argparse
 
-def extract_reattachment_point(filename, final_time):
-    X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
+def extract_reattachment_point(filename, final_time=None):
+    """
+    Extracts the reattachment point from wall shear stress data at the bottom wall.
 
-    # Find latestTime (may not be final_time if converges early)
+    Parameters:
+        filename (str): The case directory containing the mesh and field data.
+        final_time (float, optional): The final simulation time (not used).
+
+    Returns:
+        tuple: Contains the reattachment point (x), the X-coordinates of the bottom wall, 
+               and the wall shear stress (Tx).
+    """
+    # Read the bottom wall mesh
+    X, Y, Z = fluidfoam.readmesh(filename, boundary="bottomWall")
+
+    # Identify the latest available time directory
     largest_subdir = get_largest_number_subdirectory(filename)
 
-    Tx,Ty,Tz = fluidfoam.readfield(filename,name="wallShearStress",time_name=largest_subdir,boundary="bottomWall")
-    # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
+    # Read the wall shear stress field data
+    Tx, Ty, Tz = fluidfoam.readfield(
+        filename,
+        name="wallShearStress",
+        time_name=largest_subdir,
+        boundary="bottomWall"
+    )
 
-    x = extract_reattachment_point_from_dataseries(X,Tx)
+    # Extract the reattachment point based on the data series
+    try:
+        x = extract_reattachment_point_from_dataseries(X, Tx)
+    except Exception as e:
+        raise ValueError("Error while extracting the reattachment point.") from e
 
-    return (x, X, Tx)
+    return x, X, Tx
 
-def extract_reattachment_point_from_dataseries(X,Tx):
 
-    spline = interpolate.CubicSpline(X,Tx, extrapolate=False)
+def extract_reattachment_point_from_dataseries(X, Tx):
+    """
+    Extracts the reattachment point from the wall shear stress.
 
-    r = spline.roots()
+    Parameters:
+        X : X-coordinates.
+        Tx : wall shear stress values.
 
-    # Return last root
-    if len(r) > 0:
-        x = float(r[-1])
+    Returns:
+        float: Reattachment point .
+    """
+    # Create a cubic spline interpolation for the data
+    spline = interpolate.CubicSpline(X, Tx, extrapolate=False)
+
+    # Find the roots
+    roots = spline.roots()
+
+    # Return the last root or issue a warning if none found
+    if len(roots) > 0:
+        reattachment_point = float(roots[-1])
     else:
-        print('Warning: unable to detect reattachment point -- setting to 0')
-        x = 0.0
+        print("Unable to detect reattachment point. Setting it to 0.")
+        reattachment_point = 0.0
 
-    return x
+    return reattachment_point
 
 def extract_cf(filename, final_time, rhoinf, uinf):
-    X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
+    """
+    Extracts the skin-friction coefficient (Cf) from the wall shear stress data.
 
-    # Find latestTime (may not be final_time if converges early)
+    Parameters:
+        filename (str): Case directory
+        final_time (float):Final simulation time (not used).
+        rhoinf (float): Density
+        uinf (float): Inflow velocity
+
+    Returns:
+        tuple Skin-friction coefficient (cf), the X-coordinates of the bottom wall,
+               and the wall shear stress (Tx).
+    """
+    # Read mesh
+    X, Y, Z = fluidfoam.readmesh(filename, boundary="bottomWall")
+
+    # Latest available time directory
     largest_subdir = get_largest_number_subdirectory(filename)
 
-    Tx,Ty,Tz = fluidfoam.readfield(filename,name="wallShearStress",time_name=largest_subdir,boundary="bottomWall")
-    # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
+    # Read the wall shear stress field data
+    Tx, Ty, Tz = fluidfoam.readfield(
+        filename,
+        name="wallShearStress",
+        time_name=largest_subdir,
+        boundary="bottomWall"
+    )
 
-    cf = extract_cf_from_dataseries(X,Tx, rhoinf, uinf)
-    return (cf, X, Tx)
+    # Extract the skin-friction coefficient
+    try:
+        cf = extract_cf_from_dataseries(X, Tx, rhoinf, uinf)
+    except Exception as e:
+        raise ValueError("Failed to extract the skin-friction coefficient.") from e
 
-def extract_cf_from_dataseries(X,Tx, rhoinf, uinf):
+    return cf, X, Tx
 
-    #spline = interpolate.CubicSpline(X,Tx, extrapolate=True)
+import numpy as np
 
-    #xeval = linspace(xmin, xmax, n)
-    #cf_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
+def extract_cf_from_dataseries(X, Tx, rhoinf, uinf):
+    """
+    Computes the skin-friction coefficient (Cf) from wall shear stress data.
+
+    Parameters:
+        X: X-coordinates.
+        Tx: wall shear stress values.
+        rhoinf : freestream density.
+        uinf : freestream velocity.
+
+    Returns:
+       Skin-friction coefficient.
+    """
     Tx = np.array(Tx, dtype=float)
-    cf_at_x = Tx / (0.5*rhoinf*uinf**2)
+
+    # Compute the skin-friction coefficient
+    cf_at_x = Tx / (0.5 * rhoinf * uinf**2)
 
     return cf_at_x
 
-def extract_cp(filename, final_time,rhoinf, uinf):
-    X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
+def extract_cp(filename, final_time, rhoinf, uinf):
+    """
+    Extracts the pressure coefficient (Cp) from wall pressure data.
 
-    # Find latestTime (may not be final_time if converges early)
+    Parameters:
+        filename: Case directory
+        final_time: Final simulation time (not used).
+        rhoinf: Freestream density.
+        uinf: Freestream velocity.
+
+    Returns:
+        Pressure coefficient (cp), X-coordinates of the bottom wall,
+               and the wall pressure (P).
+    """
+    # Read the bottom wall mesh
+    X, Y, Z = fluidfoam.readmesh(filename, boundary="bottomWall")
+
+    # Identify the latest available time directory
     largest_subdir = get_largest_number_subdirectory(filename)
 
-    P = fluidfoam.readfield(filename,name="pWall",time_name=largest_subdir,boundary="bottomWall")
-    # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
+    # Read the wall pressure field data
+    P = fluidfoam.readfield(
+        filename,
+        name="pWall",
+        time_name=largest_subdir,
+        boundary="bottomWall"
+    )
 
-    cp = extract_cp_from_dataseries(X,P, rhoinf, uinf)
-    return (cp, X, P)
+    # Compute the pressure coefficient
+    try:
+        cp = extract_cp_from_dataseries(X, P, rhoinf, uinf)
+    except Exception as e:
+        raise ValueError("Failed to extract the pressure coefficient.") from e
 
-def extract_cp_from_dataseries(X,Tx,rhoinf, uinf):
+    return cp, X, P
 
-    #spline = interpolate.CubicSpline(X,Tx, extrapolate=True)
 
-    #xeval = linspace(xmin, xmax, n)
-    #cp_at_x = spline(xeval) / (0.5*rhoinf*uinf**2)
-    Tx = np.array(Tx, dtype=float)
-    cp_at_x = Tx / (0.5*uinf**2)
+def extract_cp_from_dataseries(X, P, rhoinf, uinf):
+    """
+    Computes the pressure coefficient (Cp) from pressure data.
+
+    Parameters:
+        X : X-coordinates.
+        P : Pressure
+        rhoinf :Freestream density.
+        uinf : Freestream velocity.
+
+    Returns:
+        Pressure coefficient (Cp).
+    """
+    # Convert P to a NumPy array for consistency
+    P = np.array(P, dtype=float)
+
+    # Compute the pressure coefficient
+    cp_at_x = P / (0.5 * rhoinf * uinf**2)
 
     return cp_at_x
 
-def extract_yplus(filename, final_time):
-    X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
+def extract_yplus(filename, final_time=None):
+    """
+    Extracts the y+ values.
 
-    # Find latestTime (may not be final_time if converges early)
+    Parameters:
+        filename : Case directory.
+        final_time : Final simulation time (not used).
+
+    Returns:
+        X-coordinates of the bottom wall and the y+ values.
+    """
+    # Read the bottom wall mesh
+    X, Y, Z = fluidfoam.readmesh(filename, boundary="bottomWall")
+
+    # Identify the latest available time directory
     largest_subdir = get_largest_number_subdirectory(filename)
 
-    yPlus = fluidfoam.readfield(filename,name="yPlus",time_name=largest_subdir,boundary="bottomWall")
-    # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
+    # Read the y+ field data
+    yPlus = fluidfoam.readfield(
+        filename,
+        name="yPlus",
+        time_name=largest_subdir,
+        boundary="bottomWall"
+    )
 
-    return (X,yPlus)
-    
-def extract_pWall(filename, final_time):
-    X, Y, Z = fluidfoam.readmesh(filename,boundary="bottomWall")
+    return X, yPlus
 
-    # Find latestTime (may not be final_time if converges early)
+def extract_pWall(filename, final_time=None):
+    """
+    Extracts wall pressure (p) values from the bottom wall.
+
+    Parameters:
+        filename : Case directory
+        final_time : Final simulation time (not used).
+
+    Returns:
+       X-coordinates of the bottom wall and the wall pressure (p).
+    """
+    # Read the bottom wall mesh
+    X, Y, Z = fluidfoam.readmesh(filename, boundary="bottomWall")
+
+    # Identify the latest available time directory
     largest_subdir = get_largest_number_subdirectory(filename)
 
-    print(filename)
-    print(largest_subdir)
+    p = fluidfoam.readfield(
+        filename,
+        name="p",
+        time_name=largest_subdir,
+        boundary="bottomWall"
+    )
 
-    p = fluidfoam.readfield(filename,name="p",time_name=largest_subdir,boundary="bottomWall")
-    # Px,Py,Pz = fluidfoam.readfield(filename,name="p",time_name="5000",boundary="bottomWall")
+    return X, p
 
-    return (X,p)
 
 def extract_integrals(filename):
+    """
+    Extracts the integrals of pressure before and after the jet
+
+    Parameters:
+        filename : Case directory
+
+    Returns:
+        Before integral and after integral values.
+    """
     beforeIntegral = None
     afterIntegral = None
     
@@ -134,82 +275,148 @@ def extract_integrals(filename):
     return [beforeIntegral,afterIntegral]
 
 def extract_forces(filename):
+    """
+    Extracts total, pressure, and viscous forces.
+
+    Parameters:
+        filename : Case directory
+
+    Returns:
+        list: Total forces, pressure forces, and viscous forces. Each is a list of three components.
+    """
+    
     total_forces = None
     pressure_forces = None
     viscous_forces = None
     
-    # Open the file and process line by line
-    with open(filename+'/postProcessing/forces1/0/force.dat', 'r') as file:
-        for line in file:
-            # Split the line into columns and check if it matches the data format
-            # Input line (last line)
+    # Construct the file path
+    file_path = f"{filename}/postProcessing/forces1/0/force.dat"
+    
+    try:
+        with open(file_path, 'r') as file:
+            for line in file:
+                components = line.split()
+                
+                # Ensure the line has the expected number of components
+                if len(components) == 10:
+                    try:
+                        # Extract forces from the components
+                        time = float(components[0])
+                        total_forces = [float(components[i]) for i in range(1, 4)]
+                        pressure_forces = [float(components[i]) for i in range(4, 7)]
+                        viscous_forces = [float(components[i]) for i in range(7, 10)]
+                    except ValueError:
+                        print(f"Warning: Malformed data line (could not convert to float): {line}")
+                        continue  # Skip malformed lines
 
-            # Split the line into components
-            components = line.split()
-            if len(components) == 10:  # Assuming data lines have exactly 2 columns
-                # Extract the forces
-                time = float(components[0])
-                total_forces = [float(components[i]) for i in range(1, 4)]
-                pressure_forces = [float(components[i]) for i in range(4, 7)]
-                viscous_forces = [float(components[i]) for i in range(7, 10)]         
-    return [total_forces,pressure_forces,viscous_forces]
+    except FileNotFoundError:
+        print(f"Warning: File {file_path} not found.")
+        return [None, None, None]
 
-def extract_linesamples(filename, final_time):
-    # Find latestTime (may not be final_time if converges early)
+    return [total_forces, pressure_forces, viscous_forces]
+
+
+def extract_linesamples(filename, final_time=None):
+    """
+    Line sample data of position (y), pressure (p),
+    and velocity components (ux, uy, uz).
+
+    Parameters:
+        filename : Case directory
+        final_time (optional): Not Used
+
+    Returns:
+        tuple: A tuple containing five lists: y, p, ux, uy, uz.
+               - y: y coordinate
+               - p: pressure
+               - ux: x-component of velocity
+               - uy: y-component of velocity
+               - uz: z-component of velocity
+    """
+    
+    # Find the largest subdirectory (latest time step)
     largest_subdir = get_largest_number_subdirectory(filename)
+    
+    # Initialize an empty list to store the data
+    data = []
 
-    # Open the file and process line by line
-    with open(filename+'/postProcessing/lineSample/'+str(largest_subdir)+'/ySlice_p_U.xy', 'r') as file:
-        for line in file:
-            columns = line.strip().split()
-            if len(columns) == 5:
-                row = [float(value) for value in columns]
-                data.append(row)
+    # Construct the file path
+    file_path = f'{filename}/postProcessing/lineSample/{largest_subdir}/ySlice_p_U.xy'
+    
+    try:
+        with open(file_path, 'r') as file:
+            for line in file:
+                columns = line.strip().split()
 
-    y, p, ux, uy, uz = zip(*data)
+                # Ensure the line has 5 values (y, p, ux, uy, uz)
+                if len(columns) == 5:
+                    try:
+                        # Convert columns to floats and append to data
+                        row = [float(value) for value in columns]
+                        data.append(row)
+                    except ValueError:
+                        print(f"Warning: Skipping malformed line: {line.strip()}")
+    except FileNotFoundError:
+        print(f"Error: The file {file_path} was not found.")
+        return [], [], [], [], []
 
-    return (y, p, ux, uy, uz)
+    # Unpack the data into separate lists for each variable
+    if data:
+        y, p, ux, uy, uz = zip(*data)
+        return y, p, ux, uy, uz
+    else:
+        print("Warning: No valid data found in the file.")
+        return [], [], [], [], []
+
+
+import os
+import re
 
 def get_largest_number_subdirectory(path):
+    """
+    Finds the largest numerical value subdirectory.
+
+    Parameters:
+        path : Case directory 
+
+    Returns:
+        str: The largest number, or None if no such subdirectory exists.
+    """
+    
+    # Check if the directory exists
+    if not os.path.exists(path):
+        print(f"Error: The directory {path} does not exist.")
+        return None
+    
     # List all subdirectories in the specified path
     subdirs = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
 
-    # Use regex to extract numbers from subdirectory names
-    number_pattern = re.compile(r'(\d+(\.\d+)?)')
-    subdir_numbers = []
+    # If no subdirectories are found, return None
+    if not subdirs:
+        print(f"Warning: No subdirectories found in {path}.")
+        return None
     
+    # Regex pattern to match numbers (including decimal points)
+    number_pattern = re.compile(r'(\d+(\.\d+)?)')
+
+    largest_number = None
+    largest_subdir = None
+    
+    # Iterate over subdirectories to find the largest numerical value
     for subdir in subdirs:
         match = number_pattern.fullmatch(subdir)
         if match:
-            subdir_numbers.append(float(match.group(0)))
+            try:
+                num = float(match.group(0))
+                # Update largest number and corresponding subdirectory
+                if largest_number is None or num > largest_number:
+                    largest_number = num
+                    largest_subdir = subdir
+            except ValueError:
+                continue  # Skip non-numeric subdirectory names
 
-    if not subdir_numbers:
+    if largest_subdir is None:
+        print("Warning: No valid numeric subdirectories found.")
         return None
 
-    # Find the largest number
-    largest_number = max(subdir_numbers)
-    largest_subdir = str(largest_number)
-
-    # Ensure the format matches the original subdirectory name
-    if largest_subdir not in subdirs:
-        largest_subdir = f"{largest_number:.6g}"
-
     return largest_subdir
-
-# def main():
-#     # Set up the argument parser
-#     parser = argparse.ArgumentParser(description="A script to run different functions based on command-line arguments")
-
-#     # Add arguments
-#     parser.add_argument("--case", type=str, help="This is the case directory")
-
-#     # Parse the arguments
-#     args = parser.parse_args()
-
-#     if args.case == None:
-#         print("Please specify a case")
-#     else:
-#         extract_reattachment_point(args.case, final_time)
-
-# if __name__ == "__main__":
-#     main()
