@@ -142,7 +142,7 @@ def configure_case(config,parameters):
 
 def copy_case(foldername):
     tempcasefile = "./caserealisation"
-
+    
     # List all items in the source folder
     source_dir = f'outputdata/{foldername}'
     if not os.path.exists(source_dir):
@@ -151,6 +151,10 @@ def copy_case(foldername):
     
     # Create a regular expression to match directories that start with a number
     number_pattern = re.compile(r'^\d')
+    
+    # Initialize variables to track the subdirectory with the largest numerical name
+    max_value = -float('inf')
+    max_subdir = None
 
     # Iterate over the contents of the source directory
     for subdir in os.listdir(source_dir):
@@ -158,17 +162,32 @@ def copy_case(foldername):
 
         # Check if it's a directory and starts with a number
         if os.path.isdir(subdir_path) and number_pattern.match(subdir):
-            # Construct the target path in the temp case file
-            target_dir = os.path.join(tempcasefile, subdir)
+            try:
+                # Try to convert the subdirectory name to a float
+                subdir_value = float(subdir)
+                
+                # Update if this subdir has a larger value
+                if subdir_value > max_value:
+                    max_value = subdir_value
+                    max_subdir = subdir
+            except ValueError:
+                print(f"Warning: Skipping non-numeric subdirectory name '{subdir}'.")
 
-            # If the target directory exists, remove it before copying
-            if os.path.exists(target_dir):
-                shutil.rmtree(target_dir)
-                print(f"Removed existing directory {target_dir}")
-            
-            # Copy the directory to the temp case file
-            shutil.copytree(subdir_path, target_dir)
-            print(f"Copied {subdir} to {tempcasefile}")
+    # If a subdirectory with the largest numerical value was found, copy it
+    if max_subdir is not None:
+        max_subdir_path = os.path.join(source_dir, max_subdir)
+        target_dir = os.path.join(tempcasefile, max_subdir)
+
+        # If the target directory exists, remove it before copying
+        if os.path.exists(target_dir):
+            shutil.rmtree(target_dir)
+            print(f"Removed existing directory {target_dir}")
+        
+        # Copy the directory to the temp case file
+        shutil.copytree(max_subdir_path, target_dir)
+        print(f"Copied {max_subdir} to {tempcasefile}")
+    else:
+        print("No valid subdirectory with a numerical name found.")
 
 
 def run_case(filename_console, filename, parameters,copywholecase=False):
@@ -282,7 +301,7 @@ class Nasa2DWMHModel(umbridge.Model):
 
         # Use post process to evaluate the OpenFOAM functions
         tempcasefile = './caserealisation'
-        os.system('openfoam2406 simpleFoam -postProcess -case '+tempcasefile + ' | tee -a outputdata/'+filename_console)
+        os.system('openfoam2406 simpleFoam -postProcess -latestTime -case '+tempcasefile + ' | tee -a outputdata/'+filename_console)
 
         # Now extract the proper QoI
         uinf=parameters[0][1]
