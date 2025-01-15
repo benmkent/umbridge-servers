@@ -194,19 +194,45 @@ def extract_yplus(filename, final_time=None):
     Returns:
         X-coordinates of the bottom wall and the y+ values.
     """
-    # Read the bottom wall mesh
-    X, Y, Z = fluidfoam.readmesh(filename, boundary="bottomWall")
 
     # Identify the latest available time directory
     largest_subdir = get_largest_number_subdirectory(filename)
 
+    # Read the bottom wall mesh
+    X1, Y, Z = fluidfoam.readmesh(filename, boundary="bottomWall")
+
     # Read the y+ field data
-    yPlus = fluidfoam.readfield(
+    yPlus1 = fluidfoam.readfield(
         filename,
         name="yPlus",
         time_name=largest_subdir,
         boundary="bottomWall"
     )
+
+    try:
+        # Read the hump mesh
+        X2, Y, Z = fluidfoam.readmesh(filename, boundary="hump")
+        # Read the y+ field data
+        yPlus2 = fluidfoam.readfield(
+            filename,
+            name="yPlus",
+            time_name=largest_subdir,
+            boundary="hump"
+        )
+    except:
+        # If the hump is not defined
+        X2 = []
+        yPlus2 = []
+
+    dataset1 = list(zip(X1, yPlus1))
+    dataset2 = list(zip(X2, yPlus2))
+    
+    # Interleave and combine the datasets
+    combined_dataset = dataset1 + dataset2
+    
+    # Sort the combined dataset (first by x, then by y)
+    sorted_dataset = sorted(combined_dataset)
+    X, yPlus = zip(*sorted_dataset)
 
     return X, yPlus
 
