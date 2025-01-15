@@ -62,8 +62,8 @@ def extract_reattachment_point_from_dataseries(X, Tx):
     if len(roots) > 0:
         reattachment_point = float(roots[-1])
     else:
-        print("Unable to detect reattachment point. Setting it to 0.")
-        reattachment_point = 0.0
+        print("Unable to detect reattachment point. Setting it to 0.66")
+        reattachment_point = 0.66
 
     return reattachment_point
 
