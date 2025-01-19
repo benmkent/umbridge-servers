@@ -56,7 +56,6 @@ def configure_case(config,parameters):
     replace_inflow_mag(input_file, output_file,
                         replacement_value_inflow)
 
-    
     wpd = 0.0
     replacement_value = str(wpd)
     replace_wallpressuredist(input_file, output_file, replacement_value)
@@ -80,6 +79,7 @@ def configure_case(config,parameters):
         res_tol_str = ''
     else:
         res_tol_str = '_restol_' + str(config['res_tol'])
+    
     if 'res_tol_u' not in config:
         config['res_tol_u'] = config['res_tol']
         res_tol_str = res_tol_str+''
@@ -98,6 +98,15 @@ def configure_case(config,parameters):
     else:
         res_tol_str = res_tol_str+'_resP_' + str(config['res_tol_p'])
 
+    if 'res_tol_nut' not in config:
+        config['res_tol_nut'] = config['res_tol']
+        res_tol_str = res_tol_str+''
+    elif abs(config['res_tol_nut'] - 1e-10) < 1e-14:
+        config['res_tol_nut'] = 1e-10
+        res_tol_str = res_tol_str+''
+    else:
+        res_tol_str = res_tol_str+'_resnut_' + str(config['res_tol_nut'])
+
     print("Residual tolerances "+res_tol_str, file=sys.stdout, flush=True)
 
     if 'abs_tol' not in config:
@@ -107,7 +116,14 @@ def configure_case(config,parameters):
         abs_tol_str = ''
     else:
         abs_tol_str = '_abstol_' + str(config['abs_tol'])
-    print("Iterative solver tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
+    print("Iterative solver abs tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
+
+    if 'rel_tol' not in config:
+        config['rel_tol'] = 1e-3
+        abs_tol_str = ''
+    else:
+        abs_tol_str = '_reltol_' + str(config['rel_tol'])
+    print("Iterative solver rel tolerance "+str(config['rel_tol']), file=sys.stdout, flush=True)
 
     input_file = tempcasefile+"/system/fvSolution"
     output_file = input_file
@@ -115,6 +131,8 @@ def configure_case(config,parameters):
     replace_res_tol_u(input_file, output_file, replacement_value)
     replacement_value = str(config['res_tol_p'])
     replace_res_tol_p(input_file, output_file, replacement_value)
+    replacement_value = str(config['res_tol_nut'])
+    replace_res_tol_nut(input_file, output_file, replacement_value)
     replacement_value = str(config['res_tol'])
     replace_res_tol(input_file, output_file, replacement_value)
     replacement_value = str(config['abs_tol'])
@@ -691,6 +709,21 @@ def replace_res_tol_p(input_file, output_file, replacement_value):
 
     print(f"Replaced 'RES_TOL_P' with '{replacement_value}' in '{
           input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
+    
+def replace_res_tol_nut(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'RES_TOL_NU' with 'replacement_value'
+    modified_data = file_data.replace('RES_TOL_NU', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'RES_TOL_NU' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
 
 def replace_final_time(input_file, output_file, replacement_value):
@@ -722,6 +755,21 @@ def replace_abs_tol(input_file, output_file, replacement_value):
         f.write(modified_data)
 
     print(f"Replaced 'ABS_TOL' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
+
+def replace_rel_tol(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'REL_TOL' with 'replacement_value'
+    modified_data = file_data.replace('REL_TOL', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'REL_TOL' with '{replacement_value}' in '{
           input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
 
