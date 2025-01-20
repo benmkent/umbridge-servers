@@ -39,7 +39,7 @@ solvers
         solver          smoothSolver;
         smoother        GaussSeidel;
         tolerance       ABS_TOL;
-        relTol          REL_TOL
+        relTol          REL_TOL;
     }
 
     nuTilda
