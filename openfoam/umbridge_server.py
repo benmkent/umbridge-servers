@@ -120,9 +120,8 @@ def configure_case(config,parameters):
 
     if 'rel_tol' not in config:
         config['rel_tol'] = 1e-3
-        abs_tol_str = ''
     else:
-        abs_tol_str = '_reltol_' + str(config['rel_tol'])
+        abs_tol_str = abs_tol_str+'_reltol_' + str(config['rel_tol'])
     print("Iterative solver rel tolerance "+str(config['rel_tol']), file=sys.stdout, flush=True)
 
     input_file = tempcasefile+"/system/fvSolution"
