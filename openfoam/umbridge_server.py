@@ -377,8 +377,10 @@ class Nasa2DWMHModel(umbridge.Model):
             [total_forces,pressure_forces,viscous_forces] = extract_forces(tempcasefile)
             return [total_forces,pressure_forces,viscous_forces]
         elif config['qoi'] == 'residuals':
-            os.system('cp -r '+' outputdata/'+foldername+'/postProcessing '+ tempcasefile +'/postProcessing')
+            print("Extract residuals")
+            os.system('cp -r '+' outputdata/'+foldername+'/postProcessing '+ tempcasefile +'/')
             (iterations, initial_residuals, final_residuals) = extract_residuals(tempcasefile)
+
             return [iterations,initial_residuals["Ux"],final_residuals["Ux"],initial_residuals["Uy"],final_residuals["Uy"],initial_residuals["p"],final_residuals["p"],initial_residuals["nuTilda"],final_residuals["nuTilda"]]
         elif config['qoi'] == 'exectime':
             # Read the number from the file

@@ -413,13 +413,15 @@ def extract_residuals(filename):
         "p": []
     }
     
-    print("Open file")
+    print("Open file "+file_path)
     # Read and process the file
     with open(file_path, "r") as file:
         lines = file.readlines()[2:]  # Skip the header lines
         for line in lines:
             if not line.strip():  # Skip empty lines
                 continue
+            print(line)
+
             columns = line.split()  # Split line into columns based on whitespace
             
             # Extract time
