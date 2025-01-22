@@ -175,7 +175,7 @@ functions
     {
         type            solverInfo;
         libs            ("libutilityFunctionObjects.so");
-        fields          (U p);
+        fields          (U p nuTilda);
         writeResidualFields yes;
         writeControl  outputTime;
     }

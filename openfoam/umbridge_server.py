@@ -15,12 +15,16 @@ from postprocess_openfoam import get_largest_number_subdirectory
 from postprocess_openfoam import extract_integrals
 from postprocess_openfoam import extract_forces
 from postprocess_openfoam import extract_linesamples
+from postprocess_openfoam import extract_residuals
 
 def configure_case(config,parameters):
     print("==========START CONFIGURE CASE==========")
 
     # Decide on fidelity
-    if config['Fidelity'] == 10:
+    if config['Fidelity'] == 4:
+        casefile = "./NASA_hump_data_baseline"
+        print("Selecting fidelity <<fine>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 10:
         casefile = "./NASA_hump_data_fine"
         print("Selecting fidelity <<fine>>", file=sys.stdout, flush=True)
     elif config['Fidelity'] == 11:
@@ -282,6 +286,8 @@ class Nasa2DWMHModel(umbridge.Model):
             return [3,3,3]
         elif config['qoi'] == 'yslice':
             return [500,500,500,500,500]
+        elif config['qoi'] == 'residuals':
+            return [5000,5000,5000,5000,5000,5000,5000,5000,5000]
         else:
             raise Exception('unknown qoi')
         
@@ -370,6 +376,9 @@ class Nasa2DWMHModel(umbridge.Model):
         elif config['qoi'] == 'forces':
             [total_forces,pressure_forces,viscous_forces] = extract_forces(tempcasefile)
             return [total_forces,pressure_forces,viscous_forces]
+        elif config['qoi'] == 'residuals':
+            (iterations, initial_residuals, final_residuals) = extract_residuals(tempcasefile)
+            return [iterations,initial_residuals["Ux"],final_residuals["Ux"],initial_residuals["Uy"],final_residuals["Uy"],initial_residuals["p"],final_residuals["p"],initial_residuals["nuTilda"],final_residuals["nuTilda"]]
         elif config['qoi'] == 'exectime':
             # Read the number from the file
             with open('outputdata/exectime_'+filename, mode="r") as file:

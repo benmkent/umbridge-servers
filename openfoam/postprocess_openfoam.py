@@ -394,6 +394,70 @@ def extract_linesamples(filename, final_time=None):
         print("Warning: No valid data found in the file.")
         return [], [], [], [], []
 
+def extract_residuals(filename):
+    # Define the file path
+    file_path = f'{filename}/postProcessing/solverInfo/0/solverInfo.dat'
+
+    # Initialize lists to store time and residuals
+    time = []
+    initial_residuals = {
+        "Ux": [],
+        "Uy": [],
+        "nuTilda": [],
+        "p": []
+    }
+    final_residuals = {
+        "Ux": [],
+        "Uy": [],
+        "nuTilda": [],
+        "p": []
+    }
+
+    # Read and process the file
+    with open(file_path, "r") as file:
+        lines = file.readlines()[2:]  # Skip the header lines
+
+        for line in lines:
+            if not line.strip():  # Skip empty lines
+                continue
+            columns = line.split()  # Split line into columns based on whitespace
+            
+            # Extract time
+            time.append(float(columns[0]))
+            
+            # Extract initial and final residuals for each field
+            initial_residuals["Ux"].append(float(columns[2]))
+            final_residuals["Ux"].append(float(columns[3]))
+            
+            initial_residuals["Uy"].append(float(columns[5]))
+            final_residuals["Uy"].append(float(columns[6]))
+
+            if len(columns) != 19:
+                initial_residuals["nuTilda"].append(0.0)
+                final_residuals["nuTilda"].append(0.0)
+                
+                initial_residuals["p"].append(float(columns[10]))
+                final_residuals["p"].append(float(columns[11]))
+            else:
+                initial_residuals["nuTilda"].append(float(columns[10]))
+                final_residuals["nuTilda"].append(float(columns[11]))
+                
+                initial_residuals["p"].append(float(columns[15]))
+                final_residuals["p"].append(float(columns[16]))
+
+    n = len(time)
+    time.extend([0.0] * (5000 - n))
+    initial_residuals["Ux"].extend([0.0] * (5000 - n))
+    initial_residuals["Uy"].extend([0.0] * (5000 - n))
+    initial_residuals["p"].extend([0.0] * (5000 - n))
+    initial_residuals["nuTilda"].extend([0.0] * (5000 - n))
+    final_residuals["Ux"].extend([0.0] * (5000 - n))
+    final_residuals["Uy"].extend([0.0] * (5000 - n))
+    final_residuals["p"].extend([0.0] * (5000 - n))
+    final_residuals["nuTilda"].extend([0.0] * (5000 - n))
+
+
+    return (time, initial_residuals, final_residuals)
 
 import os
 import re

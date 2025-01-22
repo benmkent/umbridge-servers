@@ -186,5 +186,14 @@ functions
         }
     }
 
+    solverInfo
+    {
+        type            solverInfo;
+        libs            ("libutilityFunctionObjects.so");
+        fields          (U p nuTilda);
+        writeResidualFields yes;
+        writeControl  outputTime;
+    }
+
 }
 // ************************************************************************* //
