@@ -412,11 +412,11 @@ def extract_residuals(filename):
         "nuTilda": [],
         "p": []
     }
-
+    
+    print("Open file")
     # Read and process the file
     with open(file_path, "r") as file:
         lines = file.readlines()[2:]  # Skip the header lines
-
         for line in lines:
             if not line.strip():  # Skip empty lines
                 continue
@@ -432,7 +432,7 @@ def extract_residuals(filename):
             initial_residuals["Uy"].append(float(columns[5]))
             final_residuals["Uy"].append(float(columns[6]))
 
-            if len(columns) != 19:
+            if len(columns) < 19:
                 initial_residuals["nuTilda"].append(0.0)
                 final_residuals["nuTilda"].append(0.0)
                 
