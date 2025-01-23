@@ -297,6 +297,10 @@ class Nasa2DWMHModel(umbridge.Model):
         print("Case configured: "+filename, file=sys.stdout, flush=True)
         foldername = filename[0:-4]
 
+        if 'force_run' in config:
+            if config['force_run'] == 1 and os.path.exists('outputdata/'+foldername):
+                os.system('rm -rf outputdata/'+foldername)
+
         # Now check if we have saved case data
         if os.path.exists('outputdata/'+foldername) and os.path.isdir('outputdata/'+foldername):
             # Copy the final saved case data
