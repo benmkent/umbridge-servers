@@ -20,7 +20,14 @@ def extract_reattachment_point(filename, final_time=None):
     """
     # Read the bottom wall mesh
     X, Y, Z = fluidfoam.readmesh(filename, boundary="bottomWall")
-
+    try:
+        X_hump, Y_hump, Z_hump = fluidfoam.readmesh(filename, boundary="bottomWall")
+    except Exception as e:
+        print("Hump not found, setting it to 0")
+        X_hump = []
+        Y_hump = []
+        Z_hump = []
+    
     # Identify the latest available time directory
     largest_subdir = get_largest_number_subdirectory(filename)
 
@@ -31,6 +38,26 @@ def extract_reattachment_point(filename, final_time=None):
         time_name=largest_subdir,
         boundary="bottomWall"
     )
+
+    try:
+        Tx_hump, Ty_hump, Tz_hump = fluidfoam.readfield(
+            filename,
+            name="wallShearStress",
+            time_name=largest_subdir,
+            boundary="hump"
+        )
+    except Exception as e:
+        print("Hump not found, setting it to 0")
+        Tx_hump = []
+        Ty_hump = []
+        Tz_hump = []
+
+    if len(X_hump) > 0:
+        X = X + X_hump
+        Tx = Tx + X_hump
+
+        X, sort_pattern = zip(*sorted((x, i) for i, x in enumerate(X)))
+        Tx = [Tx[i] for i in sort_pattern]
 
     # Extract the reattachment point based on the data series
     try:
