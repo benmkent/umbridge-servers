@@ -6,7 +6,7 @@ from postprocess_openfoam import extract_reattachment_point
 def main():
     x_a = 0.0
     x_b = 1.0
-    n = 2**3+1
+    n = 2**1+1
     print(n)
     x = [np.cos(float(x) * np.pi/(n-1)) for x in range(0,n)]
     print(x)
@@ -14,7 +14,7 @@ def main():
     print(x)
 
     print("Define config dictionary")
-    config = {'Fidelity',4}
+    config = {'Fidelity':1}
     print(config)
 
     # Specify the filename
@@ -28,9 +28,9 @@ def main():
             print(str(ii))
             u = 23.4*(0.1 + (1-0.1)*z)
             v = 34.6
-            # x = run_openfoam_simulation([[u,v]], config)
+            x = run_openfoam_simulation([[u,v]], config)
             print("Simulation for "+str(u)+" jet, " + str(v) + " inflow")
-            x = run_openfoam_simulation_empty([[u,v]], config)
+            # x = run_openfoam_simulation_empty([[u,v]], config)
             print("Reattachment point " + str(x[0][0]))
 
             reattachment_pt[ii] = x[0][0]
@@ -106,7 +106,7 @@ def run_openfoam_simulation(parameters, config):
 
     # Clean up
     print("Clean up temporary case file")
-    os.system('rm -r ' + tempcasefile)
+    #os.system('rm -r ' + tempcasefile)
 
     return [[x]]
 

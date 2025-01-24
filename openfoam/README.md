@@ -10,22 +10,22 @@ where the first port number is mapped through to ```4242``` which is exposed in 
 ```
 docker run -p 4242:4242 -it benmkent/openfoam2dwmh:latest
 ```
-The compressed size of the container is 789.48 MB.
+The compressed size of the container is 787.37 MB.
 
-The Docker container a single models
-- forward
+The Docker container a single model
+- forward2dwmh
 
 ## Properties
 The parametric input is two dimensional.
 The parameters are
-- jet flow rate, values in [2.34, 23.4]
-- inflow rate, values in [3.46, 34.6].
-The output is the reattachement point of the flow.
+- jet flow rate,
+- inflow rate.
+A number of quantities of interest can be evaluated on the solution.
 
 Mapping | Dimensions	| Description
 --------|-------------|------------
 input |	[2] |	These values modify the flow properties (software does not check that input values are valid).
-output |	[1] |	The reattachement point of the flow after the hump.
+output |	[varied] |	Various quantites of interest as detailed below.
 
 The model supports the UM-BRIDGE evaluate feature.
 
@@ -37,27 +37,43 @@ ApplyJacobian|	False
 ApplyHessian|	False
 
 ### Config
-Dictionary Key | Default value | User control | Description
----------------|---------------|--------------|-------------
-Fidelity       | n/a           | 1,2,3,4      | Selects one of four meshes, with coarsest fidelity 1 and finest fidelity 4.
-res_tol        |  1e-10        | Float        | Tol on the residual in the iterative solvers in the simpleFoam solver.
+Dictionary Key | Default value | User control          | Description
+---------------|---------------|-----------------------|-------------
+Fidelity       |               | 20                    | Fine mesh (January 25)
+               |               | 11                    | Intermediate mesh (January 25)
+               |               | 12                    | Coarse mesh (January 25)
+               |               | 4                     | Baseline mesh
+qoi            |               | "reattachmentpoint"   | Flow reattachment point
+               |               | "exectime"            | Solver execution time
+               |               | "cf"                  | Friction coefficient on bottom boundary
+               |               | "cp"                  | Pressure coefficient on bottom boundary
+               |               | "yplus"               | yPlus on bottom boundary
+               |               | "p"                   | Pressure on bottom boundary
+               |               | "forces"              | Forces on hump (total, pressure, viscous)
+               |               | "residuals"           | Solver residuals at each simplefoam iteration
+               |               | "yslice"              | Ux at a vertical slice in the domain (default x=0.5, otherwise specify "yslice_x" in config.
+abs_tol        |  1e-10         | Float                | Absolute tolerance for iterative LA solvers in each simplefoam iteration.
+rel_tol        |  1e-3         | Float                 | Relative tolerance for iterative LA solvers in each simplefoam iteration.
+res_tol_u      |  1e-10         | Float                | Tolerance for velocity residuals in simplefoam.
+res_tol_p      |  1e-10         | Float                | Tolerance for pressure residual in simplefoam.
+res_tol_nut    |  1e-10         | Float                | Tolerance for nuTilda residual in simplefoam.
+
+Notes:
+- Unintuative mesh numbering is a consequence of legacy meshes.
+- Computation of forces QoI is not availible on the baseline mesh.
 
 ## Implementation details
 ### umbridge-server.py
 This defines the UM-BRIDGE interfaces for the test problem.
 This copies the case file for the selected fidelity into a temporary folder.
 The simpleFoam solver is applied to the temporary folder.
-5000 iterations are performed.
-The wallShearStress is extracted and posprocessed using Python.
+Either 5000 iterations are performed or the case terminates early if the residaul tolerances are satisfied.
+OpenFOAM postprocessing is applied.
 It is saved to the directory ```./outputdata```.
-A cubic spline is used to interpolate the discrete wallShearStress data along the bottomWall of the domain.
-The final root (change in sign of wallShearStress) indicates the reattachment point.
-This is the QoI and is returned.
+Python based post processing extracts the QoI.
 
 ### NASA_hump_data_*
-These files contain the blockMesh definitions for the four fidelities.
-The meshes are constructed and an initial condition prescribed by the data in NASA_hump_data_baseline.
-This occurs during the building of the Docker image (see Dockerfile).
+These files contain the case definitions for each of the fidelities.
 
 ### Kubernetes files
 pv.yaml and pvc.yaml are used to bind the directory ```./outputdata``` to a folder on the host machine.
