@@ -24,15 +24,6 @@ def configure_case(config,parameters):
     if config['Fidelity'] == 4:
         casefile = "./NASA_hump_data_baseline"
         print("Selecting fidelity <<fine>>", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 10:
-        casefile = "./NASA_hump_data_fine"
-        print("Selecting fidelity <<fine>>", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 11:
-        casefile = "./NASA_hump_data_coarse"
-        print("Selecting fidelity <<coarse>>", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 12:
-        casefile = "./NASA_hump_data_coarse_2"
-        print("Selecting fidelity <<coarse 2>>", file=sys.stdout, flush=True)
     elif config['Fidelity'] == 20:
         casefile = "./NASA_hump_data_jan25_fine"
         print("Selecting fidelity <<jan25_fine>>", file=sys.stdout, flush=True)
@@ -42,6 +33,24 @@ def configure_case(config,parameters):
     elif config['Fidelity'] == 22:
         casefile = "./NASA_hump_data_jan25_coarse_2"
         print("Selecting fidelity <<jan25_coarse_2>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 30:
+        casefile = "./NASA_hump_data_jan25_fine"
+        print("Selecting fidelity <<jan25_fine>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 31:
+        casefile = "./NASA_hump_data_jan25_coarse_1"
+        print("Selecting fidelity <<jan25_coarse_1>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 32:
+        casefile = "./NASA_hump_data_jan25_coarse_2"
+        print("Selecting fidelity <<jan25_coarse_2>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 40:
+        casefile = "./NASA_hump_data_jan25_fine_zero_ic"
+        print("Selecting fidelity <<NASA_hump_data_jan25_fine_zero_ic>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 41:
+        casefile = "./NASA_hump_data_jan25_coarse_1_zero_ic"
+        print("Selecting fidelity <<NASA_hump_data_jan25_coarse_1_zero_ic>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 42:
+        casefile = "./NASA_hump_data_jan25_coarse_2_zero_ic"
+        print("Selecting fidelity <<NASA_hump_data_jan25_coarse_2_zero_ic>>", file=sys.stdout, flush=True)
     else:
         AssertionError("Unknown config")
 
