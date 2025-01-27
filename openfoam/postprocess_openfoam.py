@@ -21,7 +21,7 @@ def extract_reattachment_point(filename, final_time=None):
     # Read the bottom wall mesh
     X, Y, Z = fluidfoam.readmesh(filename, boundary="bottomWall")
     try:
-        X_hump, Y_hump, Z_hump = fluidfoam.readmesh(filename, boundary="bottomWall")
+        X_hump, Y_hump, Z_hump = fluidfoam.readmesh(filename, boundary="hump")
     except Exception as e:
         print("Hump not found, setting it to 0")
         X_hump = []
