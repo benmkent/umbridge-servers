@@ -53,8 +53,8 @@ def extract_reattachment_point(filename, final_time=None):
         Tz_hump = []
 
     if len(X_hump) > 0:
-        X = X + X_hump
-        Tx = Tx + X_hump
+        X.extend(X_hump)
+        Tx.extend(Tx_hump)
 
         X, sort_pattern = zip(*sorted((x, i) for i, x in enumerate(X)))
         Tx = [Tx[i] for i in sort_pattern]
