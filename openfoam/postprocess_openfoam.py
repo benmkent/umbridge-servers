@@ -24,9 +24,8 @@ def extract_reattachment_point(filename, final_time=None):
         X_hump, Y_hump, Z_hump = fluidfoam.readmesh(filename, boundary="hump")
     except Exception as e:
         print("Hump not found, setting it to 0")
-        X_hump = []
-        Y_hump = []
-        Z_hump = []
+        X_hump, Y_hump, Z_hump = np.array([]), np.array([]), np.array([])
+
     
     # Identify the latest available time directory
     largest_subdir = get_largest_number_subdirectory(filename)
@@ -48,16 +47,16 @@ def extract_reattachment_point(filename, final_time=None):
         )
     except Exception as e:
         print("Hump not found, setting it to 0")
-        Tx_hump = []
-        Ty_hump = []
-        Tz_hump = []
+        Tx_hump, Ty_hump, Tz_hump = np.array([]), np.array([]), np.array([])
 
-    if len(X_hump) > 0:
-        X.extend(X_hump)
-        Tx.extend(Tx_hump)
 
-        X, sort_pattern = zip(*sorted((x, i) for i, x in enumerate(X)))
-        Tx = [Tx[i] for i in sort_pattern]
+    if X_hump.size > 0:
+        X = np.concatenate((X, X_hump))
+        Tx = np.concatenate((Tx, Tx_hump))
+
+        sort_indices = np.argsort(X)
+        X = X[sort_indices]
+        Tx = Tx[sort_indices]
 
     # Extract the reattachment point based on the data series
     try:
