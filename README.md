@@ -1,4 +1,8 @@
 # UM-BRIDGE Servers
+[![Build and Push Docker Image (OpenFOAM)](https://github.com/benmkent/umbridge-servers/actions/workflows/docker-image-openfoam.yml/badge.svg)](https://github.com/benmkent/umbridge-servers/actions/workflows/docker-image-openfoam.yml)
+[![Build and Push Docker Image (Cookies)](https://github.com/benmkent/umbridge-servers/actions/workflows/docker-image-cookie.yml/badge.svg)](https://github.com/benmkent/umbridge-servers/actions/workflows/docker-image-cookie.yml)
+[![Build and Push Docker Image (Double Glazing)](https://github.com/benmkent/umbridge-servers/actions/workflows/docker-image-doubleglazing.yml/badge.svg)](https://github.com/benmkent/umbridge-servers/actions/workflows/docker-image-doubleglazing.yml)
+[![Build and Push Docker Image (Darcy)](https://github.com/benmkent/umbridge-servers/actions/workflows/darcy.yml/badge.svg)](https://github.com/benmkent/umbridge-servers/actions/workflows/darcy.yml)
 
 This repository contains the code and Dockerfiles for containers to be used with [UM-BRIDGE](https://github.com/UM-Bridge/umbridge).
 
