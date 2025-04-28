@@ -1,0 +1,92 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2406                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    arch        "LSB;label=32;scalar=64";
+    class       dictionary;
+    location    "system";
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+actions
+(
+    {
+        name        xBeforeFaces;    // Name of the new face set
+        type        faceSet;   // Type of set to create
+        action      new;       // Create a new face set
+
+        source      patchToFace;  // Filter source type
+        sourceInfo
+        {
+            patch       "hump";  // Patch name to select faces from
+        }
+    }
+    {
+        name        xBeforeFaces;    // Name of the new face set
+        type        faceSet;         // Type of set to create
+        action      subset;             // Create a new face set
+
+        source      boxToFace;       // Filter source type
+        sourceInfo
+        {
+            faceSet    "xBeforeFaces";      // Use previously created face set
+            min         (0.0 -1 -1);  // Minimum bounds (x, y, z)
+            max         (0.654157 1 1);  // Maximum bounds (x, y, z)
+        }
+    }
+    {
+        name        xBeforeFaceZone;    // Name of the new face set
+        type        faceZoneSet;   // Type of set to create
+        action      new;       // Create a new face set
+
+        source      setToFaceZone;  // Filter source type
+        sourceInfo
+        {
+            faceSet       "xBeforeFaces";  // Patch name to select faces from
+        }
+    }
+
+    {
+        name        xAfterFaces;    // Name of the new face set
+        type        faceSet;   // Type of set to create
+        action      new;       // Create a new face set
+
+        source      patchToFace;  // Filter source type
+        sourceInfo
+        {
+            patch       "hump";  // Patch name to select faces from
+        }
+    }
+    {
+        name        xAfterFaces;    // Name of the new face set
+        type        faceSet;         // Type of set to create
+        action      subset;             // Create a new face set
+
+        source      boxToFace;       // Filter source type
+        sourceInfo
+        {
+            faceSet    "xAfterFaces";      // Use previously created face set
+            min         (0.658481 -1 -1);  // Minimum bounds (x, y, z)
+            max         (1.2 1 1);  // Maximum bounds (x, y, z)
+        }
+    }
+    {
+        name        xAfterFaceZone;    // Name of the new face set
+        type        faceZoneSet;   // Type of set to create
+        action      new;       // Create a new face set
+
+        source      setToFaceZone;  // Filter source type
+        sourceInfo
+        {
+            faceSet       "xAfterFaces";  // Patch name to select faces from
+        }
+    }
+);

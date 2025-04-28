@@ -94,32 +94,32 @@ functions
     }
 
 
-wallShearStress1
-{
-    type wallShearStress;
-    libs     ("libfieldFunctionObjects.so");
-    // Optional Entries
-    outputControl outputTime;
+    wallShearStress1
+    {
+        type wallShearStress;
+        libs     ("libfieldFunctionObjects.so");
+        // Optional Entries
+        outputControl outputTime;
 
-    // Restrict to a set of patches
-    patches  ("bottomWall");
-}
+        // Restrict to a set of patches
+        patches  ("bottomWall");
+    }
 
 
-nearWallFields1
-{
-    // Mandatory entries (unmodifiable)
-    type            nearWallFields;
-    libs     ("libfieldFunctionObjects.so");
-    fields
-    (
-        (p pWall)
-    );
-    patches  ("bottomWall");
-    distance        WALLPRESSUREDIST;
+    nearWallFields1
+    {
+        // Mandatory entries (unmodifiable)
+        type            nearWallFields;
+        libs     ("libfieldFunctionObjects.so");
+        fields
+        (
+            (p pWall)
+        );
+        patches  ("bottomWall");
+        distance        WALLPRESSUREDIST;
 
-    outputControl outputTime;
-}
+        outputControl outputTime;
+    }
 
     integrationBeforeJet
     {
@@ -139,15 +139,6 @@ nearWallFields1
         (
             p
         );
-        // type surfaceFieldValue;
-        // libs     ("libfieldFunctionObjects.so");
-
-        // fields p;// Specify the fields to process
-        // operation areaIntegrate;  // Change to sum or areaAverage if needed
-        // regionType faceZone;
-        // name "xBeforeFaceZone";
-
-        // outputControl outputTime;
     }
 
     integrationAfterJet
@@ -171,13 +162,38 @@ nearWallFields1
         );
     }
 
-// turbulenceFields1
-// {
-//     type    turbulenceFields;
-//     libs    ("libfieldFunctionObjects.so");
-//     fields  (nut nuEff R);
-// }
-// }
+    lineSample
+    {
+        type            sets;
+        libs            ("libsampling.so");
+        writeControl  outputTime;
+
+
+        interpolationScheme cellPoint;
+        setFormat       raw;
+
+        fields          ( U p );
+
+        sets
+        {
+            ySlice
+            {
+                type            midPoint;
+                axis            y;
+                start           (XFORYSLICE 0 0);
+                end             (XFORYSLICE 1 0);
+            }
+        }
+    }
+
+    solverInfo
+    {
+        type            solverInfo;
+        libs            ("libutilityFunctionObjects.so");
+        fields          (U p nuTilda);
+        writeResidualFields yes;
+        writeControl  outputTime;
+    }
 
 }
 // ************************************************************************* //

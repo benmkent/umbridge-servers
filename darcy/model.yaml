@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-cookies
+spec:
+  selector:
+    matchLabels:
+      app: cookies
+  replicas: 6
+  template:
+    metadata:
+      labels:
+        app: cookies
+    spec:
+      containers:
+      - name: cookies
+        image: benmkent/cookiebenchmark:latest
+        imagePullPolicy: "Always"
+        env:
+        - name: OMP_NUM_THREADS
+          value: "1"
+        resources:
+          requests:
+            cpu: 1
+            memory: 2Gi
+          limits:
+            cpu: 1
+            memory: 2Gi

@@ -107,6 +107,42 @@ spec:
                 port:
                   number: 80
 ---
+# Service for Darcy application
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-darcy
+  namespace: default
+  annotations:
+    haproxy.org/load-balance: "leastconn"  # Use least connections for load balancing
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 4242
+  selector:
+    app: darcy
+---
+# Ingress for Darcy application
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: darcy-ingress
+  annotations:
+    haproxy.org/path-rewrite: /darcy/(.*) /\1
+spec:
+  ingressClassName: haproxy
+  rules:
+    - http:
+        paths:
+          - path: /darcy
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-darcy
+                port:
+                  number: 80
+---
 # ConfigMap for HAProxy Ingress Controller
 apiVersion: v1
 kind: ConfigMap

@@ -4,47 +4,53 @@ import sys
 import csv
 import numpy as np
 import time
+import re
+import shutil
+
 from postprocess_openfoam import extract_reattachment_point, extract_reattachment_point_from_dataseries
 from postprocess_openfoam import extract_cf, extract_cf_from_dataseries
 from postprocess_openfoam import extract_cp, extract_cp_from_dataseries
 from postprocess_openfoam import extract_yplus, extract_pWall
 from postprocess_openfoam import get_largest_number_subdirectory
 from postprocess_openfoam import extract_integrals
+from postprocess_openfoam import extract_forces
+from postprocess_openfoam import extract_linesamples
+from postprocess_openfoam import extract_residuals
 
 def configure_case(config,parameters):
     print("==========START CONFIGURE CASE==========")
 
     # Decide on fidelity
-    if config['Fidelity'] == 0:
-        casefile = "./NASA_hump_data_coarse4"
-        print("Selecting fidelity 0", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 1:
-        casefile = "./NASA_hump_data_coarse3"
-        print("Selecting fidelity 1", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 2:
-        casefile = "./NASA_hump_data_coarse2"
-        print("Selecting fidelity 2", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 3:
-        casefile = "./NASA_hump_data_coarse1"
-        print("Selecting fidelity 3", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 4:
+    if config['Fidelity'] == 4:
         casefile = "./NASA_hump_data_baseline"
-        print("Selecting fidelity 4", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == -1:
-        casefile = "./NASA_hump_data_coarse5"
-        print("Selecting fidelity -1", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == -2:
-        casefile = "./NASA_hump_data_coarse6"
-        print("Selecting fidelity -2", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 10:
-        casefile = "./NASA_hump_data_fine"
         print("Selecting fidelity <<fine>>", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 11:
-        casefile = "./NASA_hump_data_coarse"
-        print("Selecting fidelity <<coarse>>", file=sys.stdout, flush=True)
-    elif config['Fidelity'] == 12:
-        casefile = "./NASA_hump_data_coarse_2"
-        print("Selecting fidelity <<coarse 2>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 20:
+        casefile = "./NASA_hump_data_jan25_fine"
+        print("Selecting fidelity <<jan25_fine>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 21:
+        casefile = "./NASA_hump_data_jan25_coarse_1"
+        print("Selecting fidelity <<jan25_coarse_1>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 22:
+        casefile = "./NASA_hump_data_jan25_coarse_2"
+        print("Selecting fidelity <<jan25_coarse_2>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 30:
+        casefile = "./NASA_hump_data_jan25_fine"
+        print("Selecting fidelity <<jan25_fine>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 31:
+        casefile = "./NASA_hump_data_jan25_coarse_1"
+        print("Selecting fidelity <<jan25_coarse_1>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 32:
+        casefile = "./NASA_hump_data_jan25_coarse_2"
+        print("Selecting fidelity <<jan25_coarse_2>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 40:
+        casefile = "./NASA_hump_data_jan25_fine_zero_ic"
+        print("Selecting fidelity <<NASA_hump_data_jan25_fine_zero_ic>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 41:
+        casefile = "./NASA_hump_data_jan25_coarse_1_zero_ic"
+        print("Selecting fidelity <<NASA_hump_data_jan25_coarse_1_zero_ic>>", file=sys.stdout, flush=True)
+    elif config['Fidelity'] == 42:
+        casefile = "./NASA_hump_data_jan25_coarse_2_zero_ic"
+        print("Selecting fidelity <<NASA_hump_data_jan25_coarse_2_zero_ic>>", file=sys.stdout, flush=True)
     else:
         AssertionError("Unknown config")
 
@@ -54,24 +60,6 @@ def configure_case(config,parameters):
     os.system('cp -r ' + casefile + ' ' + tempcasefile)
     print("Create temporary case files", file=sys.stdout, flush=True)
 
-    if 'res_tol' not in config:
-        config['res_tol'] = 1e-10
-        res_tol_str = ''
-    elif abs(config['res_tol'] - 1e-10) < 1e-14:
-        res_tol_str = ''
-    else:
-        res_tol_str = 'restol_' + str(config['res_tol'])
-    print("Residual tolerance "+str(config['res_tol']), file=sys.stdout, flush=True)
-
-    if 'abs_tol' not in config:
-        config['abs_tol'] = 1e-10
-        abs_tol_str = ''
-    elif abs(config['abs_tol'] - 1e-10) < 1e-14:
-        abs_tol_str = ''
-    else:
-        abs_tol_str = 'abstol_' + str(config['abs_tol'])
-    print("Iterative solver tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
-
     # For realisation assign parameters
     input_file = tempcasefile+"/system/controlDict"
     output_file = input_file
@@ -80,16 +68,85 @@ def configure_case(config,parameters):
     replacement_value_inflow = str(parameters[0][1])
     replace_inflow_mag(input_file, output_file,
                         replacement_value_inflow)
+
     wpd = 0.0
     replacement_value = str(wpd)
     replace_wallpressuredist(input_file, output_file, replacement_value)
     # replacement_value = str(config['final_time'])
     # replace_final_time(input_file, output_file, replacement_value)
 
+    # Ste up yslice
+    if 'yslice_x' not in config:
+        config['yslice_x'] = 0.5
+    replacement_value = str(config['yslice_x'])
+    input_file = tempcasefile+"/system/controlDict"
+    output_file = input_file
+    replace_xforyslice(input_file, output_file, replacement_value)
+
+    # Set up residual tolerances (could be simplified)
+    if 'res_tol' not in config:
+        config['res_tol'] = 1e-10
+        res_tol_str = ''
+    elif abs(config['res_tol'] - 1e-10) < 1e-14:
+        config['res_tol'] = 1e-10
+        res_tol_str = ''
+    else:
+        res_tol_str = '_restol_' + str(config['res_tol'])
+    
+    if 'res_tol_u' not in config:
+        config['res_tol_u'] = config['res_tol']
+        res_tol_str = res_tol_str+''
+    elif abs(config['res_tol_u'] - 1e-10) < 1e-14:
+        config['res_tol_u'] = 1e-10
+        res_tol_str = res_tol_str+''
+    else:
+        res_tol_str = res_tol_str+'_resU_' + str(config['res_tol_u'])
+
+    if 'res_tol_p' not in config:
+        config['res_tol_p'] = config['res_tol']
+        res_tol_str = res_tol_str+''
+    elif abs(config['res_tol_p'] - 1e-10) < 1e-14:
+        config['res_tol_p'] = 1e-10
+        res_tol_str = res_tol_str+''
+    else:
+        res_tol_str = res_tol_str+'_resP_' + str(config['res_tol_p'])
+
+    if 'res_tol_nut' not in config:
+        config['res_tol_nut'] = config['res_tol']
+        res_tol_str = res_tol_str+''
+    elif abs(config['res_tol_nut'] - 1e-10) < 1e-14:
+        config['res_tol_nut'] = 1e-10
+        res_tol_str = res_tol_str+''
+    else:
+        res_tol_str = res_tol_str+'_resnut_' + str(config['res_tol_nut'])
+
+    print("Residual tolerances "+res_tol_str, file=sys.stdout, flush=True)
+
+    if 'abs_tol' not in config:
+        config['abs_tol'] = 1e-10
+        abs_tol_str = ''
+    elif abs(config['abs_tol'] - 1e-10) < 1e-14:
+        abs_tol_str = ''
+    else:
+        abs_tol_str = '_abstol_' + str(config['abs_tol'])
+    print("Iterative solver abs tolerance "+str(config['abs_tol']), file=sys.stdout, flush=True)
+
+    if 'rel_tol' not in config:
+        config['rel_tol'] = 1e-3
+    else:
+        abs_tol_str = abs_tol_str+'_reltol_' + str(config['rel_tol'])
+    print("Iterative solver rel tolerance "+str(config['rel_tol']), file=sys.stdout, flush=True)
+
     input_file = tempcasefile+"/system/fvSolution"
     output_file = input_file
-    replacement_value = str(config['res_tol'])
-    replace_res_tol(input_file, output_file, replacement_value)
+    replacement_value = str(config['res_tol_u'])
+    replace_res_tol_u(input_file, output_file, replacement_value)
+    replacement_value = str(config['res_tol_p'])
+    replace_res_tol_p(input_file, output_file, replacement_value)
+    replacement_value = str(config['res_tol_nut'])
+    replace_res_tol_nut(input_file, output_file, replacement_value)
+    replacement_value = str(config['rel_tol'])
+    replace_rel_tol(input_file, output_file, replacement_value)
     replacement_value = str(config['abs_tol'])
     replace_abs_tol(input_file, output_file, replacement_value)
 
@@ -99,7 +156,7 @@ def configure_case(config,parameters):
     if 'qoi' in config:
         # nasa2dwmh naming convention
         filename = 'Jet_'+str(replacement_value_jet) + '_Inflow_' + str(replacement_value_inflow) + '_Fidelity_' + str(config['Fidelity']) +'_' +res_tol_str + abs_tol_str +'.csv'
-        filename_console = 'console_Jet_'+str(replacement_value_jet) + '_Inflow_' + str(replacement_value_inflow) + '_Fidelity_' + str(config['Fidelity']) +'_' +res_tol_str + abs_tol_str +'.log'
+        filename_console = 'console_Jet_'+str(replacement_value_jet) + '_Inflow_' + str(replacement_value_inflow) + '_Fidelity_' + str(config['Fidelity']) +res_tol_str + abs_tol_str +'.log'
     else:
         # legacy naming convention
         filename = str(replacement_value_jet) + 'Inflow' + str(replacement_value_inflow) + 'Fidelity' + str(config['Fidelity']) + res_tol_str + abs_tol_str +'.csv'
@@ -115,10 +172,55 @@ def configure_case(config,parameters):
 
 def copy_case(foldername):
     tempcasefile = "./caserealisation"
-    os.system('cp -r outputdata/'+ foldername +'/* '+tempcasefile)
+    
+    # List all items in the source folder
+    source_dir = f'outputdata/{foldername}'
+    if not os.path.exists(source_dir):
+        print(f"Error: Source directory {source_dir} does not exist.")
+        return
+    
+    # Create a regular expression to match directories that start with a number
+    number_pattern = re.compile(r'^\d')
+    
+    # Initialize variables to track the subdirectory with the largest numerical name
+    max_value = -float('inf')
+    max_subdir = None
+
+    # Iterate over the contents of the source directory
+    for subdir in os.listdir(source_dir):
+        subdir_path = os.path.join(source_dir, subdir)
+
+        # Check if it's a directory and starts with a number
+        if os.path.isdir(subdir_path) and number_pattern.match(subdir):
+            try:
+                # Try to convert the subdirectory name to a float
+                subdir_value = float(subdir)
+                
+                # Update if this subdir has a larger value
+                if subdir_value > max_value:
+                    max_value = subdir_value
+                    max_subdir = subdir
+            except ValueError:
+                print(f"Warning: Skipping non-numeric subdirectory name '{subdir}'.")
+
+    # If a subdirectory with the largest numerical value was found, copy it
+    if max_subdir is not None:
+        max_subdir_path = os.path.join(source_dir, max_subdir)
+        target_dir = os.path.join(tempcasefile, max_subdir)
+
+        # If the target directory exists, remove it before copying
+        if os.path.exists(target_dir):
+            shutil.rmtree(target_dir)
+            print(f"Removed existing directory {target_dir}")
+        
+        # Copy the directory to the temp case file
+        shutil.copytree(max_subdir_path, target_dir)
+        print(f"Copied {max_subdir} to {tempcasefile}")
+    else:
+        print("No valid subdirectory with a numerical name found.")
 
 
-def run_case(filename_console, filename, parameters):
+def run_case(filename_console, filename, parameters,copywholecase=False):
     output_dir = './outputdata'
     tempcasefile = "./caserealisation"
 
@@ -169,7 +271,11 @@ def run_case(filename_console, filename, parameters):
     max_iteration_number = get_largest_number_subdirectory(tempcasefile)
     foldername = filename[0:-4]
     os.system('mkdir -p outputdata/'+foldername)
-    os.system('cp -r ' + tempcasefile +'/' + max_iteration_number +' outputdata/'+foldername+'/' + max_iteration_number)
+    if copywholecase == False:
+        os.system('cp -r ' + tempcasefile +'/' + max_iteration_number +' outputdata/'+foldername+'/' + max_iteration_number)
+        os.system('cp -r ' + tempcasefile +'/postProcessing' +' outputdata/'+foldername+'/postProcessing')
+    else:
+        os.system('cp -r ' + tempcasefile +'/* outputdata/'+foldername)
 
 class Nasa2DWMHModel(umbridge.Model):
     def __init__(self):
@@ -185,6 +291,12 @@ class Nasa2DWMHModel(umbridge.Model):
             return [1000,1000]
         elif config['qoi'] == 'pressureintegrals':
             return [2]
+        elif config['qoi'] == 'forces':
+            return [3,3,3]
+        elif config['qoi'] == 'yslice':
+            return [500,500,500,500,500]
+        elif config['qoi'] == 'residuals':
+            return [5000,5000,5000,5000,5000,5000,5000,5000,5000]
         else:
             raise Exception('unknown qoi')
         
@@ -194,6 +306,10 @@ class Nasa2DWMHModel(umbridge.Model):
         print("Case configured: "+filename, file=sys.stdout, flush=True)
         foldername = filename[0:-4]
 
+        if 'force_run' in config:
+            if config['force_run'] == 1 and os.path.exists('outputdata/'+foldername):
+                os.system('rm -rf outputdata/'+foldername)
+
         # Now check if we have saved case data
         if os.path.exists('outputdata/'+foldername) and os.path.isdir('outputdata/'+foldername):
             # Copy the final saved case data
@@ -201,7 +317,13 @@ class Nasa2DWMHModel(umbridge.Model):
         else:
             # We must run the case and save out the data
             t = time.time()
-            run_case(filename_console, filename, parameters)
+            if 'saveall' not in config:
+                run_case(filename_console, filename, parameters)
+            elif config['saveall'] == 1:
+                run_case(filename_console, filename, parameters, copywholecase=True)
+            else:
+                run_case(filename_console, filename, parameters)
+
             elapsed = time.time() - t
             # Write the number to the file
             with open('outputdata/exectime_'+filename, mode="w", newline="") as file:
@@ -215,7 +337,7 @@ class Nasa2DWMHModel(umbridge.Model):
 
         # Use post process to evaluate the OpenFOAM functions
         tempcasefile = './caserealisation'
-        os.system('openfoam2406 simpleFoam -postProcess -case '+tempcasefile + ' | tee -a outputdata/'+filename_console)
+        os.system('openfoam2406 simpleFoam -postProcess -latestTime -case '+tempcasefile)
 
         # Now extract the proper QoI
         uinf=parameters[0][1]
@@ -264,6 +386,15 @@ class Nasa2DWMHModel(umbridge.Model):
         elif config['qoi'] == 'pressureintegrals':
             integrals = extract_integrals(tempcasefile)
             return [integrals]
+        elif config['qoi'] == 'forces':
+            [total_forces,pressure_forces,viscous_forces] = extract_forces(tempcasefile)
+            return [total_forces,pressure_forces,viscous_forces]
+        elif config['qoi'] == 'residuals':
+            print("Extract residuals")
+            os.system('cp -r '+' outputdata/'+foldername+'/postProcessing '+ tempcasefile +'/')
+            (iterations, initial_residuals, final_residuals) = extract_residuals(tempcasefile)
+
+            return [iterations,initial_residuals["Ux"],final_residuals["Ux"],initial_residuals["Uy"],final_residuals["Uy"],initial_residuals["p"],final_residuals["p"],initial_residuals["nuTilda"],final_residuals["nuTilda"]]
         elif config['qoi'] == 'exectime':
             # Read the number from the file
             with open('outputdata/exectime_'+filename, mode="r") as file:
@@ -272,6 +403,19 @@ class Nasa2DWMHModel(umbridge.Model):
                     if row:  # Skip empty rows
                         t = float(row[0])  # Convert the first value to a float
             return [[t]]
+        elif config['qoi'] == 'yslice':
+            (y, p, ux, uy, uz) = extract_linesamples(tempcasefile, 5000)
+            y_return = np.zeros(500)
+            y_return[0:len(y)] = y
+            p_return = np.zeros(500)
+            p_return[0:len(p)] = p
+            ux_return = np.zeros(500)
+            ux_return[0:len(ux)] = ux
+            uy_return = np.zeros(500)
+            uy_return[0:len(uy)] = uy
+            uz_return = np.zeros(500)
+            uz_return[0:len(uz)] = uz
+            return [y_return.tolist(),p_return.tolist(),ux_return.tolist(),uy_return.tolist(),uz_return.tolist()]
         else:
             raise Exception('unknown qoi')
         
@@ -560,6 +704,51 @@ def replace_res_tol(input_file, output_file, replacement_value):
     print(f"Replaced 'RES_TOL' with '{replacement_value}' in '{
           input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
+def replace_res_tol_u(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'RES_TOL_U' with 'replacement_value'
+    modified_data = file_data.replace('RES_TOL_U', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'RES_TOL_U' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
+
+def replace_res_tol_p(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'RES_TOL_P' with 'replacement_value'
+    modified_data = file_data.replace('RES_TOL_P', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'RES_TOL_P' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
+    
+def replace_res_tol_nut(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'RES_TOL_NU' with 'replacement_value'
+    modified_data = file_data.replace('RES_TOL_NU', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'RES_TOL_NU' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
+
 
 def replace_final_time(input_file, output_file, replacement_value):
     # Read input file
@@ -592,6 +781,21 @@ def replace_abs_tol(input_file, output_file, replacement_value):
     print(f"Replaced 'ABS_TOL' with '{replacement_value}' in '{
           input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
+def replace_rel_tol(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'REL_TOL' with 'replacement_value'
+    modified_data = file_data.replace('REL_TOL', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'REL_TOL' with '{replacement_value}' in '{
+          input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
+
 
 def replace_inflow_mag(input_file, output_file, replacement_value):
     # Read input file
@@ -621,6 +825,19 @@ def replace_wallpressuredist(input_file, output_file, replacement_value):
 
     print(f"Replaced 'WALLPRESSUREDIST' with '{replacement_value}' in '{input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
+def replace_xforyslice(input_file, output_file, replacement_value):
+    # Read input file
+    with open(input_file, 'r') as f:
+        file_data = f.read()
+
+    # Replace all occurrences of 'XFORYSLICE' with 'replacement_value'
+    modified_data = file_data.replace('XFORYSLICE', replacement_value)
+
+    # Write modified content to output file
+    with open(output_file, 'w') as f:
+        f.write(modified_data)
+
+    print(f"Replaced 'XFORYSLICE' with '{replacement_value}' in '{input_file}'. Output saved to '{output_file}'.", file=sys.stdout, flush=True)
 
 # Define UM-BRIDGE Models and serve
 reattachment_model = ReattachmentModel()

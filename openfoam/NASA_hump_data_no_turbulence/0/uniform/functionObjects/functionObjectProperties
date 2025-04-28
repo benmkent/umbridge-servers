@@ -1,0 +1,116 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2406                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    arch        "LSB;label=32;scalar=64";
+    class       dictionary;
+    location    "100/uniform/functionObjects";
+    object      functionObjectProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+cdf7e925f5746741c316f5fbcf39ad0dfca90775
+{
+    solverInfo
+    {
+        scalar
+        {
+            Ux_initial      0.00028789873;
+            Ux_final        2.0883959e-06;
+            Uy_initial      0.0059334785;
+            Uy_final        5.8928905e-05;
+            p_initial       0.24676406;
+            p_final         0.0018738043;
+        }
+        label
+        {
+            Ux_iters        7;
+            Uy_iters        5;
+            p_iters         13;
+        }
+    }
+    forces1
+    {
+        vector
+        {
+            pressureForce   ( 2.4849101 14.621362 -2.643803e-19 );
+            viscousForce    ( 0.20189916 0.044767158 4.3594751e-19 );
+            internalForce   ( 0 0 0 );
+            pressureMoment  ( -0.73106811 0.12424551 9.503792300000001 );
+            viscousMoment   ( -0.0022383579 0.010094958 -0.010380888 );
+            internalMoment  ( 0 0 0 );
+        }
+    }
+    integrationBeforeJet
+    {
+        scalar
+        {
+            areaIntegrate(xBeforeFaceZone,p) -6.390811353824288;
+        }
+    }
+    integrationAfterJet
+    {
+        scalar
+        {
+            areaIntegrate(xAfterFaceZone,p) -5.925280556304038;
+        }
+    }
+    lineSample
+    {
+        scalar
+        {
+            average(ySlice,p) -167.0832566508418;
+            min(ySlice,p)   -194.8013034820459;
+            max(ySlice,p)   -83.82506245899873;
+            average(p)      -167.0832566508418;
+            min(p)          -194.8013034820459;
+            max(p)          -83.82506245899873;
+        }
+        label
+        {
+            size(ySlice,p)  113;
+            size(p)         113;
+            size(ySlice,U)  113;
+            size(U)         113;
+        }
+        vector
+        {
+            average(ySlice,U) ( 21.61945 1.0419553 -1.668244e-20 );
+            min(ySlice,U)   ( 0.0051442698 5.5365846e-05 -2.7816092e-18 );
+            max(ySlice,U)   ( 41.33558 2.615015 2.4918787e-18 );
+            average(U)      ( 21.61945 1.0419553 -1.668244e-20 );
+            min(U)          ( 0.0051442698 5.5365846e-05 -2.7816092e-18 );
+            max(U)          ( 41.33558 2.615015 2.4918787e-18 );
+        }
+    }
+}
+
+wallPressure
+{
+    p
+    {
+        file            "<case>/postProcessing/wallPressure/100/p_bottomWall.raw";
+    }
+}
+
+lineSample
+{
+    p
+    {
+        file            "<case>/postProcessing/lineSample/100/ySlice_p_U.xy";
+    }
+    U
+    {
+        file            "<case>/postProcessing/lineSample/100/ySlice_p_U.xy";
+    }
+}
+
+
+// ************************************************************************* //
