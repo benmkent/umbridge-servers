@@ -1,3 +1,7 @@
+using UMBridge
+using ApproxFun: Chebyshev, Fun
+using PythonCall
+
 DarcyModel = UMBridge.Model(
     name = "darcy",
     inputSizes = [50], #[config["n_basis_input"]],
