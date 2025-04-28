@@ -27,4 +27,4 @@ jobs:
         with:
           context: ./darcy
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/cookiebenchmark:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/darcy:latest
