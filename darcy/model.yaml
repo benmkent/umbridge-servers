@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-cookies
+  name: deployment-darcy
 spec:
   selector:
     matchLabels:
-      app: cookies
+      app: darcy
   replicas: 6
   template:
     metadata:
       labels:
-        app: cookies
+        app: darcy
     spec:
       containers:
-      - name: cookies
-        image: benmkent/cookiebenchmark:latest
+      - name: darcy
+        image: benmkent/darcy:latest
         imagePullPolicy: "Always"
         env:
         - name: OMP_NUM_THREADS
