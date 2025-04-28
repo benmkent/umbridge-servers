@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM quay.io/fenicsproject/stable:current
 
 # Install fenics and python packages
 RUN apt update
