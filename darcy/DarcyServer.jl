@@ -15,15 +15,13 @@ DarcyModel = UMBridge.Model(
     evaluate = (y, config) -> evaluate_darcy(y, config),
 )
 
-DarcyModel = UMBridge.Model(
+AdvDiffModel = UMBridge.Model(
     name = "advdiff",
     inputSizes = [1,50, 50, 50], #[config["n_basis_input"]],
     outputSizes = [50], #[config["n_basis_output"]],
     supportsGradient = false,
     evaluate = (y, config) -> evaluate_advdiff(y, config),
 )
-
-pyimport("sys").path.append("./darcy")
 
 """
     evaluate_darcy(y, config)
@@ -121,6 +119,7 @@ Solves the advection-diffusion PDE.
 - Solution grid and values.
 """
 function advdiff_solve(adv_u1,adv_u2, ε, config)
+    pyimport("sys").path.append(".")
     AdvDiffPDE = pyimport("AdvectionDiffusionPDE")
 
     py_ux = Py((x, y) -> begin
@@ -156,7 +155,8 @@ Solves the Darcy PDE.
 - Solution grid and values for velocity and pressure.
 """
 function darcy_solve(y, config)
-    # Import your Python module
+    # Import Python module
+    pyimport("sys").path.append(".")
     DarcyPDE = pyimport("DarcyPDE")
     
     # Instantiate and call methods
