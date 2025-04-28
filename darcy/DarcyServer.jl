@@ -1,12 +1,3 @@
-using UMBridge
-using PythonCall
-using CondaPkg
-using ApproxFun
-
-CondaPkg.add("mpi4py")
-CondaPkg.add("fenics-dolfinx";version="0.9.0.*")
-CondaPkg.add("fenics-basix") 
-
 DarcyModel = UMBridge.Model(
     name = "darcy",
     inputSizes = [50], #[config["n_basis_input"]],
@@ -139,7 +130,9 @@ function advdiff_solve(adv_u1,adv_u2, ε, config)
     advdiff.setup_problem(py_ux, py_uy, ε)
     advdiff.solve()
     x, u = advdiff.get_u()
-    return x,u
+    x_out = pyconvert(Array,x)
+    u_out = pyconvert(Array,u)
+    return x_out,u_out
 end
 
 """

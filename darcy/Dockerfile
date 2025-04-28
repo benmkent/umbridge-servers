@@ -29,8 +29,6 @@ ENV PATH="/root/.juliaup/bin:${PATH}"
 # Set the environment variable for OpenSSL version (ignore or specify version)
 ENV JULIA_CONDAPKG_OPENSSL_VERSION="ignore"
 
-# Set the environment variable for OpenSSL version (ignore or specify version)
-ENV JULIA_CONDAPKG_OPENSSL_VERSION="ignore"
 
 # Set up internal folders and files
 WORKDIR /
