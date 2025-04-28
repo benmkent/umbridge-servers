@@ -29,19 +29,22 @@ class AdvDiffPDE:
         ndim (int): Dimension of the problem (1D or 2D).
         """
         k = 1  # Polynomial degree for finite element space
+        nx = 8
+        self.nx = nx
         if ndim == 2:
             # Create a 2D rectangular mesh
-            domain = mesh.create_rectangle(MPI.COMM_WORLD, [[-1.0, -1.0], [1.0, 1.0]], [8, 8], cell_type=mesh.CellType.quadrilateral)
+            domain = mesh.create_rectangle(MPI.COMM_WORLD, [[-1.0, -1.0], [1.0, 1.0]], [nx, nx], cell_type=mesh.CellType.quadrilateral)
             Q_el = element("CG", domain.basix_cell(), k)
         elif ndim == 1:
             # Create a 1D interval mesh
-            domain = mesh.create_interval(MPI.COMM_WORLD, 32, [-1.0, 1.0])
+            domain = mesh.create_interval(MPI.COMM_WORLD, nx, [-1.0, 1.0])
             Q_el = element("CG", domain.basix_cell(), k)
         else:
             raise ValueError("ndim must be 1 or 2")  # Error for unsupported dimensions
         
         V = fem.functionspace(domain, Q_el)
         self.V = V
+        self.ndim = ndim
         self.domain = domain
 
     def setup_problem(self, ux, uy, epsilon):
@@ -71,7 +74,12 @@ class AdvDiffPDE:
 
         # Define Dirichlet boundary condition on the left wall
         leftwall = fem.Function(self.V)
-        leftwall.interpolate(lambda x: 1 - x[1]**4)
+        if self.ndim ==1:
+            leftwall.interpolate(lambda x: 1.0 - 0.0*x[0])
+        elif self.ndim ==2:
+            leftwall.interpolate(lambda x: 1.0 - x[1]**4)
+        else:
+            raise ValueError("ndim must be 1 or 2")
         bc = fem.dirichletbc(leftwall, left_dofs)
         facet_values = np.full(left_facets.size, LEFT, dtype=np.int32)
         facet_tag = mesh.meshtags(self.domain, fdim, left_facets, facet_values)
@@ -81,7 +89,16 @@ class AdvDiffPDE:
         f.interpolate(lambda x: 0.0 + 0.0 * x[0])
 
         # Create advection field from ux, uy
-        w = create_advection_field(ux, uy, self.domain)
+        if self.ndim == 1:
+            V_vec = fem.functionspace(self.domain, element("CG", self.domain.basix_cell(), 1, shape=(1,)))  # Vector function space
+            w = fem.Function(V_vec)  # Advection field function 
+            def adv_expression(x):
+                return np.vstack((
+                    ux(x[0]),  # x-component
+                ))       
+            w.interpolate(adv_expression)  # Interpolate advection field
+        elif self.ndim == 2:
+            w = create_advection_field(ux, uy, self.domain)
         self.advfn = w
 
         # Write advection field to file
@@ -94,9 +111,9 @@ class AdvDiffPDE:
         L = f * v * dx
 
         # SUPG
-        h = 2.0/np.sqrt(domain.topology.index_map(0).size) # Approximate
+        h = 2.0/self.nx # Approximate
         tau = h / dot(w, w)
-        a += tau * inner(inner(w, grad(u)) * grad(v), dx)
+        a += tau * inner(w, grad(v)) * inner(w,grad(u)) * dx
         
         # Create linear problem
         self.problem = LinearProblem(a, L, bcs=[bc], petsc_options={"ksp_type": "gmres", "pc_type": "none"})
