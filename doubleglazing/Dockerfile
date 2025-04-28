@@ -1,7 +1,10 @@
-FROM ubuntu:mantic
+FROM ubuntu:latest
 
 # Install fenics and python packages
 RUN apt update
+RUN apt-get install -y software-properties-common
+RUN add-apt-repository ppa:fenics-packages/fenics
+RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt install -y bash fenics python3-pip
 RUN pip3 install --break-system-packages umbridge
 
