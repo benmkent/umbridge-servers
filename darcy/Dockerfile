@@ -1,4 +1,4 @@
-FROM ubuntu:mantic
+FROM ubuntu:latest
 
 # Set environment variables to avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive

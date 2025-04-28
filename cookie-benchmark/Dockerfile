@@ -1,4 +1,4 @@
-FROM ubuntu:mantic
+FROM ubuntu:latest
 
 # Install fenics and python packages
 RUN apt update
