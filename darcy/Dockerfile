@@ -36,7 +36,7 @@ ENV JULIA_CONDAPKG_OPENSSL_VERSION="ignore"
 WORKDIR /
 COPY . .
 
-RUN julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate();'
+RUN julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate(); Pkg.precompile();'
 
 # Start Julia server
-CMD julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate(); include("DarcyServer.jl");'
+CMD julia -e 'using Pkg; Pkg.activate("."); include("DarcyServer.jl");'
