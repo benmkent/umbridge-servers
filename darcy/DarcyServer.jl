@@ -162,7 +162,7 @@ function darcy_solve(y, config)
     # Instantiate and call methods
     d = DarcyPDE.DarcyPDE()
     d.setup_function_spaces(ndim=config["ndim"])
-    d.setup_permiability(y, config["basis_input"], config["n_basis_input"])
+    d.setup_permeability(y, config["basis_input"], config["n_basis_input"])
     d.setup_problem()
     d.solve()
     u = d.get_u()
