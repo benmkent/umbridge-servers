@@ -34,6 +34,6 @@ ENV JULIA_CONDAPKG_OPENSSL_VERSION="ignore"
 
 # Set up internal folders and files
 WORKDIR /
-COPY . /darcy/*
+COPY . .
 
-RUN julia -e 'using Pkg; Pkg.activate("."); include("./DarcyServer.jl");'
+RUN julia -e 'using Pkg; Pkg.activate("."); include("DarcyServer.jl");'
