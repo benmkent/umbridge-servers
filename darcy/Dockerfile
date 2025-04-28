@@ -32,6 +32,5 @@ ENV JULIA_CONDAPKG_OPENSSL_VERSION="ignore"
 # Set the environment variable for OpenSSL version (ignore or specify version)
 ENV JULIA_CONDAPKG_OPENSSL_VERSION="ignore"
 
-# Install PythonCall.jl and CondaPkg
-RUN julia -e 'using Pkg; Pkg.activate("."); \
-    run("./DarcyServer.jl");'
+# Run server
+RUN julia -e 'using Pkg; Pkg.activate("."); include("./DarcyServer.jl");'
