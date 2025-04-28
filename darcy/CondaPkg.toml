@@ -1,0 +1,4 @@
+[deps]
+mpi4py = ""
+fenics-basix = ""
+fenics-dolfinx = "0.9.0.*"
