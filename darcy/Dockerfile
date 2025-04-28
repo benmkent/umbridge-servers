@@ -40,4 +40,3 @@ RUN julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate();'
 
 # Start Julia server
 CMD julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate(); include("DarcyServer.jl");'
-
