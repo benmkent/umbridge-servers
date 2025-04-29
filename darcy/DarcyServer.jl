@@ -1,5 +1,5 @@
 using UMBridge
-using ApproxFun: Chebyshev, Fun
+using ApproxFunBase
 using PythonCall
 
 DarcyModel = UMBridge.Model(
